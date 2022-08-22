@@ -2,6 +2,7 @@
 members = [
     "node",
     "pallets/template",
+	"pallets/random_node_selector",
     "runtime",
 ]
 [profile.release]
