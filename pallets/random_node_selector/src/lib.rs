@@ -27,7 +27,7 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// New random hash.
-		UniqueCreated { hash: T::Hash },
+		UniqueHash { hash: T::Hash },
 
 		/// New random number.
 		UniqueNumber { number: u32 },
@@ -63,7 +63,7 @@ pub mod pallet {
 				let (random_value, _) = T::Randomness::random(&nonce);
 			// Write the random value to storage.
 			<RandomNumber<T>>::put(random_value);
-			Self::deposit_event(Event::UniqueCreated{hash: random_value});
+			Self::deposit_event(Event::UniqueHash{hash: random_value});
 
 			Ok(())
 		}
