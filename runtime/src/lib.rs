@@ -43,6 +43,8 @@ use pallet_transaction_payment::CurrencyAdapter;
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
+pub use pallet_randomness_collective_flip;
+
 /// Import the template pallet.
 pub use pallet_template;
 
@@ -275,7 +277,7 @@ impl pallet_template::Config for Runtime {
 
 impl pallet_random_node_selector::Config for Runtime {
 	type Event = Event;
-	type MyRandomness = RandomnessCollectiveFlip;
+	type Randomness = RandomnessCollectiveFlip;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
