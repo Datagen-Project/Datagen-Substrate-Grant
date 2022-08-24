@@ -10,10 +10,11 @@ pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 	use frame_support::traits::Randomness;
+	use sp_core::OpaquePeerId as PeerId;
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	#[pallet::config]
@@ -31,11 +32,31 @@ pub mod pallet {
 
 		/// New random number.
 		UniqueNumber { number: u32 },
+
+		/// Set new node owner.
+		SetOwner {
+			peer_id: PeerId,
+			owner: T::AccountId,
+		},
+
+		/// Remove node owner.
+		RemoveOwner {
+			peer_id: PeerId,
+		},
+
+		/// Number of elements in the map.
+		TotalItemsInMap {
+			total: u32,
+		}
 	}
 
 	#[pallet::storage]
-	pub(super) type RandomNumber<T: Config> =
+	pub(super) type RandomHash<T: Config> =
 		StorageValue<_, T::Hash>;
+
+	#[pallet::storage]
+	pub(super) type RandomNumber<T: Config> =
+		StorageValue<_, u32>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn get_nonce)]
@@ -44,6 +65,13 @@ pub mod pallet {
 		u64,
 		ValueQuery
 		>;
+
+	/// A map that maintains the ownership of each node.
+	#[pallet::storage]
+	#[pallet::getter(fn owners)]
+	pub type Owners<T: Config> = CountedStorageMap<_, Blake2_128Concat, PeerId, T::AccountId>;
+
+
 
 	// Dispatchable functions allow users to interact with the pallet and invoke state changes.
 	// These functions materialize as "extrinsics", which are often compared to transactions.
@@ -62,7 +90,7 @@ pub mod pallet {
 				let nonce = Self::get_and_increment_nonce();
 				let (random_value, _) = T::Randomness::random(&nonce);
 			// Write the random value to storage.
-			<RandomNumber<T>>::put(random_value);
+			<RandomHash<T>>::put(random_value);
 			Self::deposit_event(Event::UniqueHash{hash: random_value});
 
 			Ok(())
@@ -77,10 +105,61 @@ pub mod pallet {
 
 			let random_number = Self::generate_random_number();
 
+			<RandomNumber<T>>::put(random_number);
 			Self::deposit_event(Event::UniqueNumber { number: random_number });
 
 				Ok(())
 		}
+
+
+		/// Add a new owner to the list of owners.
+		#[pallet::weight(100)]
+		pub fn add_owner(
+			origin: OriginFor<T>,
+			owner: T::AccountId,
+			peer_id: PeerId
+		) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+			// Add the owner to the list of owners.
+			<Owners<T>>::insert(&peer_id, &owner);
+
+			Self::deposit_event(Event::SetOwner {
+				peer_id,
+				owner,
+			});
+
+			Ok(())
+		}
+
+		/// Remove an owner from the list of owners.
+		#[pallet::weight(100)]
+		pub fn remove_owner(
+			origin: OriginFor<T>,
+			peer_id: PeerId
+		) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+			// Remove the owner from the list of owners.
+			<Owners<T>>::remove(peer_id);
+			Ok(())
+		}
+
+		/// Number of elements in the map.
+		#[pallet::weight(100)]
+		pub fn total_elements(
+			origin: OriginFor<T>
+		) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+			// Get the list of owners.
+
+			let total = <Owners<T>>::count();
+
+			Self::deposit_event(Event::TotalItemsInMap {
+				total,
+			});
+
+			Ok(())
+		}
+
 	}
 }
 
