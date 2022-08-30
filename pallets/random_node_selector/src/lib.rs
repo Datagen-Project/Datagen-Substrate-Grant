@@ -5,6 +5,12 @@ use frame_support::traits::Randomness;
 use scale_info::prelude::vec::Vec;
 pub use pallet::*;
 
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
+mod tests;
+
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
@@ -56,7 +62,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	pub(super) type RandomNumber<T: Config> =
-		StorageValue<_, u32>;
+		StorageValue<_, u32, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn get_nonce)]
@@ -69,7 +75,12 @@ pub mod pallet {
 	/// A map that maintains the ownership of each node.
 	#[pallet::storage]
 	#[pallet::getter(fn owners)]
-	pub type Owners<T: Config> = CountedStorageMap<_, Blake2_128Concat, PeerId, T::AccountId>;
+	pub type Owners<T: Config> = CountedStorageMap<
+		_,
+		Blake2_128Concat,
+		PeerId,
+		T::AccountId
+		>;
 
 
 
@@ -108,7 +119,7 @@ pub mod pallet {
 			<RandomNumber<T>>::put(random_number);
 			Self::deposit_event(Event::UniqueNumber { number: random_number });
 
-				Ok(())
+			Ok(())
 		}
 
 
@@ -149,8 +160,8 @@ pub mod pallet {
 			origin: OriginFor<T>
 		) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
-			// Get the list of owners.
 
+			// Count how many owners are in the list.
 			let total = <Owners<T>>::count();
 
 			Self::deposit_event(Event::TotalItemsInMap {
@@ -170,7 +181,7 @@ impl<T: Config> Pallet<T> {
 		nonce.encode()
 	}
 
-	/// Generate a random number
+	/// Generate a random number.
 	fn generate_random_number() -> u32 {
 		let (random_seed, _) = T::Randomness::random(&Self::get_and_increment_nonce());
 		let random_number = <u32>::decode(&mut random_seed.as_ref())
