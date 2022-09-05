@@ -17,6 +17,7 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use frame_support::traits::Randomness;
 	use sp_core::OpaquePeerId as PeerId;
+	use scale_info::prelude::vec::Vec;
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -41,8 +42,14 @@ pub mod pallet {
 
 		/// Set new node owner.
 		SetOwner {
-			peer_id: PeerId,
 			owner: T::AccountId,
+			peer_id: PeerId,
+		},
+
+		/// An array with all node owners.
+		/// [Node Owners, Node PeerId]
+		OwnersList {
+			owners: Vec<(T::AccountId, PeerId)>,
 		},
 
 		/// Remove node owner.
@@ -78,10 +85,31 @@ pub mod pallet {
 	pub type Owners<T: Config> = CountedStorageMap<
 		_,
 		Blake2_128Concat,
-		PeerId,
-		T::AccountId
+		T::AccountId,
+		PeerId
 		>;
 
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config> {
+		/// The initial node owners.
+		pub node_owners: Vec<(T::AccountId, PeerId)>,
+	}
+
+	#[cfg(feature = "std")]
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			Self { node_owners: Default::default() }
+		}
+	}
+
+	#[pallet::genesis_build]
+	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+		fn build(&self) {
+			for (owner, peer_id) in &self.node_owners {
+				<Owners<T>>::insert(owner, peer_id);
+			}
+		}
+	}
 
 
 	// Dispatchable functions allow users to interact with the pallet and invoke state changes.
@@ -92,7 +120,7 @@ pub mod pallet {
 
 		/// Create a new random hash.
 		#[pallet::weight(100)]
-		pub fn crate_random_hash(
+		pub fn create_random_hash(
 			origin: OriginFor<T>
 		) -> DispatchResult {
 			// Account calling this dispatchable.
@@ -127,12 +155,12 @@ pub mod pallet {
 		#[pallet::weight(100)]
 		pub fn add_owner(
 			origin: OriginFor<T>,
-			owner: T::AccountId,
-			peer_id: PeerId
+			peer_id: PeerId,
+			owner: T::AccountId
 		) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
 			// Add the owner to the list of owners.
-			<Owners<T>>::insert(&peer_id, &owner);
+			<Owners<T>>::insert(&owner, &peer_id);
 
 			Self::deposit_event(Event::SetOwner {
 				peer_id,
@@ -146,11 +174,11 @@ pub mod pallet {
 		#[pallet::weight(100)]
 		pub fn remove_owner(
 			origin: OriginFor<T>,
-			peer_id: PeerId
+			owner: T::AccountId
 		) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
 			// Remove the owner from the list of owners.
-			<Owners<T>>::remove(peer_id);
+			<Owners<T>>::remove(owner);
 			Ok(())
 		}
 
@@ -168,6 +196,19 @@ pub mod pallet {
 				total,
 			});
 
+			Ok(())
+		}
+
+		#[pallet::weight(100)]
+		pub fn get_owners_list(
+			origin: OriginFor<T>
+		) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+			// Get all owners.
+			let owners = <Owners<T>>::iter().collect::<Vec<_>>();
+			Self::deposit_event(Event::OwnersList {
+				owners,
+			});
 			Ok(())
 		}
 
