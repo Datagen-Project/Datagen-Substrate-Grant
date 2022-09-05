@@ -18,6 +18,7 @@ name = "node-template"
 
 [dependencies]
 clap = { version = "3.1.18", features = ["derive"] }
+bs58 = { version = "0.4.0" }
 
 sc-cli = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", features = ["wasmtime"], branch = "polkadot-v0.9.28" }
 sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28" }
