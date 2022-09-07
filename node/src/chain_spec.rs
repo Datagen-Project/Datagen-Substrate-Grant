@@ -160,7 +160,7 @@ fn testnet_genesis(
 		},
 		transaction_payment: Default::default(),
 		random_node_selector: RandomNodeSelectorConfig {
-			node_owners: test_node_owners_list,
+			initial_node_owners: test_node_owners_list,
 		},
 	}
 }
