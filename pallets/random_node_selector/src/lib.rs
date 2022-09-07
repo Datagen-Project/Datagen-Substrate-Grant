@@ -58,9 +58,7 @@ pub mod pallet {
 		},
 
 		/// Number of elements in the map.
-		TotalItemsInMap {
-			total: u32,
-		}
+		TotalItemsInMap(u32),
 	}
 
 	#[pallet::storage]
@@ -92,20 +90,20 @@ pub mod pallet {
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		/// The initial node owners.
-		pub node_owners: Vec<(T::AccountId, PeerId)>,
+		pub initial_node_owners: Vec<(T::AccountId, PeerId)>,
 	}
 
 	#[cfg(feature = "std")]
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
-			Self { node_owners: Default::default() }
+			Self { initial_node_owners: Default::default() }
 		}
 	}
 
 	#[pallet::genesis_build]
 	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
 		fn build(&self) {
-			for (owner, peer_id) in &self.node_owners {
+			for (owner, peer_id) in &self.initial_node_owners {
 				<Owners<T>>::insert(owner, peer_id);
 			}
 		}
@@ -155,8 +153,8 @@ pub mod pallet {
 		#[pallet::weight(100)]
 		pub fn add_owner(
 			origin: OriginFor<T>,
-			peer_id: PeerId,
-			owner: T::AccountId
+			owner: T::AccountId,
+			peer_id: PeerId
 		) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
 			// Add the owner to the list of owners.
@@ -192,9 +190,7 @@ pub mod pallet {
 			// Count how many owners are in the list.
 			let total = <Owners<T>>::count();
 
-			Self::deposit_event(Event::TotalItemsInMap {
-				total,
-			});
+			Self::deposit_event(Event::TotalItemsInMap(total));
 
 			Ok(())
 		}
