@@ -1,11 +1,12 @@
 use crate as pallet_random_node_selector;
-use frame_support::traits::{ConstU16, ConstU64};
+use frame_support::traits::{ConstU16, ConstU64, GenesisBuild, OnFinalize, OnInitialize};
 use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
 };
+use sp_core::OpaquePeerId;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -57,7 +58,32 @@ impl pallet_random_node_selector::Config for Test {
 
 impl pallet_randomness_collective_flip::Config for Test {}
 
-// Build genesis storage according to the mock runtime.
+/// Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	system::GenesisConfig::default().build_storage::<Test>().unwrap().into()
+	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	pallet_random_node_selector::GenesisConfig::<Test> {
+		initial_node_owners: vec![
+			(1, OpaquePeerId(vec![1, 2, 3, 4])),
+			(2, OpaquePeerId(vec![1, 2, 3, 4]))
+		],
+	}
+	.assimilate_storage(&mut t).unwrap();
+
+
+	let mut ext = sp_io::TestExternalities::new(t);
+	ext.execute_with(|| System::set_block_number(1));
+	ext
+}
+
+/// Helper function to run a block.
+pub fn run_to_block(n: u64) {
+	while System::block_number() < n {
+	 if System::block_number() > 1 {
+		RandomNodeSelector::on_finalize(System::block_number());
+	  System::on_finalize(System::block_number());
+	 }
+	 System::set_block_number(System::block_number() + 1);
+	 System::on_initialize(System::block_number());
+	 RandomNodeSelector::on_initialize(System::block_number());
+	}
 }
