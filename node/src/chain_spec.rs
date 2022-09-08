@@ -137,6 +137,8 @@ fn testnet_genesis(
 	vec![
 		(endowed_accounts[0].clone(), OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap())),
 		(endowed_accounts[1].clone(), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap())),
+		(endowed_accounts[2].clone(), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKpip").into_vec().unwrap())),
+		(endowed_accounts[3].clone(), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKpro").into_vec().unwrap())),
 	];
 
 	GenesisConfig {
