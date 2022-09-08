@@ -135,10 +135,11 @@ fn testnet_genesis(
 
 	let test_node_owners_list: Vec<(AccountId, OpaquePeerId)> =
 	vec![
-		(endowed_accounts[0].clone(), OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap())),
-		(endowed_accounts[1].clone(), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap())),
-		(endowed_accounts[2].clone(), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKpip").into_vec().unwrap())),
-		(endowed_accounts[3].clone(), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKpro").into_vec().unwrap())),
+		(get_account_id_from_seed::<sr25519::Public>("Alice"), OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap())),
+		(get_account_id_from_seed::<sr25519::Public>("Bob"), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap())),
+		(get_account_id_from_seed::<sr25519::Public>("Charlie"), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKpip").into_vec().unwrap())),
+		(get_account_id_from_seed::<sr25519::Public>("Dave"), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhK234").into_vec().unwrap())),
+		(get_account_id_from_seed::<sr25519::Public>("Eve"), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKp666").into_vec().unwrap())),
 	];
 
 	GenesisConfig {
