@@ -7,6 +7,7 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
 };
 use sp_core::OpaquePeerId;
+use frame_support_test::TestRandomness;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -53,7 +54,7 @@ impl system::Config for Test {
 
 impl pallet_random_node_selector::Config for Test {
 	type Event = Event;
-	type Randomness = RandomnessCollectiveFlip;
+	type Randomness = TestRandomness<Self>;
 }
 
 impl pallet_randomness_collective_flip::Config for Test {}
@@ -63,8 +64,16 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 	pallet_random_node_selector::GenesisConfig::<Test> {
 		initial_node_owners: vec![
-			(1, OpaquePeerId(vec![1, 2, 3, 4])),
-			(2, OpaquePeerId(vec![1, 2, 3, 4]))
+			(1, OpaquePeerId(vec![4, 4, 4, 4])),
+			(2, OpaquePeerId(vec![1, 2, 3, 4])),
+			(3, OpaquePeerId(vec![1, 2, 3, 4])),
+			(4, OpaquePeerId(vec![1, 2, 3, 4])),
+			(5, OpaquePeerId(vec![1, 2, 3, 4])),
+			(6, OpaquePeerId(vec![1, 2, 3, 4])),
+			(7, OpaquePeerId(vec![1, 2, 3, 4])),
+			(8, OpaquePeerId(vec![1, 2, 3, 4])),
+			(9, OpaquePeerId(vec![1, 2, 3, 4])),
+			(10, OpaquePeerId(vec![1, 2, 3, 4]))
 		],
 	}
 	.assimilate_storage(&mut t).unwrap();
@@ -76,6 +85,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 /// Helper function to run a block.
+#[allow(dead_code)]
 pub fn run_to_block(n: u64) {
 	while System::block_number() < n {
 	 if System::block_number() > 1 {
