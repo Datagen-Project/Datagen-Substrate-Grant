@@ -20,6 +20,7 @@ pallet-randomness-collective-flip = { version = "4.0.0-dev", default-features = 
 
 [dev-dependencies]
 sp-io = { version = "6.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.28" }
+frame-support-test = { version = "3.0.0", git = "https://github.com/paritytech/substrate/", branch = "polkadot-v0.9.28" }
 
 [features]
 default = ["std"]
