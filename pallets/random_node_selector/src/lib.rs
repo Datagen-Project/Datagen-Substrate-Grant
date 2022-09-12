@@ -44,18 +44,19 @@ pub mod pallet {
 		RandomNumber { number: u32 },
 
 		/// Owner has been set.
-		SetOwner {
+		SetOwnerReliableNode {
 			owner: T::AccountId,
 			peer_id: PeerId,
 		},
 
 		/// Owner has been removed.
-		RemoveOwner {
+		RemoveReliableNode {
+			owner: T::AccountId,
 			peer_id: PeerId,
 		},
 
 		/// Owner and node to check and random number used to select the owner.
-		OwnerToCheck {
+		ReliableNodeToCheck {
 			owner: T::AccountId,
 			peer_id: PeerId,
 			random_number: u32,
@@ -75,9 +76,9 @@ pub mod pallet {
 		},
 
 		/// An array with all node owners.
-		/// [Node Owners, Node PeerId]
-		OwnersList {
-			owners: Vec<(T::AccountId, PeerId)>,
+		/// [Node ReliableNode, Node PeerId]
+		ReliableNodeList {
+			owners: Vec<(PeerId, T::AccountId)>,
 		},
 
 		/// Number of elements in the map.
@@ -90,6 +91,12 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// No owner to check.
 		NoOwnerToCheck,
+
+		/// The node is already taken.
+		AlreadyTakenNode,
+
+		/// You are not the owner of this node.
+		NotOwner,
 	}
 
 	// Storage for the pallet.
@@ -103,8 +110,8 @@ pub mod pallet {
 
 	/// The last owner to check.
 	#[pallet::storage]
-	pub(super) type OwnerToCheck<T: Config> =
-		StorageValue<_, (T::AccountId, PeerId)>;
+	pub(super) type ReliableNodeToCheck<T: Config> =
+		StorageValue<_, (PeerId, T::AccountId)>;
 
 
 	/// The last controller should be 3 nodes.
@@ -131,12 +138,12 @@ pub mod pallet {
 	/// A map that maintains the ownership of each node.
 	/// [Node Owner, Node PeerId]
 	#[pallet::storage]
-	#[pallet::getter(fn owners)]
-	pub type Owners<T: Config> = CountedStorageMap<
+	#[pallet::getter(fn reliable_node)]
+	pub type ReliableNode<T: Config> = CountedStorageMap<
 		_,
 		Blake2_128Concat,
-		T::AccountId,
-		PeerId
+		PeerId,
+		T::AccountId
 		>;
 
 	// Genesis config for the random node selector pallet.
@@ -144,7 +151,7 @@ pub mod pallet {
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		/// The initial node owners.
-		pub initial_node_owners: Vec<(T::AccountId, PeerId)>,
+		pub initial_node_owners: Vec<(PeerId, T::AccountId)>,
 	}
 
 	#[cfg(feature = "std")]
@@ -157,8 +164,8 @@ pub mod pallet {
 	#[pallet::genesis_build]
 	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
 		fn build(&self) {
-			for (owner, peer_id) in &self.initial_node_owners {
-				<Owners<T>>::insert(owner, peer_id);
+			for (peer_id, owner) in &self.initial_node_owners {
+				<ReliableNode<T>>::insert(peer_id, owner);
 			}
 		}
 	}
@@ -175,7 +182,7 @@ pub mod pallet {
 		/// Create a new random hash.
 		/// dev - This function is only for testing purposes.
 		#[pallet::weight(100)]
-		pub fn create_random_hash(
+		pub fn test_create_random_hash(
 			origin: OriginFor<T>
 		) -> DispatchResult {
 			// Account calling this dispatchable.
@@ -193,7 +200,7 @@ pub mod pallet {
 		/// Crate a new random number.
 		/// dev - This function is only for testing purposes.
 		#[pallet::weight(100)]
-		pub fn create_random_number(
+		pub fn test_create_random_number(
 			origin: OriginFor<T>
 		) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
@@ -206,48 +213,16 @@ pub mod pallet {
 			Ok(())
 		}
 
-
-		/// Add a new owner to the list of owners.
-		#[pallet::weight(100)]
-		pub fn add_owner(
-			origin: OriginFor<T>,
-			owner: T::AccountId,
-			peer_id: PeerId
-		) -> DispatchResult {
-			let _sender = ensure_signed(origin)?;
-			// Add the owner to the list of owners.
-			<Owners<T>>::insert(&owner, &peer_id);
-
-			Self::deposit_event(Event::SetOwner {
-				peer_id,
-				owner,
-			});
-
-			Ok(())
-		}
-
-		/// Remove an owner from the list of owners.
-		#[pallet::weight(100)]
-		pub fn remove_owner(
-			origin: OriginFor<T>,
-			owner: T::AccountId
-		) -> DispatchResult {
-			let _sender = ensure_signed(origin)?;
-			// Remove the owner from the list of owners.
-			<Owners<T>>::remove(owner);
-			Ok(())
-		}
-
 		/// Number of elements in the map.
 		/// dev - This function is only for testing purposes.
 		#[pallet::weight(100)]
-		pub fn total_elements(
+		pub fn test_total_elements(
 			origin: OriginFor<T>
 		) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
 
 			// Count how many owners are in the list.
-			let total = <Owners<T>>::count();
+			let total = <ReliableNode<T>>::count();
 
 			Self::deposit_event(Event::TotalItemsInMap(total));
 
@@ -258,13 +233,13 @@ pub mod pallet {
 		/// Get the list of all node owners.
 		/// dev - This function is only for development purposes.
 		#[pallet::weight(100)]
-		pub fn get_owners_list(
+		pub fn test_get_owners_list(
 			origin: OriginFor<T>
 		) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
 			// Get all owners.
-			let owners = <Owners<T>>::iter().collect::<Vec<_>>();
-			Self::deposit_event(Event::OwnersList {
+			let owners = <ReliableNode<T>>::iter().collect::<Vec<_>>();
+			Self::deposit_event(Event::ReliableNodeList {
 				owners,
 			});
 			Ok(())
@@ -273,7 +248,7 @@ pub mod pallet {
 		/// Generate a random number within a range.
 		/// dev - This function is only for demonstration purposes.
 		#[pallet::weight(100)]
-		pub fn generate_random_number_range(
+		pub fn test_generate_random_number_range(
 			origin: OriginFor<T>,
 			max: u32
 		) -> DispatchResult {
@@ -289,6 +264,44 @@ pub mod pallet {
 
 		// Production functions.
 
+		/// Update reliable node list.
+		/// Add a new owner to the list of owners.
+		#[pallet::weight(100)]
+		pub fn add_reliable_node(
+			origin: OriginFor<T>,
+			owner: T::AccountId,
+			peer_id: PeerId
+		) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+			ensure!(!<ReliableNode<T>>::contains_key(&peer_id), Error::<T>::AlreadyTakenNode);
+			// Add the owner to the list of owners.
+			<ReliableNode<T>>::insert(&peer_id, &owner);
+			Self::deposit_event(Event::SetOwnerReliableNode {
+				peer_id,
+				owner,
+			});
+			Ok(())
+		}
+
+		/// Update reliable node list.
+		/// Remove an owner from the list of owners.
+		#[pallet::weight(100)]
+		pub fn remove_reliable_node(
+			origin: OriginFor<T>,
+			peer_id: PeerId
+		) -> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+			ensure!(<ReliableNode<T>>::contains_key(&peer_id), Error::<T>::NoOwnerToCheck);
+			ensure!(_sender == <ReliableNode<T>>::get(&peer_id).unwrap(), Error::<T>::NotOwner);
+			// Remove the owner from the list of owners.
+			<ReliableNode<T>>::remove(&peer_id);
+			Self::deposit_event(Event::RemoveReliableNode {
+				owner: _sender,
+				peer_id,
+			});
+			Ok(())
+		}
+
 		/// Select a random owner from the list of owners.
 		/// Emit the selected owner.
 		#[pallet::weight(100)]
@@ -301,12 +314,12 @@ pub mod pallet {
 
 			let selected_owner = selected_owner_to_unwrap.unwrap();
 
-			<OwnerToCheck<T>>::put(selected_owner.clone());
+			<ReliableNodeToCheck<T>>::put(selected_owner.clone());
 			<RandomNumber<T>>::put(random_number);
 
-			Self::deposit_event(Event::OwnerToCheck {
-				owner: selected_owner.0,
-				peer_id: selected_owner.1,
+			Self::deposit_event(Event::ReliableNodeToCheck {
+				owner: selected_owner.1,
+				peer_id: selected_owner.0,
 				random_number,
 			});
 
@@ -322,7 +335,7 @@ pub mod pallet {
 			let _sender = ensure_signed(origin)?;
 
 			// Check if the owner to check is set.
-			ensure!(<OwnerToCheck<T>>::exists(), Error::<T>::NoOwnerToCheck);
+			ensure!(<ReliableNodeToCheck<T>>::exists(), Error::<T>::NoOwnerToCheck);
 
 			let mut selected_controller_to_unwrap_1;
 			let mut selected_controller_to_unwrap_2;
@@ -334,21 +347,21 @@ pub mod pallet {
 
 			loop {
 				(selected_controller_to_unwrap_1, random_number_1) = Self::select_random_node();
-				if selected_controller_to_unwrap_1 != <OwnerToCheck<T>>::get() {
+				if selected_controller_to_unwrap_1 != <ReliableNodeToCheck<T>>::get() {
 					break;
 				}
 			}
 
 			loop {
 				(selected_controller_to_unwrap_2, random_number_2) = Self::select_random_node();
-				if selected_controller_to_unwrap_1 != selected_controller_to_unwrap_2 && selected_controller_to_unwrap_2 != <OwnerToCheck<T>>::get() {
+				if selected_controller_to_unwrap_1 != selected_controller_to_unwrap_2 && selected_controller_to_unwrap_2 != <ReliableNodeToCheck<T>>::get() {
 					break;
 				}
 			}
 
 			loop {
 				(selected_controller_to_unwrap_3, random_number_3) = Self::select_random_node();
-				if selected_controller_to_unwrap_1 != selected_controller_to_unwrap_3 && selected_controller_to_unwrap_2 != selected_controller_to_unwrap_3 && selected_controller_to_unwrap_3 != <OwnerToCheck<T>>::get() {
+				if selected_controller_to_unwrap_1 != selected_controller_to_unwrap_3 && selected_controller_to_unwrap_2 != selected_controller_to_unwrap_3 && selected_controller_to_unwrap_3 != <ReliableNodeToCheck<T>>::get() {
 					break;
 				}
 			}
@@ -359,14 +372,14 @@ pub mod pallet {
 
 
 			Self::deposit_event(Event::Controllers {
-				controller_1_account_id: selected_controller_1.0,
-				controller_1_peer_id: selected_controller_1.1,
+				controller_1_account_id: selected_controller_1.1,
+				controller_1_peer_id: selected_controller_1.0,
 				random_number_1,
-				controller_2_account_id: selected_controller_2.0,
-				controller_2_peer_id: selected_controller_2.1,
+				controller_2_account_id: selected_controller_2.1,
+				controller_2_peer_id: selected_controller_2.0,
 				random_number_2,
-				controller_3_account_id: selected_controller_3.0,
-				controller_3_peer_id: selected_controller_3.1,
+				controller_3_account_id: selected_controller_3.1,
+				controller_3_peer_id: selected_controller_3.0,
 				random_number_3,
 			});
 
@@ -394,8 +407,8 @@ impl<T: Config> Pallet<T> {
 
 	/// Select a random owner and his node_id from the list of owners.
 	/// Return the selected owner and the random number used to select the owner.
-	fn select_random_node() -> (Option<(T::AccountId, PeerId)>, u32) {
-		let owners = <Owners<T>>::iter().collect::<Vec<_>>();
+	fn select_random_node() -> (Option<(PeerId, T::AccountId)>, u32) {
+		let owners = <ReliableNode<T>>::iter().collect::<Vec<_>>();
 		let random_number = Self::generate_random_number_in_range(owners.len() as u32);
 		(Some(owners[random_number as usize].clone()), random_number)
 	}
