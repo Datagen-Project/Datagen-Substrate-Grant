@@ -64,16 +64,16 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 	pallet_random_node_selector::GenesisConfig::<Test> {
 		initial_node_owners: vec![
-			(1, OpaquePeerId(vec![4, 4, 4, 4])),
-			(2, OpaquePeerId(vec![1, 2, 3, 4])),
-			(3, OpaquePeerId(vec![1, 2, 3, 4])),
-			(4, OpaquePeerId(vec![1, 2, 3, 4])),
-			(5, OpaquePeerId(vec![1, 2, 3, 4])),
-			(6, OpaquePeerId(vec![1, 2, 3, 4])),
-			(7, OpaquePeerId(vec![1, 2, 3, 4])),
-			(8, OpaquePeerId(vec![1, 2, 3, 4])),
-			(9, OpaquePeerId(vec![1, 2, 3, 4])),
-			(10, OpaquePeerId(vec![1, 2, 3, 4]))
+			(OpaquePeerId(vec![1, 1, 1, 1]), 1),
+			(OpaquePeerId(vec![2, 2, 2, 2]), 2),
+			(OpaquePeerId(vec![3, 3, 3, 3]), 3),
+			(OpaquePeerId(vec![4, 4, 4, 4]), 4),
+			(OpaquePeerId(vec![5, 5, 5, 5]), 5),
+			(OpaquePeerId(vec![6, 6, 6, 6]), 6),
+			(OpaquePeerId(vec![7, 7, 7, 7]), 7),
+			(OpaquePeerId(vec![8, 8, 8, 8]), 8),
+			(OpaquePeerId(vec![9, 9, 9, 9]), 9),
+			(OpaquePeerId(vec![1, 2, 3, 4]), 10)
 		],
 	}
 	.assimilate_storage(&mut t).unwrap();

@@ -8,7 +8,7 @@ fn create_random_hash() {
 	new_test_ext().execute_with(|| {
 
 		// Create random hash.
-		assert_ok!(RandomNodeSelector::create_random_hash(Origin::signed(1)));
+		assert_ok!(RandomNodeSelector::test_create_random_hash(Origin::signed(1)));
 	})
 }
 
@@ -19,7 +19,7 @@ fn create_random_number() {
 	new_test_ext().execute_with(|| {
 
 		// Create random number.
-		assert_ok!(RandomNodeSelector::create_random_number(Origin::signed(1)));
+		assert_ok!(RandomNodeSelector::test_create_random_number(Origin::signed(1)));
 	});
 }
 
@@ -31,11 +31,11 @@ fn create_random_number_with_test_randomness() {
 		// Create 3 random numbers.
 		// In testing environment, the random number is progressing by 1, starting at 0.
 		// random_number = 0
-		assert_ok!(RandomNodeSelector::create_random_number(Origin::signed(1)));
+		assert_ok!(RandomNodeSelector::test_create_random_number(Origin::signed(1)));
 		// random_number = 1
-		assert_ok!(RandomNodeSelector::create_random_number(Origin::signed(1)));
+		assert_ok!(RandomNodeSelector::test_create_random_number(Origin::signed(1)));
 		// random_number = 2
-		assert_ok!(RandomNodeSelector::create_random_number(Origin::signed(1)));
+		assert_ok!(RandomNodeSelector::test_create_random_number(Origin::signed(1)));
 
 		let random_number = RandomNodeSelector::random_number();
 
@@ -50,7 +50,7 @@ fn check_add_owner() {
 	new_test_ext().execute_with(|| {
 
 		// Add owner.
-		assert_ok!(RandomNodeSelector::add_owner(Origin::signed(1), 1, OpaquePeerId(vec![1, 2, 3, 4])));
+		assert_ok!(RandomNodeSelector::add_reliable_node(Origin::signed(1), 1, OpaquePeerId(vec![1, 2, 3, 4])));
 	});
 }
 
@@ -60,7 +60,7 @@ fn check_remove_owner() {
 	new_test_ext().execute_with(|| {
 
 		// Remove owner.
-		assert_ok!(RandomNodeSelector::remove_owner(Origin::signed(1), 1));
+		assert_ok!(RandomNodeSelector::remove_reliable_node(Origin::signed(1), OpaquePeerId(vec![6, 6, 6, 6])));
 	})
 }
 
@@ -70,19 +70,19 @@ fn check_initial_owners_list() {
 	new_test_ext().execute_with(|| {
 
 		// Dispatch a signed extrinsic.
-		assert_ok!(RandomNodeSelector::get_owners_list(Origin::signed(1)));
-		System::assert_last_event(Event::RandomNodeSelector(crate::Event::OwnersList {
+		assert_ok!(RandomNodeSelector::test_get_owners_list(Origin::signed(1)));
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::ReliableNodeList {
 			owners: vec![
-				(6, OpaquePeerId(vec![1, 2, 3, 4])),
-				(5, OpaquePeerId(vec![1, 2, 3, 4])),
-				(3, OpaquePeerId(vec![1, 2, 3, 4])),
-				(1, OpaquePeerId(vec![4, 4, 4, 4])),
-				(8, OpaquePeerId(vec![1, 2, 3, 4])),
-				(4, OpaquePeerId(vec![1, 2, 3, 4])),
-				(7, OpaquePeerId(vec![1, 2, 3, 4])),
-				(9, OpaquePeerId(vec![1, 2, 3, 4])),
-				(10, OpaquePeerId(vec![1, 2, 3, 4])),
-				(2, OpaquePeerId(vec![1, 2, 3, 4]))
+				(OpaquePeerId(vec![6, 6, 6, 6]), 6),
+				(OpaquePeerId(vec![5, 5, 5, 5]), 5),
+				(OpaquePeerId(vec![3, 3, 3, 3]), 3),
+				(OpaquePeerId(vec![1, 1, 1, 1]), 1),
+				(OpaquePeerId(vec![8, 8, 8, 8]), 8),
+				(OpaquePeerId(vec![4, 4, 4, 4]), 4),
+				(OpaquePeerId(vec![7, 7, 7, 7]), 7),
+				(OpaquePeerId(vec![9, 9, 9, 9]), 9),
+				(OpaquePeerId(vec![1, 2, 3, 4]), 10),
+				(OpaquePeerId(vec![2, 2, 2, 2]), 2)
 			],
 		}));
 	});
@@ -103,7 +103,7 @@ fn check_random_node_to_check() {
 fn check_total_items_in_map() {
 	new_test_ext().execute_with(|| {
 
-		assert_ok!(RandomNodeSelector::total_elements(Origin::signed(1)));
+		assert_ok!(RandomNodeSelector::test_total_elements(Origin::signed(1)));
 		System::assert_last_event(crate::Event::TotalItemsInMap(10).into());
 	});
 }

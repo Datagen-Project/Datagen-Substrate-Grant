@@ -133,13 +133,13 @@ fn testnet_genesis(
 	_enable_println: bool,
 ) -> GenesisConfig {
 
-	let test_node_owners_list: Vec<(AccountId, OpaquePeerId)> =
+	let test_node_owners_list: Vec<(OpaquePeerId, AccountId)> =
 	vec![
-		(get_account_id_from_seed::<sr25519::Public>("Alice"), OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap())),
-		(get_account_id_from_seed::<sr25519::Public>("Bob"), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap())),
-		(get_account_id_from_seed::<sr25519::Public>("Charlie"), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKpip").into_vec().unwrap())),
-		(get_account_id_from_seed::<sr25519::Public>("Dave"), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhK234").into_vec().unwrap())),
-		(get_account_id_from_seed::<sr25519::Public>("Eve"), OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKp666").into_vec().unwrap())),
+		(OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Alice")),
+		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Bob")),
+		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKpip").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Charlie")),
+		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhK234").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Dave")),
+		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKp666").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Eve")),
 	];
 
 	GenesisConfig {
