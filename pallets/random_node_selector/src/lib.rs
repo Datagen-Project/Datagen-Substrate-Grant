@@ -20,6 +20,7 @@ pub mod pallet {
 	use scale_info::prelude::vec::Vec;
 	use sp_core::OpaquePeerId as PeerId;
 
+
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
 	#[pallet::without_storage_info]
@@ -60,6 +61,19 @@ pub mod pallet {
 			random_number: u32,
 		},
 
+		/// Controllers and which will check the selected node.
+		Controllers {
+			controller_1_account_id: T::AccountId,
+			controller_1_peer_id: PeerId,
+			random_number_1: u32,
+			controller_2_account_id: T::AccountId,
+			controller_2_peer_id: PeerId,
+			random_number_2: u32,
+			controller_3_account_id: T::AccountId,
+			controller_3_peer_id: PeerId,
+			random_number_3: u32,
+		},
+
 		/// An array with all node owners.
 		/// [Node Owners, Node PeerId]
 		OwnersList {
@@ -69,6 +83,16 @@ pub mod pallet {
 		/// Number of elements in the map.
 		TotalItemsInMap(u32),
 	}
+
+	// Errors inform users that something went wrong.
+
+	#[pallet::error]
+	pub enum Error<T> {
+		/// No owner to check.
+		NoOwnerToCheck,
+	}
+
+	// Storage for the pallet.
 
 	/// The las random hash.
 	/// dev - This is only for testing purposes.
@@ -82,6 +106,11 @@ pub mod pallet {
 	pub(super) type OwnerToCheck<T: Config> =
 		StorageValue<_, (T::AccountId, PeerId)>;
 
+
+	/// The last controller should be 3 nodes.
+	#[pallet::storage]
+	pub(super) type Controllers<T: Config> =
+		StorageValue<_, Vec<(T::AccountId, PeerId)>>;
 
 	/// The last random number.
 	#[pallet::storage]
@@ -111,6 +140,7 @@ pub mod pallet {
 		>;
 
 	// Genesis config for the random node selector pallet.
+
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		/// The initial node owners.
@@ -278,6 +308,66 @@ pub mod pallet {
 				owner: selected_owner.0,
 				peer_id: selected_owner.1,
 				random_number,
+			});
+
+			Ok(())
+		}
+
+		/// Select 3 random owners from the list of owners as controllers.
+		/// Emit the selected controllers owners and the random numbers.
+		#[pallet::weight(100)]
+		pub fn random_checker_node_selector(
+			origin: OriginFor<T>
+		)-> DispatchResult {
+			let _sender = ensure_signed(origin)?;
+
+			// Check if the owner to check is set.
+			ensure!(<OwnerToCheck<T>>::exists(), Error::<T>::NoOwnerToCheck);
+
+			let mut selected_controller_to_unwrap_1;
+			let mut selected_controller_to_unwrap_2;
+			let mut selected_controller_to_unwrap_3;
+
+			let mut random_number_1;
+			let mut random_number_2;
+			let mut random_number_3;
+
+			loop {
+				(selected_controller_to_unwrap_1, random_number_1) = Self::select_random_node();
+				if selected_controller_to_unwrap_1 != <OwnerToCheck<T>>::get() {
+					break;
+				}
+			}
+
+			loop {
+				(selected_controller_to_unwrap_2, random_number_2) = Self::select_random_node();
+				if selected_controller_to_unwrap_1 != selected_controller_to_unwrap_2 && selected_controller_to_unwrap_2 != <OwnerToCheck<T>>::get() {
+					break;
+				}
+			}
+
+			loop {
+				(selected_controller_to_unwrap_3, random_number_3) = Self::select_random_node();
+				if selected_controller_to_unwrap_1 != selected_controller_to_unwrap_3 && selected_controller_to_unwrap_2 != selected_controller_to_unwrap_3 && selected_controller_to_unwrap_3 != <OwnerToCheck<T>>::get() {
+					break;
+				}
+			}
+
+			let selected_controller_1 = selected_controller_to_unwrap_1.unwrap();
+			let selected_controller_2 = selected_controller_to_unwrap_2.unwrap();
+			let selected_controller_3 = selected_controller_to_unwrap_3.unwrap();
+
+
+			Self::deposit_event(Event::Controllers {
+				controller_1_account_id: selected_controller_1.0,
+				controller_1_peer_id: selected_controller_1.1,
+				random_number_1,
+				controller_2_account_id: selected_controller_2.0,
+				controller_2_peer_id: selected_controller_2.1,
+				random_number_2,
+				controller_3_account_id: selected_controller_3.0,
+				controller_3_peer_id: selected_controller_3.1,
+				random_number_3,
 			});
 
 			Ok(())
