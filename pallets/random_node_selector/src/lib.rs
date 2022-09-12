@@ -43,19 +43,19 @@ pub mod pallet {
 		/// Last random number.
 		RandomNumber { number: u32 },
 
-		/// Owner has been set.
+		/// Node has been taken.
 		SetOwnerReliableNode {
 			owner: T::AccountId,
 			peer_id: PeerId,
 		},
 
-		/// Owner has been removed.
+		/// Node has been removed.
 		RemoveReliableNode {
 			owner: T::AccountId,
 			peer_id: PeerId,
 		},
 
-		/// Owner and node to check and random number used to select the owner.
+		/// The node and its owner to check + random number used to select the owner.
 		ReliableNodeToCheck {
 			owner: T::AccountId,
 			peer_id: PeerId,
@@ -89,8 +89,8 @@ pub mod pallet {
 
 	#[pallet::error]
 	pub enum Error<T> {
-		/// No owner to check.
-		NoOwnerToCheck,
+		/// No node to check.
+		NoReliableNodeToCheck,
 
 		/// The node is already taken.
 		AlreadyTakenNode,
@@ -114,7 +114,8 @@ pub mod pallet {
 		StorageValue<_, (PeerId, T::AccountId)>;
 
 
-	/// The last controller should be 3 nodes.
+	/// The last controllers selected.
+	/// Should be 3 nodes.
 	#[pallet::storage]
 	pub(super) type Controllers<T: Config> =
 		StorageValue<_, Vec<(T::AccountId, PeerId)>>;
@@ -265,7 +266,7 @@ pub mod pallet {
 		// Production functions.
 
 		/// Update reliable node list.
-		/// Add a new owner to the list of owners.
+		/// Add a reliable node to the list and set the ownership.
 		#[pallet::weight(100)]
 		pub fn add_reliable_node(
 			origin: OriginFor<T>,
@@ -284,14 +285,14 @@ pub mod pallet {
 		}
 
 		/// Update reliable node list.
-		/// Remove an owner from the list of owners.
+		/// Remove a reliable node.
 		#[pallet::weight(100)]
 		pub fn remove_reliable_node(
 			origin: OriginFor<T>,
 			peer_id: PeerId
 		) -> DispatchResult {
 			let _sender = ensure_signed(origin)?;
-			ensure!(<ReliableNode<T>>::contains_key(&peer_id), Error::<T>::NoOwnerToCheck);
+			ensure!(<ReliableNode<T>>::contains_key(&peer_id), Error::<T>::NoReliableNodeToCheck);
 			ensure!(_sender == <ReliableNode<T>>::get(&peer_id).unwrap(), Error::<T>::NotOwner);
 			// Remove the owner from the list of owners.
 			<ReliableNode<T>>::remove(&peer_id);
@@ -302,8 +303,8 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Select a random owner from the list of owners.
-		/// Emit the selected owner.
+		/// Select a random reliable node from the list for the control.
+		/// Emit the selected node and the random number.
 		#[pallet::weight(100)]
 		pub fn random_node_to_check(
 			origin: OriginFor<T>
@@ -326,16 +327,16 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Select 3 random owners from the list of owners as controllers.
-		/// Emit the selected controllers owners and the random numbers.
+		/// Select 3 random reliable nodes from the list as controllers.
+		/// Emit the selected controllers nodes and the random numbers.
 		#[pallet::weight(100)]
 		pub fn random_checker_node_selector(
 			origin: OriginFor<T>
 		)-> DispatchResult {
 			let _sender = ensure_signed(origin)?;
 
-			// Check if the owner to check is set.
-			ensure!(<ReliableNodeToCheck<T>>::exists(), Error::<T>::NoOwnerToCheck);
+			// Check if the reliable node to check has been chosen.
+			ensure!(<ReliableNodeToCheck<T>>::exists(), Error::<T>::NoReliableNodeToCheck);
 
 			let mut selected_controller_to_unwrap_1;
 			let mut selected_controller_to_unwrap_2;
