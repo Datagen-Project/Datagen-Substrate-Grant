@@ -32,6 +32,7 @@ pub mod pallet {
 		type Randomness: Randomness<Self::Hash, Self::BlockNumber>;
 	}
 
+	// Events of the pallet.
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]

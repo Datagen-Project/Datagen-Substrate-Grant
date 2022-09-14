@@ -1,8 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// Edit this file to define custom logic or remove it if it is not needed.
-/// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// <https://docs.substrate.io/reference/frame-pallets/>
 pub use pallet::*;
 
 // #[cfg(test)]
@@ -38,8 +35,8 @@ pub mod pallet {
 	pub type RawAndElaboratedData<T: Config> =
 	StorageValue<_, (T::Hash, T::Hash)>;
 
-	// Pallets use events to inform users when important changes are made.
-	// https://docs.substrate.io/main-docs/build/events-errors/
+	// Events of the pallet.
+
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
@@ -53,22 +50,13 @@ pub mod pallet {
 		}
 	}
 
-	// Errors inform users that something went wrong.
-	#[pallet::error]
-	pub enum Error<T> {
-		/// Error names should be descriptive.
-		NoneValue,
-		/// Errors should have helpful documentation associated with them.
-		StorageOverflow,
-	}
-
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
 	// These functions materialize as "extrinsics", which are often compared to transactions.
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 
-
+		/// Hashes the raw data and elaborated data.
 		#[pallet::weight(100)]
 		pub fn hash_work(
 			origin: OriginFor<T>,
@@ -96,6 +84,8 @@ pub mod pallet {
 }
 
 impl <T: Config> Pallet<T> {
+
+	/// A function that does some math work, fibonacci sequence, for testing purposes.
 	fn math_work_testing(n: u32) -> u32 {
 		match n {
 			0 => 0,
