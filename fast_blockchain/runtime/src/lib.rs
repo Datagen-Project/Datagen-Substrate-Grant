@@ -46,6 +46,9 @@ pub use sp_runtime::{Perbill, Permill};
 /// Import the template pallet.
 pub use pallet_template;
 
+/// Import the computational work pallet.
+pub use pallet_computational_work;
+
 /// An index to a block.
 pub type BlockNumber = u32;
 
@@ -270,6 +273,11 @@ impl pallet_template::Config for Runtime {
 	type Event = Event;
 }
 
+/// Configure the pallet-computational-work in pallets/computational_work.
+impl pallet_computational_work::Config for Runtime {
+	type Event = Event;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub struct Runtime
@@ -288,6 +296,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		ComputationalWork: pallet_computational_work,
 	}
 );
 
@@ -333,6 +342,7 @@ mod benches {
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
 		[pallet_template, TemplateModule]
+		[pallet_computational_work, ComputationalWork]
 	);
 }
 

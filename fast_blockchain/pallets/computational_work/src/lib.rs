@@ -5,11 +5,11 @@
 /// <https://docs.substrate.io/reference/frame-pallets/>
 pub use pallet::*;
 
-#[cfg(test)]
-mod mock;
+// #[cfg(test)]
+// mod mock;
 
-#[cfg(test)]
-mod tests;
+// #[cfg(test)]
+// mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -18,9 +18,11 @@ mod benchmarking;
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use frame_support::sp_runtime::traits::Hash;
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -30,22 +32,25 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 	}
 
-	// The pallet's runtime storage items.
-	// https://docs.substrate.io/main-docs/build/runtime-storage/
+	/// A tuple with raw hashed data and elaborated hashed data.
 	#[pallet::storage]
-	#[pallet::getter(fn something)]
-	// Learn more about declaring storage items:
-	// https://docs.substrate.io/main-docs/build/runtime-storage/#declaring-storage-items
-	pub type Something<T> = StorageValue<_, u32>;
+	#[pallet::getter(fn raw_and_elaborated_data)]
+	pub type RawAndElaboratedData<T: Config> =
+	StorageValue<_, (T::Hash, T::Hash)>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/main-docs/build/events-errors/
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// Event documentation should end with an array that provides descriptive names for event
-		/// parameters. [something, who]
-		SomethingStored(u32, T::AccountId),
+		/// Event emitted when a new data is hashed.
+		/// [raw_data, elaborated_data, raw_hash, elaborated_hash]
+		RawAndElaboratedData {
+			raw_data: u32,
+			elaborated_data: u32,
+			raw_hash: T::Hash,
+			elaborated_hash: T::Hash,
+		}
 	}
 
 	// Errors inform users that something went wrong.
@@ -62,41 +67,42 @@ pub mod pallet {
 	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// An example dispatchable that takes a singles value as a parameter, writes the value to
-		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
-		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResult {
-			// Check that the extrinsic was signed and get the signer.
-			// This function will return an error if the extrinsic is not signed.
-			// https://docs.substrate.io/main-docs/build/origins/
-			let who = ensure_signed(origin)?;
 
-			// Update storage.
-			<Something<T>>::put(something);
 
-			// Emit an event.
-			Self::deposit_event(Event::SomethingStored(something, who));
-			// Return a successful DispatchResultWithPostInfo
+		#[pallet::weight(100)]
+		pub fn hash_work(
+			origin: OriginFor<T>,
+			number: u32,
+		) -> DispatchResult{
+			let _sender = ensure_signed(origin)?;
+
+			let elaborated_math_work = Self::math_work_testing(number);
+
+			let raw_hashed_data = T::Hashing::hash_of(&number);
+			let elaborated_hashed_data = T::Hashing::hash_of(&elaborated_math_work);
+
+			<RawAndElaboratedData<T>>::put((raw_hashed_data, elaborated_hashed_data));
+
+			Self::deposit_event(Event::RawAndElaboratedData {
+				raw_data: number,
+				elaborated_data: elaborated_math_work,
+				raw_hash: raw_hashed_data,
+				elaborated_hash: elaborated_hashed_data,
+			});
+
 			Ok(())
-		}
-
-		/// An example dispatchable that may throw a custom error.
-		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
-			let _who = ensure_signed(origin)?;
-
-			// Read a value from storage.
-			match <Something<T>>::get() {
-				// Return an error if the value has not been set.
-				None => return Err(Error::<T>::NoneValue.into()),
-				Some(old) => {
-					// Increment the value read from storage; will error in the event of overflow.
-					let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-					// Update the value in storage with the incremented result.
-					<Something<T>>::put(new);
-					Ok(())
-				},
-			}
 		}
 	}
 }
+
+impl <T: Config> Pallet<T> {
+	fn math_work_testing(n: u32) -> u32 {
+		match n {
+			0 => 0,
+			1 => 1,
+			_ => Self::math_work_testing(n - 1) + Self::math_work_testing(n - 2),
+		}
+	}
+}
+
+
