@@ -23,11 +23,14 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
+// Add ensure root with sudo for testing
+use frame_system::EnsureRoot;
+
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
-	construct_runtime, parameter_types,
+	construct_runtime, parameter_types, ConsensusEngineId,
 	traits::{
-		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness, StorageInfo,
+		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness, StorageInfo, FindAuthor
 	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -145,6 +148,10 @@ parameter_types! {
 	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
 		::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
 	pub const SS58Prefix: u8 = 42;
+
+	// Add parameter const for node-authorization pallet
+	pub const MaxWellKnownNodes: u32 = 10;
+	pub const MaxPeerIdLength: u32 = 128;
 }
 
 // Configure FRAME pallets to include in runtime.
@@ -208,6 +215,7 @@ impl pallet_aura::Config for Runtime {
 	type DisabledValidators = ();
 	type MaxAuthorities = ConstU32<32>;
 }
+
 
 impl pallet_grandpa::Config for Runtime {
 	type Event = Event;
@@ -278,6 +286,43 @@ impl pallet_computational_work::Config for Runtime {
 	type Event = Event;
 }
 
+
+/// Configure the pallet-node-authorization
+impl pallet_node_authorization::Config for Runtime {
+	type Event = Event;
+	type MaxWellKnownNodes = MaxWellKnownNodes;
+	type MaxPeerIdLength = MaxPeerIdLength;
+	type AddOrigin = EnsureRoot<AccountId>;
+	type RemoveOrigin = EnsureRoot<AccountId>;
+	type ResetOrigin = EnsureRoot<AccountId>;
+	type SwapOrigin = EnsureRoot<AccountId>;
+	type WeightInfo = ();
+}
+
+impl pallet_authorship::Config for Runtime {
+	// I wanted to do this, but the types were incompatible
+	// type FindAuthor = aura::AuraAuthorId<Self>;
+
+	// So instead I tried this. The adapter is defined immediately below
+	type FindAuthor = AuraAccountAdapter;
+	type UncleGenerations = ();
+	type FilterUncle = ();
+	type EventHandler = ();
+}
+
+// This struct is (supposed to be) an adapter type that converts an AuraId into an AccountId
+pub struct AuraAccountAdapter;
+
+impl FindAuthor<AccountId> for AuraAccountAdapter {
+	fn find_author<'a, I>(digests: I) -> Option<AccountId>
+		where I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
+	{
+		pallet_aura::AuraAuthorId::<Runtime>::find_author(digests).and_then(|k| {
+			AccountId::try_from(k.as_ref()).ok()
+		})
+	}
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub struct Runtime
@@ -297,6 +342,7 @@ construct_runtime!(
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
 		ComputationalWork: pallet_computational_work,
+		NodeAuthorization: pallet_node_authorization,
 	}
 );
 
