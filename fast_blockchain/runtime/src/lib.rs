@@ -343,6 +343,7 @@ construct_runtime!(
 		TemplateModule: pallet_template,
 		ComputationalWork: pallet_computational_work,
 		NodeAuthorization: pallet_node_authorization,
+		Authorship: pallet_authorship,
 	}
 );
 
