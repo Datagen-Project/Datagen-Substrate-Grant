@@ -137,8 +137,8 @@ fn testnet_genesis(
 	vec![
 		(OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Alice")),
 		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Bob")),
-		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKpip").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Charlie")),
-		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhK234").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Dave")),
+		(OpaquePeerId(bs58::decode("12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Charlie")),
+		(OpaquePeerId(bs58::decode("12D3KooWPHWFrfaJzxPnqnAYAoRUyAHHKqACmEycGTVmeVhQYuZN").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Dave")),
 		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKp666").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Eve")),
 	];
 
