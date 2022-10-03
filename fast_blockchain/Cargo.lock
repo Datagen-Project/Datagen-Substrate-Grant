@@ -3842,6 +3842,7 @@ dependencies = [
  "pallet-grandpa",
  "pallet-node-authorization",
  "pallet-randomness-collective-flip",
+ "pallet-session",
  "pallet-sudo",
  "pallet-template",
  "pallet-timestamp",

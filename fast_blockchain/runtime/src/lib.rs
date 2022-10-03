@@ -6,6 +6,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+use frame_support::traits::ValidatorSet;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -14,7 +15,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
-	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify},
+	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, Verify, Convert},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
 };
@@ -304,22 +305,46 @@ impl pallet_authorship::Config for Runtime {
 	// type FindAuthor = aura::AuraAuthorId<Self>;
 
 	// So instead I tried this. The adapter is defined immediately below
-	type FindAuthor = AuraAccountAdapter;
+	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
 	type UncleGenerations = ();
 	type FilterUncle = ();
 	type EventHandler = ();
 }
 
 // This struct is (supposed to be) an adapter type that converts an AuraId into an AccountId
-pub struct AuraAccountAdapter;
-impl FindAuthor<AccountId> for AuraAccountAdapter {
-	fn find_author<'a, I>(digests: I) -> Option<AccountId>
-		where I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
-	{
-		pallet_aura::AuraAuthorId::<Runtime>::find_author(digests).and_then(|k| {
-			AccountId::try_from(k.as_ref()).ok()
-		})
-	}
+// pub struct AuraAccountAdapter;
+// impl FindAuthor<AccountId> for AuraAccountAdapter {
+// 	fn find_author<'a, I>(digests: I) -> Option<AccountId>
+// 		where I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
+// 	{
+// 		pallet_aura::AuraAuthorId::<Runtime>::find_author(digests).and_then(|k| {
+// 			AccountId::try_from(k.as_ref()).ok()
+// 		})
+// 	}
+// }
+
+pub struct ValidatorIdOf;
+impl<T> Convert<T, Option<T>> for ValidatorIdOf {
+    fn convert(a: T) -> Option<T> {
+        Some(a)
+    }
+}
+
+parameter_types! {
+	Period: BlockNumber = 10 * MINUTES;
+	Offset: BlockNumber = 0;
+}
+
+impl pallet_session::Config for Runtime {
+	type Event = Event;
+	type ValidatorId = <Self as frame_system::Config>::AccountId;
+	type ValidatorIdOf = ValidatorIdOf;
+	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
+	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
+	type SessionHandler = <opaque::SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
+	type Keys = opaque::SessionKeys;
+	type WeightInfo = ();
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -343,6 +368,7 @@ construct_runtime!(
 		ComputationalWork: pallet_computational_work,
 		NodeAuthorization: pallet_node_authorization,
 		Authorship: pallet_authorship,
+		Session: pallet_session,
 	}
 );
 
