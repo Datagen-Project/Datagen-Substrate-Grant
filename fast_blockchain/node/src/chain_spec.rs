@@ -1,12 +1,13 @@
 use node_template_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
-	SystemConfig, WASM_BINARY, NodeAuthorizationConfig
+	SystemConfig, SessionConfig, WASM_BINARY, NodeAuthorizationConfig
 };
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public, OpaquePeerId};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
+use node_template_runtime::opaque::SessionKeys;
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -48,6 +49,24 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		move || {
 			testnet_genesis(
 				wasm_binary,
+				vec![
+					(
+						get_account_id_from_seed::<sr25519::Public>("Alice"),
+						get_from_seed::<AuraId>("Alice"),
+					),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Bob"),
+						get_from_seed::<AuraId>("Bob"),
+					),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Charlie"),
+						get_from_seed::<AuraId>("Charlie"),
+					),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Dave"),
+						get_from_seed::<AuraId>("Dave"),
+					),
+				],
 				// Initial PoA authorities
 				vec![authority_keys_from_seed("Alice")],
 				// Sudo account
@@ -79,6 +98,8 @@ pub fn development_config() -> Result<ChainSpec, String> {
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 
+
+
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Local Testnet",
@@ -88,6 +109,24 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		move || {
 			testnet_genesis(
 				wasm_binary,
+					vec![
+					(
+						get_account_id_from_seed::<sr25519::Public>("Alice"),
+						get_from_seed::<AuraId>("Alice"),
+					),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Bob"),
+						get_from_seed::<AuraId>("Bob"),
+					),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Charlie"),
+						get_from_seed::<AuraId>("Charlie"),
+					),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Dave"),
+						get_from_seed::<AuraId>("Dave"),
+					),
+				],
 				// Initial PoA authorities
 				vec![
 					authority_keys_from_seed("Alice"),
@@ -132,6 +171,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	wasm_binary: &[u8],
+	authorities: Vec<(AccountId, AuraId)>,
 	initial_authorities: Vec<(AuraId, GrandpaId)>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
@@ -142,12 +182,18 @@ fn testnet_genesis(
 			// Add Wasm runtime to storage.
 			code: wasm_binary.to_vec(),
 		},
+		session: SessionConfig {
+			keys: authorities
+				.iter()
+				.map(|x| (x.0.clone(), x.0.clone(), session_keys(x.1.clone())))
+				.collect::<Vec<_>>(),
+		},
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
 		aura: AuraConfig {
-			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
+			authorities: vec![]
 		},
 		node_authorization: NodeAuthorizationConfig {
 			nodes: vec![
@@ -178,4 +224,9 @@ fn testnet_genesis(
 		},
 		transaction_payment: Default::default(),
 	}
+}
+
+/// Helper for session keys to map aura id
+fn session_keys(aura: AuraId) -> SessionKeys {
+	SessionKeys { aura }
 }

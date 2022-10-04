@@ -8,3 +8,5 @@ pub mod pallet_transaction_payment_config;
 pub mod pallet_sudo_config;
 pub mod pallet_computational_work_config;
 pub mod pallet_node_authorization_config;
+pub mod pallet_session_config;
+pub mod pallet_authorship_config;

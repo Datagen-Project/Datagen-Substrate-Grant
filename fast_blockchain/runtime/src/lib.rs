@@ -89,7 +89,7 @@ pub mod opaque {
 	impl_opaque_keys! {
 		pub struct SessionKeys {
 			pub aura: Aura,
-			pub grandpa: Grandpa,
+			// pub grandpa: Grandpa,
 		}
 	}
 }
@@ -199,12 +199,12 @@ construct_runtime!(
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
-		
+
 		// Include the custom logic from the pallet-template in the runtime.
 		ComputationalWork: pallet_computational_work,
 		NodeAuthorization: pallet_node_authorization,
-		// Authorship: pallet_authorship,
-		// Session: pallet_session,
+		Authorship: pallet_authorship,
+		Session: pallet_session,
 	}
 );
 

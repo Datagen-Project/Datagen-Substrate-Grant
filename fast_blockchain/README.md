@@ -45,3 +45,8 @@ Node 4 - Dave
 --ws-port 9947 \
 --offchain-worker always
 ```
+
+to purge validator
+```shell
+ ./target/release/node-template purge-chain --base-path /tmp/validator1 --chain local
+```
