@@ -205,6 +205,7 @@ construct_runtime!(
 		NodeAuthorization: pallet_node_authorization,
 		Authorship: pallet_authorship,
 		Session: pallet_session,
+		CheckNodeComputationalWork: pallet_check_node_computational_work,
 	}
 );
 
