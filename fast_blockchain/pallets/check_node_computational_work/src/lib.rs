@@ -18,8 +18,6 @@ mod benchmarking;
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-	use sp_runtime::traits::SaturatedConversion;
-	use frame_support::traits::FindAuthor;
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -30,7 +28,6 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-		type FindAuthor: FindAuthor<Self::AccountId>;
 	}
 
 	// The pallet's runtime storage items.
@@ -48,7 +45,7 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
-		SomethingStored(T::AccountId, T::AccountId, u32),
+		SomethingStored(T::AccountId),
 	}
 
 	// Errors inform users that something went wrong.
@@ -74,15 +71,8 @@ pub mod pallet {
 			// https://docs.substrate.io/main-docs/build/origins/
 			let who = ensure_signed(origin)?;
 
-			let current_block_number = <frame_system::Pallet::<T>>::block_number();
-
-
-			let block_digest = <frame_system::Pallet<T>>::digest();
-			let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
-			let author = T::FindAuthor::find_author(digests);
-
 			// Emit an event.
-			Self::deposit_event(Event::SomethingStored(author.unwrap(), who, current_block_number.saturated_into::<u32>()));
+			Self::deposit_event(Event::SomethingStored(who));
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}

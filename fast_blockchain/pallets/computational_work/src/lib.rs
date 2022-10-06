@@ -15,6 +15,8 @@ mod benchmarking;
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use sp_runtime::traits::SaturatedConversion;
+	use frame_support::traits::FindAuthor;
 	use frame_support::sp_runtime::traits::Hash;
 
 	#[pallet::pallet]
@@ -27,13 +29,21 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type FindAuthor: FindAuthor<Self::AccountId>;
 	}
 
-	/// A tuple with raw hashed data and elaborated hashed data.
+	/// The storage of the last computational work.
+	///
+	/// -  `raw_hashed_data` - The raw hashed data.
+	/// -  `elaborated_hashed_data` - The elaborated hashed data.
+	/// -  `author` - The author of the block.
+	/// -  `block_number` - The block number.
+	///
+	/// This storage is picked up by the heavy blockchain every x (to define and implement in the M2) blocks for checking the computational work.
 	#[pallet::storage]
-	#[pallet::getter(fn raw_and_elaborated_data)]
-	pub type RawAndElaboratedData<T: Config> =
-	StorageValue<_, (T::Hash, T::Hash)>;
+	#[pallet::getter(fn last_computational_work)]
+	pub type LastComputationalWork<T: Config> =
+	StorageValue<_, (T::Hash, T::Hash, T::AccountId, u32)>;
 
 	// Events of the pallet.
 
@@ -41,12 +51,22 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Event emitted when a new data is hashed.
+		/// The data will be only hashed at production time, the not hashed data is shown for testing purposes.
 		/// [raw_data, elaborated_data, raw_hash, elaborated_hash]
-		RawAndElaboratedData {
+		LastComputationalWork {
 			raw_data: u32,
 			elaborated_data: u32,
 			raw_hash: T::Hash,
 			elaborated_hash: T::Hash,
+			author: T::AccountId,
+			block_height: u32,
+		},
+
+		TestEvent {
+			raw_hash: T::Hash,
+			elaborated_hash: T::Hash,
+			author: T::AccountId,
+			block_height: u32,
 		}
 	}
 
@@ -56,7 +76,8 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 
-		/// Hashes the raw data and elaborated data.
+		/// Hashes the raw data and elaborated and store them in the storage with the author and the block number
+		/// for future checks.
 		#[pallet::weight(100)]
 		pub fn hash_work(
 			origin: OriginFor<T>,
@@ -64,18 +85,53 @@ pub mod pallet {
 		) -> DispatchResult{
 			let _sender = ensure_signed(origin)?;
 
+			// The n number of the fibonacci sequence is calculated.
 			let elaborated_math_work = Self::math_work_testing(number);
 
+			// Hashing the raw data and elaborated data.
 			let raw_hashed_data = T::Hashing::hash_of(&number);
 			let elaborated_hashed_data = T::Hashing::hash_of(&elaborated_math_work);
 
-			<RawAndElaboratedData<T>>::put((raw_hashed_data, elaborated_hashed_data));
+			// Get the block author.
+			let block_digest = <frame_system::Pallet<T>>::digest();
+			let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
+			let author = T::FindAuthor::find_author(digests).unwrap();
 
-			Self::deposit_event(Event::RawAndElaboratedData {
+			// Get the block height.
+			let block_height = <frame_system::Pallet<T>>::block_number();
+
+			// Store data for possible checks.
+			<LastComputationalWork<T>>::put((raw_hashed_data, elaborated_hashed_data, author.clone(), block_height.saturated_into::<u32>()));
+
+			// Emit an event.
+			Self::deposit_event(Event::LastComputationalWork {
 				raw_data: number,
 				elaborated_data: elaborated_math_work,
 				raw_hash: raw_hashed_data,
 				elaborated_hash: elaborated_hashed_data,
+				author,
+				block_height: block_height.saturated_into::<u32>(),
+			});
+
+			Ok(())
+		}
+
+		/// Get the last computational work.
+		#[pallet::weight(100)]
+		pub fn get_last_raw_and_elaborated_data(
+			origin: OriginFor<T>,
+		) -> DispatchResult{
+			let _sender = ensure_signed(origin)?;
+
+			// Get the last computational work from the getter function.
+			let last_computational_work = Self::last_computational_work().unwrap();
+
+			// Emit an event.
+			Self::deposit_event(Event::TestEvent {
+				raw_hash: last_computational_work.0,
+				elaborated_hash: last_computational_work.1,
+				author: last_computational_work.2,
+				block_height: last_computational_work.3,
 			});
 
 			Ok(())
