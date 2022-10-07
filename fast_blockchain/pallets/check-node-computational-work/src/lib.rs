@@ -18,6 +18,7 @@ mod benchmarking;
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use frame_support::traits::FindAuthor;
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -25,9 +26,12 @@ pub mod pallet {
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: frame_system::Config + pallet_computational_work::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+		/// The pallet computational work.
+		type FindAuthor: FindAuthor<Self::AccountId>;
 	}
 
 	// The pallet's runtime storage items.
@@ -46,6 +50,13 @@ pub mod pallet {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
 		SomethingStored(T::AccountId),
+
+		TestEvent {
+			raw_hash: T::Hash,
+			elaborated_hash: T::Hash,
+			author: T::AccountId,
+			block_height: u32,
+		}
 	}
 
 	// Errors inform users that something went wrong.
@@ -69,10 +80,18 @@ pub mod pallet {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/main-docs/build/origins/
-			let who = ensure_signed(origin)?;
+			let _sender = ensure_signed(origin)?;
+
+			// Get the last computational work from pallet_computational_work.
+			let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
 			// Emit an event.
-			Self::deposit_event(Event::SomethingStored(who));
+			Self::deposit_event(Event::TestEvent {
+				raw_hash: last_computational_work.0,
+				elaborated_hash: last_computational_work.1,
+				author: last_computational_work.2,
+				block_height: last_computational_work.3,
+			});
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())
 		}
