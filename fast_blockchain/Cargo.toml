@@ -2,8 +2,8 @@
 members = [
     "node",
     "pallets/template",
-	"pallets/computational_work",
-	"pallets/check_node_computational_work",
+	"pallets/computational-work",
+	"pallets/check-node-computational-work",
     "runtime",
 ]
 [profile.release]

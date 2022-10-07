@@ -4094,6 +4094,7 @@ dependencies = [
  "frame-support-test",
  "frame-system",
  "pallet-authorship",
+ "pallet-computational-work",
  "pallet-randomness-collective-flip",
  "parity-scale-codec",
  "scale-info",
