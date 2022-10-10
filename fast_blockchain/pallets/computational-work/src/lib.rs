@@ -53,7 +53,7 @@ pub mod pallet {
 		/// Event emitted when a new data is hashed.
 		/// The data will be only hashed at production time, the not hashed data is shown for testing purposes.
 		/// [raw_data, elaborated_data, raw_hash, elaborated_hash]
-		LastComputationalWork {
+		ResultsComputationalWork {
 			raw_data: u32,
 			elaborated_data: u32,
 			raw_hash: T::Hash,
@@ -62,7 +62,8 @@ pub mod pallet {
 			block_height: u32,
 		},
 
-		TestEvent {
+
+		LastComputationalWork {
 			raw_hash: T::Hash,
 			elaborated_hash: T::Hash,
 			author: T::AccountId,
@@ -104,7 +105,7 @@ pub mod pallet {
 			<LastComputationalWork<T>>::put((raw_hashed_data, elaborated_hashed_data, author.clone(), block_height.saturated_into::<u32>()));
 
 			// Emit an event.
-			Self::deposit_event(Event::LastComputationalWork {
+			Self::deposit_event(Event::ResultsComputationalWork {
 				raw_data: number,
 				elaborated_data: elaborated_math_work,
 				raw_hash: raw_hashed_data,
@@ -127,7 +128,7 @@ pub mod pallet {
 			let last_computational_work = Self::last_computational_work().unwrap();
 
 			// Emit an event.
-			Self::deposit_event(Event::TestEvent {
+			Self::deposit_event(Event::LastComputationalWork {
 				raw_hash: last_computational_work.0,
 				elaborated_hash: last_computational_work.1,
 				author: last_computational_work.2,
@@ -142,7 +143,7 @@ pub mod pallet {
 impl <T: Config> Pallet<T> {
 
 	/// A function that does some math work, fibonacci sequence, for testing purposes.
-	fn math_work_testing(n: u32) -> u32 {
+	pub fn math_work_testing(n: u32) -> u32 {
 		match n {
 			0 => 0,
 			1 => 1,
@@ -150,5 +151,3 @@ impl <T: Config> Pallet<T> {
 		}
 	}
 }
-
-
