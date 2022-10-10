@@ -19,6 +19,7 @@ pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 	use frame_support::traits::FindAuthor;
+	use frame_support::sp_runtime::traits::Hash;
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -26,7 +27,7 @@ pub mod pallet {
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_computational_work::Config {
+	pub trait Config: frame_system::Config + pallet_computational_work::Config + pallet_session::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
@@ -54,8 +55,10 @@ pub mod pallet {
 		TestEvent {
 			raw_hash: T::Hash,
 			elaborated_hash: T::Hash,
-			author: T::AccountId,
+			checked_author: T::AccountId,
 			block_height: u32,
+			current_author: T::AccountId,
+			is_passed: bool,
 		}
 	}
 
@@ -76,7 +79,10 @@ pub mod pallet {
 		/// An example dispatchable that takes a singles value as a parameter, writes the value to
 		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
 		#[pallet::weight(100)]
-		pub fn check_computational_work(origin: OriginFor<T>) -> DispatchResult {
+		pub fn check_computational_work(
+			origin: OriginFor<T>,
+			number: u32,
+		) -> DispatchResult {
 			// Check that the extrinsic was signed and get the signer.
 			// This function will return an error if the extrinsic is not signed.
 			// https://docs.substrate.io/main-docs/build/origins/
@@ -85,12 +91,27 @@ pub mod pallet {
 			// Get the last computational work from pallet_computational_work.
 			let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
+			// Get the author of the block.
+			// Get the block author.
+			let block_digest = <frame_system::Pallet<T>>::digest();
+			let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
+			let current_author = <T as pallet_computational_work::Config>::FindAuthor::find_author(digests).unwrap();
+
+
+			// Use the math function to check if the work is correct.
+			let check_computational_work = pallet_computational_work::Pallet::<T>::math_work_testing(number);
+			let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
+
+			let is_passed = check_computational_work_hashed == last_computational_work.1;
+
 			// Emit an event.
 			Self::deposit_event(Event::TestEvent {
 				raw_hash: last_computational_work.0,
 				elaborated_hash: last_computational_work.1,
-				author: last_computational_work.2,
+				checked_author: last_computational_work.2,
 				block_height: last_computational_work.3,
+				current_author,
+				is_passed
 			});
 			// Return a successful DispatchResultWithPostInfo
 			Ok(())

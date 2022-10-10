@@ -4096,6 +4096,7 @@ dependencies = [
  "pallet-authorship",
  "pallet-computational-work",
  "pallet-randomness-collective-flip",
+ "pallet-session",
  "parity-scale-codec",
  "scale-info",
  "sp-core",
