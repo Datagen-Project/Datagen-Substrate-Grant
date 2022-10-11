@@ -48,11 +48,9 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// Event documentation should end with an array that provides descriptive names for event
-		/// parameters. [something, who]
-		SomethingStored(T::AccountId),
 
-		TestEvent {
+		/// Check result of computational work.
+		CheckResult {
 			raw_hash: T::Hash,
 			elaborated_hash: T::Hash,
 			checked_author: T::AccountId,
@@ -105,7 +103,7 @@ pub mod pallet {
 			let is_passed = check_computational_work_hashed == last_computational_work.1;
 
 			// Emit an event.
-			Self::deposit_event(Event::TestEvent {
+			Self::deposit_event(Event::CheckResult {
 				raw_hash: last_computational_work.0,
 				elaborated_hash: last_computational_work.1,
 				checked_author: last_computational_work.2,
