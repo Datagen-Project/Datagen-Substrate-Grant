@@ -50,7 +50,8 @@ fn check_add_owner() {
 	new_test_ext().execute_with(|| {
 
 		// Add owner.
-		assert_ok!(RandomNodeSelector::add_reliable_node(Origin::signed(1), 1, OpaquePeerId(vec![1, 2, 3, 4])));
+		// Need to set an free peer id.
+		assert_ok!(RandomNodeSelector::add_reliable_node(Origin::signed(1), 1, OpaquePeerId(vec![0, 1, 1, 1])));
 	});
 }
 
@@ -59,8 +60,8 @@ fn check_add_owner() {
 fn check_remove_owner() {
 	new_test_ext().execute_with(|| {
 
-		// Remove owner.
-		assert_ok!(RandomNodeSelector::remove_reliable_node(Origin::signed(1), OpaquePeerId(vec![6, 6, 6, 6])));
+		// Remove remove the peer id by the owner.
+		assert_ok!(RandomNodeSelector::remove_reliable_node(Origin::signed(1), OpaquePeerId(vec![1, 1, 1, 1])));
 	})
 }
 
@@ -73,16 +74,16 @@ fn check_initial_owners_list() {
 		assert_ok!(RandomNodeSelector::test_get_owners_list(Origin::signed(1)));
 		System::assert_last_event(Event::RandomNodeSelector(crate::Event::ReliableNodeList {
 			owners: vec![
+				(OpaquePeerId(vec![8, 8, 8, 8]), 8),
+				(OpaquePeerId(vec![2, 2, 2, 2]), 2),
+				(OpaquePeerId(vec![4, 4, 4, 4]), 4),
+				(OpaquePeerId(vec![3, 3, 3, 3]), 3),
 				(OpaquePeerId(vec![6, 6, 6, 6]), 6),
 				(OpaquePeerId(vec![5, 5, 5, 5]), 5),
-				(OpaquePeerId(vec![3, 3, 3, 3]), 3),
-				(OpaquePeerId(vec![1, 1, 1, 1]), 1),
-				(OpaquePeerId(vec![8, 8, 8, 8]), 8),
-				(OpaquePeerId(vec![4, 4, 4, 4]), 4),
-				(OpaquePeerId(vec![7, 7, 7, 7]), 7),
 				(OpaquePeerId(vec![9, 9, 9, 9]), 9),
 				(OpaquePeerId(vec![1, 2, 3, 4]), 10),
-				(OpaquePeerId(vec![2, 2, 2, 2]), 2)
+				(OpaquePeerId(vec![1, 1, 1, 1]), 1),
+				(OpaquePeerId(vec![7, 7, 7, 7]), 7),
 			],
 		}));
 	});
