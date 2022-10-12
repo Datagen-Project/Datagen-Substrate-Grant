@@ -57,6 +57,10 @@ pub mod pallet {
 			block_height: u32,
 			current_author: T::AccountId,
 			is_passed: bool,
+		},
+
+		Test {
+			number: T::BlockNumber,
 		}
 	}
 
@@ -68,6 +72,19 @@ pub mod pallet {
 		/// Errors should have helpful documentation associated with them.
 		StorageOverflow,
 	}
+
+
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+
+		fn on_finalize(now: T::BlockNumber) {
+
+			Self::deposit_event(Event::Test {
+				number: now,
+			});
+		}
+	}
+
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
 	// These functions materialize as "extrinsics", which are often compared to transactions.
