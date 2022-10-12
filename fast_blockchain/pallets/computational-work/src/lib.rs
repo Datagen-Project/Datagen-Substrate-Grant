@@ -62,7 +62,7 @@ pub mod pallet {
 			block_height: u32,
 		},
 
-
+		/// Event emitted showing the results of the last computational work.
 		LastComputationalWork {
 			raw_hash: T::Hash,
 			elaborated_hash: T::Hash,
