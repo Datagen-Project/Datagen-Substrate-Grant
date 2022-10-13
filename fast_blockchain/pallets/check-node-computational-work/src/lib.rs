@@ -1,8 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// Edit this file to define custom logic or remove it if it is not needed.
-/// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// <https://docs.substrate.io/reference/frame-pallets/>
 pub use pallet::*;
 
 // #[cfg(test)]
@@ -20,6 +17,9 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 	use frame_support::traits::FindAuthor;
 	use frame_support::sp_runtime::traits::Hash;
+	use sp_runtime::traits::SaturatedConversion;
+	use scale_info::prelude::vec;
+
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -35,13 +35,44 @@ pub mod pallet {
 		type FindAuthor: FindAuthor<Self::AccountId>;
 	}
 
-	// The pallet's runtime storage items.
-	// https://docs.substrate.io/main-docs/build/runtime-storage/
+	#[pallet::type_value]
+	pub fn DefaultCheckAuthor<T: Config>() -> bool {
+		false
+	}
+
+	// First Author
 	#[pallet::storage]
-	#[pallet::getter(fn something)]
-	// Learn more about declaring storage items:
-	// https://docs.substrate.io/main-docs/build/runtime-storage/#declaring-storage-items
-	pub type Something<T> = StorageValue<_, u32>;
+	#[pallet::getter(fn first_author_has_checked)]
+	pub type FirstAuthorHasChecked<T: Config> = StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
+
+	#[pallet::storage]
+	pub type FirstAuthor<T: Config> = StorageValue<_, T::AccountId>;
+
+	#[pallet::storage]
+	pub type FirstAuthorIsPassed<T: Config> = StorageValue<_, bool>;
+
+	// Second Author
+	#[pallet::storage]
+	#[pallet::getter(fn second_author_has_checked)]
+	pub type SecondAuthorHasChecked<T: Config> = StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
+
+	#[pallet::storage]
+	pub type SecondAuthor<T: Config> = StorageValue<_, T::AccountId>;
+
+	#[pallet::storage]
+	pub type SecondAuthorIsPassed<T: Config> = StorageValue<_, bool>;
+
+	// Third Author
+	#[pallet::storage]
+	#[pallet::getter(fn third_author_has_checked)]
+	pub type ThirdAuthorHasChecked<T: Config> = StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
+
+	#[pallet::storage]
+	pub type ThirdAuthor<T: Config> = StorageValue<_, T::AccountId>;
+
+	#[pallet::storage]
+	pub type ThirdAuthorIsPassed<T: Config> = StorageValue<_, bool>;
+
 
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/main-docs/build/events-errors/
@@ -61,7 +92,18 @@ pub mod pallet {
 
 		Test {
 			number: T::BlockNumber,
-		}
+		},
+
+		FinalResult {
+			checked_author: T::AccountId,
+			controller1: T::AccountId,
+			result1: bool,
+			controller2: T::AccountId,
+			result2: bool,
+			controller3: T::AccountId,
+			result3: bool,
+			is_passed: bool,
+		},
 	}
 
 	// Errors inform users that something went wrong.
@@ -76,12 +118,166 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_initialize(_n: BlockNumberFor<T>) -> frame_support::weights::Weight {
 
-		fn on_finalize(now: T::BlockNumber) {
+			// Check if there is a computational work to check.
+			if pallet_computational_work::Pallet::<T>::last_computational_work_is_checked() == false {
+				let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
-			Self::deposit_event(Event::Test {
-				number: now,
-			});
+					if FirstAuthorHasChecked::<T>::get() && SecondAuthorHasChecked::<T>::get() && ThirdAuthorHasChecked::<T>::get() {
+						let check_results = vec![
+							FirstAuthorIsPassed::<T>::get().unwrap(),
+							SecondAuthorIsPassed::<T>::get().unwrap(),
+							ThirdAuthorIsPassed::<T>::get().unwrap(),
+						];
+
+						let mut votes = 0;
+						for check_results in check_results {
+							if check_results {
+								votes += 1;
+							}
+						}
+
+						let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
+
+						if votes >= 2 {
+							Self::deposit_event(Event::FinalResult {
+								checked_author: last_computational_work.2,
+								controller1: FirstAuthor::<T>::get().unwrap(),
+								result1: FirstAuthorIsPassed::<T>::get().unwrap(),
+								controller2: SecondAuthor::<T>::get().unwrap(),
+								result2: SecondAuthorIsPassed::<T>::get().unwrap(),
+								controller3: ThirdAuthor::<T>::get().unwrap(),
+								result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
+								is_passed: true,
+							});
+						} else {
+							Self::deposit_event(Event::FinalResult {
+								checked_author: last_computational_work.2,
+								controller1: FirstAuthor::<T>::get().unwrap(),
+								result1: FirstAuthorIsPassed::<T>::get().unwrap(),
+								controller2: SecondAuthor::<T>::get().unwrap(),
+								result2: SecondAuthorIsPassed::<T>::get().unwrap(),
+								controller3: ThirdAuthor::<T>::get().unwrap(),
+								result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
+								is_passed: false,
+							});
+						}
+
+
+						// Checks are done, reset the checks.
+						FirstAuthorHasChecked::<T>::put(false);
+						SecondAuthorHasChecked::<T>::put(false);
+						ThirdAuthorHasChecked::<T>::put(false);
+
+						// Reset the votes.
+						FirstAuthor::<T>::kill();
+						SecondAuthor::<T>::kill();
+						ThirdAuthor::<T>::kill();
+
+						pallet_computational_work::Pallet::<T>::set_last_computational_work_is_checked(true);
+					}
+
+					// Get the current block author.
+					let block_digest = <frame_system::Pallet<T>>::digest();
+					let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
+					let current_author = <T as pallet_computational_work::Config>::FindAuthor::find_author(digests).unwrap();
+
+					if last_computational_work.2 != current_author {
+						if !FirstAuthorHasChecked::<T>::get() {
+							FirstAuthor::<T>::put(current_author.clone());
+
+							let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
+
+							let number = pallet_computational_work::Pallet::<T>::raw_data();
+							let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
+
+							// Check the computational work.
+							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(number, block_height);
+							let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
+
+							let is_passed = check_computational_work_hashed == last_computational_work.1;
+
+							// Set the check result.
+							FirstAuthorIsPassed::<T>::put(is_passed);
+
+							// Set the check has been done.
+							FirstAuthorHasChecked::<T>::put(true);
+
+							// Emit the check result event.
+							Self::deposit_event(Event::CheckResult {
+								raw_hash: last_computational_work.0,
+								elaborated_hash: last_computational_work.1,
+								checked_author: last_computational_work.2,
+								block_height,
+								current_author,
+								is_passed,
+							});
+
+						} else if FirstAuthorHasChecked::<T>::get() && !SecondAuthorHasChecked::<T>::get() && FirstAuthor::<T>::get().unwrap() != current_author {
+							SecondAuthor::<T>::put(current_author.clone());
+
+
+							let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
+
+							let number = pallet_computational_work::Pallet::<T>::raw_data();
+							let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
+
+							// Check the computational work.
+							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(number, block_height);
+							let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
+
+							let is_passed = check_computational_work_hashed == last_computational_work.1;
+
+							// Set the check result.
+							SecondAuthorIsPassed::<T>::put(is_passed);
+
+							// Set the check has been done.
+							SecondAuthorHasChecked::<T>::put(true);
+
+							// Emit the check result event.
+							Self::deposit_event(Event::CheckResult {
+								raw_hash: last_computational_work.0,
+								elaborated_hash: last_computational_work.1,
+								checked_author: last_computational_work.2,
+								block_height,
+								current_author,
+								is_passed,
+							});
+						} else if FirstAuthorHasChecked::<T>::get() && SecondAuthorHasChecked::<T>::get() && !ThirdAuthorHasChecked::<T>::get() && FirstAuthor::<T>::get().unwrap() != current_author && SecondAuthor::<T>::get().unwrap() != current_author {
+							ThirdAuthor::<T>::put(current_author.clone());
+
+
+							let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
+
+							let number = pallet_computational_work::Pallet::<T>::raw_data();
+							let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
+
+							// Check the computational work.
+							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(number, block_height);
+							let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
+
+							let is_passed = check_computational_work_hashed == last_computational_work.1;
+
+							// Set the check result.
+							ThirdAuthorIsPassed::<T>::put(is_passed);
+
+							// Set the check has been done.
+							ThirdAuthorHasChecked::<T>::put(true);
+
+							// Emit the check result event.
+							Self::deposit_event(Event::CheckResult {
+								raw_hash: last_computational_work.0,
+								elaborated_hash: last_computational_work.1,
+								checked_author: last_computational_work.2,
+								block_height,
+								current_author,
+								is_passed,
+							});
+						}
+					}
+			}
+			0
 		}
 	}
 
@@ -106,8 +302,7 @@ pub mod pallet {
 			// Get the last computational work from pallet_computational_work.
 			let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
-			// Get the author of the block.
-			// Get the block author.
+			// Get the current block author.
 			let block_digest = <frame_system::Pallet<T>>::digest();
 			let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
 			let current_author = <T as pallet_computational_work::Config>::FindAuthor::find_author(digests).unwrap();
