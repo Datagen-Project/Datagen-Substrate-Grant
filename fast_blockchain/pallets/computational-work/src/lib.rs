@@ -32,18 +32,33 @@ pub mod pallet {
 		type FindAuthor: FindAuthor<Self::AccountId>;
 	}
 
+	#[pallet::type_value]
+	pub fn DefaultCheckAuthor<T: Config>() -> bool {
+		true
+	}
+
 	/// The storage of the last computational work.
 	///
 	/// -  `raw_hashed_data` - The raw hashed data.
 	/// -  `elaborated_hashed_data` - The elaborated hashed data.
 	/// -  `author` - The author of the block.
 	/// -  `block_number` - The block number.
+	/// -  `is_checked` - Is true if the last computational work has been checked.
 	///
 	/// This storage is picked up by the heavy blockchain every x (to define and implement in the M2) blocks for checking the computational work.
 	#[pallet::storage]
 	#[pallet::getter(fn last_computational_work)]
 	pub type LastComputationalWork<T: Config> =
 	StorageValue<_, (T::Hash, T::Hash, T::AccountId, u32)>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn last_computational_work_is_checked)]
+	pub type LastComputationalWorkIsChecked<T: Config> = StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
+
+
+	#[pallet::storage]
+	#[pallet::getter(fn raw_data)]
+	pub type RawData<T: Config> = StorageValue<_, u32, ValueQuery>;
 
 	// Events of the pallet.
 
@@ -68,6 +83,7 @@ pub mod pallet {
 			elaborated_hash: T::Hash,
 			author: T::AccountId,
 			block_height: u32,
+			is_checked: bool,
 		}
 	}
 
@@ -104,6 +120,12 @@ pub mod pallet {
 			// Store data for possible checks.
 			<LastComputationalWork<T>>::put((raw_hashed_data, elaborated_hashed_data, author.clone(), block_height.saturated_into::<u32>()));
 
+			// Set the checked value to false.
+			<LastComputationalWorkIsChecked<T>>::put(false);
+
+			// Store the row data for testing purposes.
+			<RawData<T>>::put(number);
+
 			// Emit an event.
 			Self::deposit_event(Event::ResultsComputationalWork {
 				raw_data: number,
@@ -133,6 +155,7 @@ pub mod pallet {
 				elaborated_hash: last_computational_work.1,
 				author: last_computational_work.2,
 				block_height: last_computational_work.3,
+				is_checked: false,
 			});
 
 			Ok(())
@@ -149,5 +172,17 @@ impl <T: Config> Pallet<T> {
 			1 => 1,
 			_ => Self::math_work_testing(n - 1) + Self::math_work_testing(n - 2),
 		}
+	}
+
+	/// A function that make wrong calculus for testing purposes on block that are multiples of 10.
+	pub fn wrong_math_work_testing(n: u32, block: u32) -> u32 {
+		match block % 10 {
+			0 => 0,
+			_ => Self::math_work_testing(n)
+		}
+	}
+
+	pub fn set_last_computational_work_is_checked(b: bool) {
+		<LastComputationalWorkIsChecked<T>>::put(b);
 	}
 }
