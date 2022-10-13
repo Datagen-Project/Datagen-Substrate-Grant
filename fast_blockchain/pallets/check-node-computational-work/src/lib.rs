@@ -121,7 +121,7 @@ pub mod pallet {
 		fn on_initialize(_n: BlockNumberFor<T>) -> frame_support::weights::Weight {
 
 			// Check if there is a computational work to check.
-			if pallet_computational_work::Pallet::<T>::last_computational_work_is_checked() == false {
+			if !pallet_computational_work::Pallet::<T>::last_computational_work_is_checked() {
 				let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
 					if FirstAuthorHasChecked::<T>::get() && SecondAuthorHasChecked::<T>::get() && ThirdAuthorHasChecked::<T>::get() {
@@ -189,11 +189,10 @@ pub mod pallet {
 
 							let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
-							let number = pallet_computational_work::Pallet::<T>::raw_data();
 							let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
 
 							// Check the computational work.
-							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(number, block_height);
+							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(block_height);
 							let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
 
 							let is_passed = check_computational_work_hashed == last_computational_work.1;
@@ -220,11 +219,10 @@ pub mod pallet {
 
 							let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
-							let number = pallet_computational_work::Pallet::<T>::raw_data();
 							let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
 
 							// Check the computational work.
-							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(number, block_height);
+							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(block_height);
 							let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
 
 							let is_passed = check_computational_work_hashed == last_computational_work.1;
@@ -250,11 +248,10 @@ pub mod pallet {
 
 							let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
-							let number = pallet_computational_work::Pallet::<T>::raw_data();
 							let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
 
 							// Check the computational work.
-							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(number, block_height);
+							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(block_height);
 							let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
 
 							let is_passed = check_computational_work_hashed == last_computational_work.1;
