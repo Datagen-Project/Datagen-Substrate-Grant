@@ -98,15 +98,17 @@ pub mod pallet {
 		#[pallet::weight(100)]
 		pub fn hash_work(
 			origin: OriginFor<T>,
-			number: u32,
 		) -> DispatchResult{
 			let _sender = ensure_signed(origin)?;
 
+			// Get the block height.
+			let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
+
 			// The n number of the fibonacci sequence is calculated.
-			let elaborated_math_work = Self::math_work_testing(number);
+			let elaborated_math_work = Self::math_work_testing(block_height);
 
 			// Hashing the raw data and elaborated data.
-			let raw_hashed_data = T::Hashing::hash_of(&number);
+			let raw_hashed_data = T::Hashing::hash_of(&block_height);
 			let elaborated_hashed_data = T::Hashing::hash_of(&elaborated_math_work);
 
 			// Get the block author.
@@ -114,8 +116,7 @@ pub mod pallet {
 			let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
 			let author = T::FindAuthor::find_author(digests).unwrap();
 
-			// Get the block height.
-			let block_height = <frame_system::Pallet<T>>::block_number();
+
 
 			// Store data for possible checks.
 			<LastComputationalWork<T>>::put((raw_hashed_data, elaborated_hashed_data, author.clone(), block_height.saturated_into::<u32>()));
@@ -124,16 +125,16 @@ pub mod pallet {
 			<LastComputationalWorkIsChecked<T>>::put(false);
 
 			// Store the row data for testing purposes.
-			<RawData<T>>::put(number);
+			<RawData<T>>::put(block_height);
 
 			// Emit an event.
 			Self::deposit_event(Event::ResultsComputationalWork {
-				raw_data: number,
+				raw_data: block_height,
 				elaborated_data: elaborated_math_work,
 				raw_hash: raw_hashed_data,
 				elaborated_hash: elaborated_hashed_data,
 				author,
-				block_height: block_height.saturated_into::<u32>(),
+				block_height,
 			});
 
 			Ok(())
@@ -165,20 +166,39 @@ pub mod pallet {
 
 impl <T: Config> Pallet<T> {
 
-	/// A function that does some math work, fibonacci sequence, for testing purposes.
-	pub fn math_work_testing(n: u32) -> u32 {
+	/// This function provides the n number of the fibonacci sequence.
+	pub fn fibonacci(n: u32) -> u32 {
 		match n {
 			0 => 0,
 			1 => 1,
-			_ => Self::math_work_testing(n - 1) + Self::math_work_testing(n - 2),
+			_ => Self::fibonacci(n - 1) + Self::fibonacci(n - 2),
 		}
 	}
 
+	/// This function create a mathematical work to be done, based on block height.
+	pub fn math_work_testing(block: u32) -> u32 {
+		match block % 3 {
+			0 => Self::fibonacci(1),
+			1 => Self::fibonacci(2),
+			// This is wrong on purpose, to test the check.
+			2 => 0,
+			_ => 0,
+		}
+	}
+
+
 	/// A function that make wrong calculus for testing purposes on block that are multiples of 10.
-	pub fn wrong_math_work_testing(n: u32, block: u32) -> u32 {
+	pub fn wrong_math_work_testing(block: u32) -> u32 {
 		match block % 10 {
 			0 => 0,
-			_ => Self::math_work_testing(n)
+			_ => {
+				match block % 3 {
+					0 => Self::fibonacci(1),
+					1 => Self::fibonacci(2),
+					2 => Self::fibonacci(3),
+					_ => 0,
+				}
+			}
 		}
 	}
 
