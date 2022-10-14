@@ -33,6 +33,7 @@ pub mod pallet {
 		type FindAuthor: FindAuthor<Self::AccountId>;
 	}
 
+	// Set the default value for the author check condition.
 	#[pallet::type_value]
 	pub fn DefaultCheckAuthor<T: Config>() -> bool {
 		false
@@ -130,6 +131,7 @@ pub mod pallet {
 			if !pallet_computational_work::Pallet::<T>::last_computational_work_is_checked() {
 				let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
+					// If all the check are done, emit the final result.
 					if FirstAuthorHasChecked::<T>::get() && SecondAuthorHasChecked::<T>::get() && ThirdAuthorHasChecked::<T>::get() {
 						let check_results = vec![
 							FirstAuthorIsPassed::<T>::get().unwrap(),
@@ -170,18 +172,8 @@ pub mod pallet {
 							});
 						}
 
-
-						// Checks are done, reset the checks.
-						FirstAuthorHasChecked::<T>::put(false);
-						SecondAuthorHasChecked::<T>::put(false);
-						ThirdAuthorHasChecked::<T>::put(false);
-
-						// Reset the votes.
-						FirstAuthor::<T>::kill();
-						SecondAuthor::<T>::kill();
-						ThirdAuthor::<T>::kill();
-
-						pallet_computational_work::Pallet::<T>::set_last_computational_work_is_checked(true);
+						// Reset the check.
+						Self::reset_check_process();
 					}
 
 					// Get the current block author.
@@ -261,8 +253,10 @@ pub mod pallet {
 								is_passed,
 							});
 						}
-					}
+				}
 			}
+
+			// Set weight to 0 just for testing.
 			0
 		}
 	}
@@ -292,5 +286,21 @@ impl <T: Config> Pallet<T> {
 
 		// Compare the check computational work with the last computational work.
 		(check_computational_work_hashed == last_computational_work.1, block_height)
+	}
+
+	/// Resetting the check process
+	pub fn reset_check_process() {
+		// Checks are done, reset the checks.
+		FirstAuthorHasChecked::<T>::put(false);
+		SecondAuthorHasChecked::<T>::put(false);
+		ThirdAuthorHasChecked::<T>::put(false);
+
+		// Reset the voters.
+		FirstAuthor::<T>::kill();
+		SecondAuthor::<T>::kill();
+		ThirdAuthor::<T>::kill();
+
+		// Set the last computational work as checked.
+		pallet_computational_work::Pallet::<T>::set_last_computational_work_is_checked(true);
 	}
 }
