@@ -16,8 +16,8 @@ pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 	use frame_support::traits::FindAuthor;
-	use frame_support::sp_runtime::traits::Hash;
-	use sp_runtime::traits::SaturatedConversion;
+	// use frame_support::sp_runtime::traits::Hash;
+	// use sp_runtime::traits::SaturatedConversion;
 	use scale_info::prelude::vec;
 
 
@@ -185,17 +185,10 @@ pub mod pallet {
 
 					if last_computational_work.2 != current_author {
 						if !FirstAuthorHasChecked::<T>::get() {
+
+							let (is_passed, block_height) = Self::check_computational_work();
+
 							FirstAuthor::<T>::put(current_author.clone());
-
-							let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
-
-							let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
-
-							// Check the computational work.
-							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(block_height);
-							let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
-
-							let is_passed = check_computational_work_hashed == last_computational_work.1;
 
 							// Set the check result.
 							FirstAuthorIsPassed::<T>::put(is_passed);
@@ -214,18 +207,10 @@ pub mod pallet {
 							});
 
 						} else if FirstAuthorHasChecked::<T>::get() && !SecondAuthorHasChecked::<T>::get() && FirstAuthor::<T>::get().unwrap() != current_author {
+
+							let (is_passed, block_height) = Self::check_computational_work();
+
 							SecondAuthor::<T>::put(current_author.clone());
-
-
-							let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
-
-							let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
-
-							// Check the computational work.
-							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(block_height);
-							let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
-
-							let is_passed = check_computational_work_hashed == last_computational_work.1;
 
 							// Set the check result.
 							SecondAuthorIsPassed::<T>::put(is_passed);
@@ -243,18 +228,10 @@ pub mod pallet {
 								is_passed,
 							});
 						} else if FirstAuthorHasChecked::<T>::get() && SecondAuthorHasChecked::<T>::get() && !ThirdAuthorHasChecked::<T>::get() && FirstAuthor::<T>::get().unwrap() != current_author && SecondAuthor::<T>::get().unwrap() != current_author {
+
+							let (is_passed, block_height) = Self::check_computational_work();
+
 							ThirdAuthor::<T>::put(current_author.clone());
-
-
-							let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
-
-							let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
-
-							// Check the computational work.
-							let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(block_height);
-							let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
-
-							let is_passed = check_computational_work_hashed == last_computational_work.1;
 
 							// Set the check result.
 							ThirdAuthorIsPassed::<T>::put(is_passed);
@@ -277,51 +254,21 @@ pub mod pallet {
 			0
 		}
 	}
+}
 
+impl <T: Config> Pallet<T> {
+	pub fn check_computational_work() -> (bool, u32) {
+		use sp_runtime::traits::SaturatedConversion;
+		use frame_support::sp_runtime::traits::Hash;
 
-	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
-	// These functions materialize as "extrinsics", which are often compared to transactions.
-	// Dispatchable functions must be annotated with a weight and must return a DispatchResult.
-	#[pallet::call]
-	impl<T: Config> Pallet<T> {
-		/// An example dispatchable that takes a singles value as a parameter, writes the value to
-		/// storage and emits an event. This function must be dispatched by a signed extrinsic.
-		#[pallet::weight(100)]
-		pub fn check_computational_work(
-			origin: OriginFor<T>,
-			number: u32,
-		) -> DispatchResult {
-			// Check that the extrinsic was signed and get the signer.
-			// This function will return an error if the extrinsic is not signed.
-			// https://docs.substrate.io/main-docs/build/origins/
-			let _sender = ensure_signed(origin)?;
+		let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
-			// Get the last computational work from pallet_computational_work.
-			let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
+		let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
 
-			// Get the current block author.
-			let block_digest = <frame_system::Pallet<T>>::digest();
-			let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
-			let current_author = <T as pallet_computational_work::Config>::FindAuthor::find_author(digests).unwrap();
+		// Check the computational work.
+		let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(block_height);
+		let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
 
-
-			// Use the math function to check if the work is correct.
-			let check_computational_work = pallet_computational_work::Pallet::<T>::math_work_testing(number);
-			let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
-
-			let is_passed = check_computational_work_hashed == last_computational_work.1;
-
-			// Emit an event.
-			Self::deposit_event(Event::CheckResult {
-				raw_hash: last_computational_work.0,
-				elaborated_hash: last_computational_work.1,
-				checked_author: last_computational_work.2,
-				block_height: last_computational_work.3,
-				current_author,
-				is_passed
-			});
-			// Return a successful DispatchResultWithPostInfo
-			Ok(())
-		}
+		(check_computational_work_hashed == last_computational_work.1, block_height)
 	}
 }
