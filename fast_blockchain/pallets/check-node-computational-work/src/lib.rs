@@ -41,35 +41,46 @@ pub mod pallet {
 	}
 
 	// First Author
+	// Store if the first author has been checked.
 	#[pallet::storage]
 	#[pallet::getter(fn first_author_has_checked)]
 	pub type FirstAuthorHasChecked<T: Config> = StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
 
+	// Store the first author.
 	#[pallet::storage]
 	pub type FirstAuthor<T: Config> = StorageValue<_, T::AccountId>;
 
+	// Store the check result of the first author.
 	#[pallet::storage]
 	pub type FirstAuthorIsPassed<T: Config> = StorageValue<_, bool>;
 
+
 	// Second Author
+	// Store if the second author has been checked.
 	#[pallet::storage]
 	#[pallet::getter(fn second_author_has_checked)]
 	pub type SecondAuthorHasChecked<T: Config> = StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
 
+	// Store the second author.
 	#[pallet::storage]
 	pub type SecondAuthor<T: Config> = StorageValue<_, T::AccountId>;
 
+	// Store the check result of the second author.
 	#[pallet::storage]
 	pub type SecondAuthorIsPassed<T: Config> = StorageValue<_, bool>;
 
+
 	// Third Author
+	// Store if the third author has been checked.
 	#[pallet::storage]
 	#[pallet::getter(fn third_author_has_checked)]
 	pub type ThirdAuthorHasChecked<T: Config> = StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
 
+	// Store the third author.
 	#[pallet::storage]
 	pub type ThirdAuthor<T: Config> = StorageValue<_, T::AccountId>;
 
+	// Store the check result of the third author.
 	#[pallet::storage]
 	pub type ThirdAuthorIsPassed<T: Config> = StorageValue<_, bool>;
 
@@ -80,7 +91,7 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 
-		/// Check result of computational work.
+		/// Emit an event when an author has been checked.
 		CheckResult {
 			raw_hash: T::Hash,
 			elaborated_hash: T::Hash,
@@ -90,10 +101,7 @@ pub mod pallet {
 			is_passed: bool,
 		},
 
-		Test {
-			number: T::BlockNumber,
-		},
-
+		/// Emit an event whit the final result of the check.
 		FinalResult {
 			checked_author: T::AccountId,
 			controller1: T::AccountId,
