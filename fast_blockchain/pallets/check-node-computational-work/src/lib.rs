@@ -16,7 +16,6 @@ pub mod pallet {
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 	use frame_support::traits::FindAuthor;
-	use scale_info::prelude::vec;
 
 
 	#[pallet::pallet]
@@ -133,44 +132,9 @@ pub mod pallet {
 
 					// If all the check are done, emit the final result.
 					if FirstAuthorHasChecked::<T>::get() && SecondAuthorHasChecked::<T>::get() && ThirdAuthorHasChecked::<T>::get() {
-						let check_results = vec![
-							FirstAuthorIsPassed::<T>::get().unwrap(),
-							SecondAuthorIsPassed::<T>::get().unwrap(),
-							ThirdAuthorIsPassed::<T>::get().unwrap(),
-						];
 
-						let mut votes = 0;
-						for check_results in check_results {
-							if check_results {
-								votes += 1;
-							}
-						}
-
-						let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
-
-						if votes >= 2 {
-							Self::deposit_event(Event::FinalResult {
-								checked_author: last_computational_work.2,
-								controller1: FirstAuthor::<T>::get().unwrap(),
-								result1: FirstAuthorIsPassed::<T>::get().unwrap(),
-								controller2: SecondAuthor::<T>::get().unwrap(),
-								result2: SecondAuthorIsPassed::<T>::get().unwrap(),
-								controller3: ThirdAuthor::<T>::get().unwrap(),
-								result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
-								is_passed: true,
-							});
-						} else {
-							Self::deposit_event(Event::FinalResult {
-								checked_author: last_computational_work.2,
-								controller1: FirstAuthor::<T>::get().unwrap(),
-								result1: FirstAuthorIsPassed::<T>::get().unwrap(),
-								controller2: SecondAuthor::<T>::get().unwrap(),
-								result2: SecondAuthorIsPassed::<T>::get().unwrap(),
-								controller3: ThirdAuthor::<T>::get().unwrap(),
-								result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
-								is_passed: false,
-							});
-						}
+						// Check the final result and emit the event.
+						Self::check_result();
 
 						// Reset the check.
 						Self::reset_check_process();
@@ -286,6 +250,56 @@ impl <T: Config> Pallet<T> {
 
 		// Compare the check computational work with the last computational work.
 		(check_computational_work_hashed == last_computational_work.1, block_height)
+	}
+
+	/// Elaborate the final check result.
+	/// If 2/3 of the authors passed the check, the check is passed.
+	pub fn check_result() {
+		use scale_info::prelude::vec;
+
+		// Get the check results from the storage.
+		let check_results = vec![
+			FirstAuthorIsPassed::<T>::get().unwrap(),
+			SecondAuthorIsPassed::<T>::get().unwrap(),
+			ThirdAuthorIsPassed::<T>::get().unwrap(),
+		];
+
+		// Count the number of true values.
+		let mut votes = 0;
+		for check_results in check_results {
+			if check_results {
+				votes += 1;
+			}
+		}
+
+		// Get last computational work for the event.
+		let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
+
+		// If 2/3 of the authors passed the check, the check is passed.
+		// emit the final check result event.
+		if votes >= 2 {
+			Self::deposit_event(Event::FinalResult {
+				checked_author: last_computational_work.2,
+				controller1: FirstAuthor::<T>::get().unwrap(),
+				result1: FirstAuthorIsPassed::<T>::get().unwrap(),
+				controller2: SecondAuthor::<T>::get().unwrap(),
+				result2: SecondAuthorIsPassed::<T>::get().unwrap(),
+				controller3: ThirdAuthor::<T>::get().unwrap(),
+				result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
+				is_passed: true,
+			});
+		} else {
+			Self::deposit_event(Event::FinalResult {
+				checked_author: last_computational_work.2,
+				controller1: FirstAuthor::<T>::get().unwrap(),
+				result1: FirstAuthorIsPassed::<T>::get().unwrap(),
+				controller2: SecondAuthor::<T>::get().unwrap(),
+				result2: SecondAuthorIsPassed::<T>::get().unwrap(),
+				controller3: ThirdAuthor::<T>::get().unwrap(),
+				result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
+				is_passed: false,
+			});
+		}
 	}
 
 	/// Resetting the check process
