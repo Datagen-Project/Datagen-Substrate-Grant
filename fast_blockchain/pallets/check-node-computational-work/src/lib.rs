@@ -192,14 +192,16 @@ pub mod pallet {
 					if last_computational_work.2 != current_author {
 						if !FirstAuthorHasChecked::<T>::get() {
 
+							// Check the computational work, get the result and the block height.
 							let (is_passed, block_height) = Self::check_computational_work();
 
+							// Set the first author.
 							FirstAuthor::<T>::put(current_author.clone());
 
-							// Set the check result.
+							// Set the check result of the first author.
 							FirstAuthorIsPassed::<T>::put(is_passed);
 
-							// Set the check has been done.
+							// Set the check has been done for the first author.
 							FirstAuthorHasChecked::<T>::put(true);
 
 							// Emit the check result event.
@@ -214,14 +216,16 @@ pub mod pallet {
 
 						} else if FirstAuthorHasChecked::<T>::get() && !SecondAuthorHasChecked::<T>::get() && FirstAuthor::<T>::get().unwrap() != current_author {
 
+							// Check the computational work, get the result and the block height.
 							let (is_passed, block_height) = Self::check_computational_work();
 
+							// Set the second author.
 							SecondAuthor::<T>::put(current_author.clone());
 
-							// Set the check result.
+							// Set the check result of the second author.
 							SecondAuthorIsPassed::<T>::put(is_passed);
 
-							// Set the check has been done.
+							// Set the check has been done for the second author.
 							SecondAuthorHasChecked::<T>::put(true);
 
 							// Emit the check result event.
@@ -235,14 +239,16 @@ pub mod pallet {
 							});
 						} else if FirstAuthorHasChecked::<T>::get() && SecondAuthorHasChecked::<T>::get() && !ThirdAuthorHasChecked::<T>::get() && FirstAuthor::<T>::get().unwrap() != current_author && SecondAuthor::<T>::get().unwrap() != current_author {
 
+							// Check the computational work, get the result and the block height.
 							let (is_passed, block_height) = Self::check_computational_work();
 
+							// Set the third author.
 							ThirdAuthor::<T>::put(current_author.clone());
 
-							// Set the check result.
+							// Set the check result of the third author.
 							ThirdAuthorIsPassed::<T>::put(is_passed);
 
-							// Set the check has been done.
+							// Set the check has been done for the third author.
 							ThirdAuthorHasChecked::<T>::put(true);
 
 							// Emit the check result event.
@@ -263,18 +269,28 @@ pub mod pallet {
 }
 
 impl <T: Config> Pallet<T> {
+
+	/// Check the computational work.
+	/// Returns a tuple of (is_passed, block_height).
+	/// is_passed: true if the computational work is passed, false otherwise.
+	/// block_height: the block height of the checked computational work.
 	pub fn check_computational_work() -> (bool, u32) {
 		use sp_runtime::traits::SaturatedConversion;
 		use frame_support::sp_runtime::traits::Hash;
 
+		// Get the last computational work.
 		let last_computational_work = pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
 
+		// Get the current block height.
 		let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
 
 		// Check the computational work.
+		// Calling wrong_math_work_testing() for PoC.
 		let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(block_height);
+		// Hash the check computational work.
 		let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
 
+		// Compare the check computational work with the last computational work.
 		(check_computational_work_hashed == last_computational_work.1, block_height)
 	}
 }
