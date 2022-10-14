@@ -32,9 +32,21 @@ pub mod pallet {
 		type FindAuthor: FindAuthor<Self::AccountId>;
 	}
 
+	#[pallet::error]
+	pub enum Error<T> {
+		XBlockCannotBeZero
+	}
+
+
+	// Some default values
 	#[pallet::type_value]
 	pub fn DefaultCheckAuthor<T: Config>() -> bool {
 		true
+	}
+
+	#[pallet::type_value]
+	pub fn DefaultXBlock<T: Config>() -> u32 {
+		0
 	}
 
 	/// The storage of the last computational work.
@@ -51,14 +63,22 @@ pub mod pallet {
 	pub type LastComputationalWork<T: Config> =
 	StorageValue<_, (T::Hash, T::Hash, T::AccountId, u32)>;
 
+	/// The status of the last computational work to check.
+	/// -  `true` - The last computational work has been checked a new one can be submitted.
+	/// -  `false` - The last computational work has not been checked yet.
 	#[pallet::storage]
 	#[pallet::getter(fn last_computational_work_is_checked)]
 	pub type LastComputationalWorkIsChecked<T: Config> = StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
 
 
+
 	#[pallet::storage]
-	#[pallet::getter(fn raw_data)]
-	pub type RawData<T: Config> = StorageValue<_, u32, ValueQuery>;
+	#[pallet::getter(fn x_block_index)]
+	pub type CheckEveryXBlocksIndex<T: Config> = StorageValue<_, u32, ValueQuery, DefaultXBlock<T>>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn x_block)]
+	pub type CheckEveryXBlocks<T: Config> = StorageValue<_, u32, ValueQuery, DefaultXBlock<T>>;
 
 	// Events of the pallet.
 
@@ -84,7 +104,13 @@ pub mod pallet {
 			author: T::AccountId,
 			block_height: u32,
 			is_checked: bool,
-		}
+		},
+
+		/// Event emitted when the x block is set.
+		/// [x_block]
+		XBlockSet {
+			x_block: u32,
+		},
 	}
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
@@ -117,15 +143,20 @@ pub mod pallet {
 			let author = T::FindAuthor::find_author(digests).unwrap();
 
 
+			if Self::last_computational_work_is_checked() {
+				if Self::x_block_index() == Self::x_block() {
+					// Store data for possible checks.
+					<LastComputationalWork<T>>::put((raw_hashed_data, elaborated_hashed_data, author.clone(), block_height.saturated_into::<u32>()));
 
-			// Store data for possible checks.
-			<LastComputationalWork<T>>::put((raw_hashed_data, elaborated_hashed_data, author.clone(), block_height.saturated_into::<u32>()));
+					// Set the checked value to false.
+					<LastComputationalWorkIsChecked<T>>::put(false);
 
-			// Set the checked value to false.
-			<LastComputationalWorkIsChecked<T>>::put(false);
-
-			// Store the row data for testing purposes.
-			<RawData<T>>::put(block_height);
+					// Reset the x block index.
+					<CheckEveryXBlocksIndex<T>>::put(0);
+				} else {
+					<CheckEveryXBlocksIndex<T>>::mutate(|x| *x += 1);
+				}
+			}
 
 			// Emit an event.
 			Self::deposit_event(Event::ResultsComputationalWork {
@@ -135,6 +166,35 @@ pub mod pallet {
 				elaborated_hash: elaborated_hashed_data,
 				author,
 				block_height,
+			});
+
+			Ok(())
+		}
+
+		/// Set the check every x blocks value.
+		/// Must be more than 0.
+		#[pallet::weight(100)]
+		pub fn set_check_every_x_blocks(
+			origin: OriginFor<T>,
+			x: u32,
+		) -> DispatchResult{
+			let _sender = ensure_signed(origin)?;
+
+			// Make sure the x value is more than 0
+			ensure!(x > 0, Error::<T>::XBlockCannotBeZero);
+
+			// Change value by 1 to make more human friendly interaction.
+			let x_one_based = x - 1;
+
+			// Set the check every x blocks value.
+			<CheckEveryXBlocks<T>>::put(x_one_based);
+
+			// Reset the x block index.
+			<CheckEveryXBlocksIndex<T>>::put(0);
+
+			// Emit an event.
+			Self::deposit_event(Event::XBlockSet {
+				x_block: x,
 			});
 
 			Ok(())
@@ -166,7 +226,7 @@ pub mod pallet {
 
 impl <T: Config> Pallet<T> {
 
-	/// This function provides the n number of the fibonacci sequence.
+	/// Provides the n number of the fibonacci sequence, for testing purposes.
 	pub fn fibonacci(n: u32) -> u32 {
 		match n {
 			0 => 0,
@@ -175,33 +235,16 @@ impl <T: Config> Pallet<T> {
 		}
 	}
 
-	/// This function create a mathematical work to be done, based on block height.
+	/// Create simple mathematical work to be done, based on block height.
+	/// If the work is done on a block height that is a multiple of 5 the result is 0, this is to test the voting system and simulate malicious behavior.
 	pub fn math_work_testing(block: u32) -> u32 {
-		match block % 3 {
-			0 => Self::fibonacci(1),
-			1 => Self::fibonacci(2),
-			// This is wrong on purpose, to test the check.
-			2 => 0,
-			_ => 0,
-		}
-	}
-
-
-	/// A function that make wrong calculus for testing purposes on block that are multiples of 10.
-	pub fn wrong_math_work_testing(block: u32) -> u32 {
-		match block % 10 {
+		match block % 5 {
 			0 => 0,
-			_ => {
-				match block % 3 {
-					0 => Self::fibonacci(1),
-					1 => Self::fibonacci(2),
-					2 => Self::fibonacci(3),
-					_ => 0,
-				}
-			}
+			_ => Self::fibonacci(10),
 		}
 	}
 
+	/// Setter function for the last computational work.
 	pub fn set_last_computational_work_is_checked(b: bool) {
 		<LastComputationalWorkIsChecked<T>>::put(b);
 	}

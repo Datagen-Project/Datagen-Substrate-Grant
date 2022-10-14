@@ -243,8 +243,8 @@ impl <T: Config> Pallet<T> {
 		let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
 
 		// Check the computational work.
-		// Calling wrong_math_work_testing() for PoC.
-		let check_computational_work = pallet_computational_work::Pallet::<T>::wrong_math_work_testing(block_height);
+		// Calling math_work_testing() for PoC.
+		let check_computational_work = pallet_computational_work::Pallet::<T>::math_work_testing(block_height);
 		// Hash the check computational work.
 		let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
 
