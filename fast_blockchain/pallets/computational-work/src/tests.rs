@@ -50,15 +50,15 @@ fn check_default_x_block_index() {
 	});
 }
 
-
 /// Has to change the index by 1 when hash_work is called.
 #[test]
 fn check_x_block_index_change_by_1() {
 	new_test_ext().execute_with(|| {
 
-		run_to_block(10);
-
+		assert_ok!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 2));
 		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
+
+		run_to_block(10);
 
 		let x_block_index = ComputationalWork::x_block_index();
 
@@ -68,3 +68,12 @@ fn check_x_block_index_change_by_1() {
 }
 
 
+/// Has to submit a computational work.
+#[test]
+fn hash_work() {
+	new_test_ext().execute_with(|| {
+
+		run_to_block(10);
+		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
+	})
+}

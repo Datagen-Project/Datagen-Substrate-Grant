@@ -1,35 +1,19 @@
 use crate as pallet_computational_work;
-use frame_support::{parameter_types, traits::{ConstU16, ConstU64, GenesisBuild, OnFinalize, OnInitialize}};
+use frame_support::{traits::{ConstU16, ConstU64, OnFinalize, OnInitialize}};
 use frame_system as system;
-use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{H256, sr25519, OpaquePeerId, crypto::{Public, Pair}};
+use sp_core::{H256, sr25519, crypto::{Public, Pair}};
 use sp_runtime::{
-	impl_opaque_keys,
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup, Verify, IdentifyAccount}, MultiSignature,
 };
-use opaque::SessionKeys;
-use frame_system::EnsureRoot;
+use sp_runtime::ConsensusEngineId;
+use frame_support::traits::FindAuthor;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 type BlockNumber = u64;
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
-
-
-pub mod opaque {
-	use super::*;
-
-	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
-
-	impl_opaque_keys! {
-		pub struct SessionKeys {
-			pub aura: Aura,
-			// pub grandpa: Grandpa,
-		}
-	}
-}
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
@@ -40,10 +24,6 @@ frame_support::construct_runtime!(
 	{
 		System: frame_system,
 		ComputationalWork: pallet_computational_work,
-		Session: pallet_session,
-		Aura: pallet_aura,
-		NodeAuthorization: pallet_node_authorization,
-		Timestamp: pallet_timestamp,
 	}
 );
 
@@ -76,114 +56,21 @@ impl system::Config for Test {
 
 impl pallet_computational_work::Config for Test {
 	type Event = Event;
-	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
+	type FindAuthor = AuthorGiven;
 }
 
-pub const MILLISECS_PER_BLOCK: u64 = 1000;
-pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
-pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
-
-impl pallet_timestamp::Config for Test {
-	/// A timestamp: milliseconds since the unix epoch.
-	type Moment = u64;
-	type OnTimestampSet = Aura;
-	type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	pub MaxAuthorities: u32 = 10;
-}
-
-impl pallet_aura::Config for Test {
-	type AuthorityId = AuraId;
-	type DisabledValidators = ();
-	type MaxAuthorities = MaxAuthorities;
-}
-
-
-parameter_types! {
-	pub Period: u64 = 10 * MINUTES;
-	pub const Offset: u32 = 0;
-}
-
-impl pallet_session::Config for Test {
-	type Event = Event;
-	type ValidatorId = AccountId;
-	type ValidatorIdOf = ();
-	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
-	type NextSessionRotation = ();
-	type SessionManager = ();
-	type SessionHandler = <opaque::SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
-	type Keys = opaque::SessionKeys;
-	type WeightInfo = ();
-}
-
-parameter_types! {
-	// Add parameter const for node-authorization pallet
-	pub const MaxWellKnownNodes: u32 = 10;
-	pub const MaxPeerIdLength: u32 = 128;
-}
-
-impl pallet_node_authorization::Config for Test {
-	type Event = Event;
-	type MaxWellKnownNodes = MaxWellKnownNodes;
-	type MaxPeerIdLength = MaxPeerIdLength;
-	type AddOrigin = EnsureRoot<AccountId>;
-	type RemoveOrigin = EnsureRoot<AccountId>;
-	type ResetOrigin = EnsureRoot<AccountId>;
-	type SwapOrigin = EnsureRoot<AccountId>;
-	type WeightInfo = ();
+pub struct AuthorGiven;
+impl FindAuthor<AccountId> for AuthorGiven {
+    fn find_author<'a, I>(_digests: I) -> Option<AccountId>
+    where
+        I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
+    {
+        Some(get_account_id_from_seed::<sr25519::Public>("Alice"))
+    }
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
-	pallet_aura::GenesisConfig::<Test> {
-		authorities: vec![],
-	}
-	.assimilate_storage(&mut t).unwrap();
-	pallet_session::GenesisConfig::<Test> {
-		keys: vec![
-			(
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				get_from_seed::<AuraId>("Alice"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Bob"),
-				get_from_seed::<AuraId>("Bob"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Charlie"),
-				get_from_seed::<AuraId>("Charlie"),
-			),
-			(
-				get_account_id_from_seed::<sr25519::Public>("Dave"),
-				get_from_seed::<AuraId>("Dave"),
-			),
-		].iter().map(|x| (x.0.clone(), x.0.clone(), session_keys(x.1.clone()))).collect::<Vec<_>>()
-	}
-	.assimilate_storage(&mut t).unwrap();
-	pallet_node_authorization::GenesisConfig::<Test> {
-		nodes: vec![
-				(
-					OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()),
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-				),
-				(
-					OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap()),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-				),
-				(
-					OpaquePeerId(bs58::decode("12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ").into_vec().unwrap()),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-				),
-				(
-					OpaquePeerId(bs58::decode("12D3KooWPHWFrfaJzxPnqnAYAoRUyAHHKqACmEycGTVmeVhQYuZN").into_vec().unwrap()),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-				)
-			]
-	}
-	.assimilate_storage(&mut t).unwrap();
+	let t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);
 	ext.execute_with(|| System::set_block_number(1));
 	ext
@@ -217,8 +104,4 @@ where
 	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
-}
-
-fn session_keys(aura: AuraId) -> SessionKeys {
-	SessionKeys { aura }
 }
