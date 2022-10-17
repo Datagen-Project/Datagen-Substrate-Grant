@@ -2,13 +2,14 @@ use crate as pallet_computational_work;
 use frame_support::{parameter_types, traits::{ConstU16, ConstU64, GenesisBuild, OnFinalize, OnInitialize}};
 use frame_system as system;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{H256, sr25519, crypto::{Public, Pair}};
+use sp_core::{H256, sr25519, OpaquePeerId, crypto::{Public, Pair}};
 use sp_runtime::{
 	impl_opaque_keys,
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup, Verify, IdentifyAccount}, MultiSignature,
 };
 use opaque::SessionKeys;
+use frame_system::EnsureRoot;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -41,6 +42,7 @@ frame_support::construct_runtime!(
 		ComputationalWork: pallet_computational_work,
 		Session: pallet_session,
 		Aura: pallet_aura,
+		NodeAuthorization: pallet_node_authorization,
 		Timestamp: pallet_timestamp,
 	}
 );
@@ -117,6 +119,23 @@ impl pallet_session::Config for Test {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	// Add parameter const for node-authorization pallet
+	pub const MaxWellKnownNodes: u32 = 10;
+	pub const MaxPeerIdLength: u32 = 128;
+}
+
+impl pallet_node_authorization::Config for Test {
+	type Event = Event;
+	type MaxWellKnownNodes = MaxWellKnownNodes;
+	type MaxPeerIdLength = MaxPeerIdLength;
+	type AddOrigin = EnsureRoot<AccountId>;
+	type RemoveOrigin = EnsureRoot<AccountId>;
+	type ResetOrigin = EnsureRoot<AccountId>;
+	type SwapOrigin = EnsureRoot<AccountId>;
+	type WeightInfo = ();
+}
+
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 	pallet_aura::GenesisConfig::<Test> {
@@ -142,6 +161,27 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 				get_from_seed::<AuraId>("Dave"),
 			),
 		].iter().map(|x| (x.0.clone(), x.0.clone(), session_keys(x.1.clone()))).collect::<Vec<_>>()
+	}
+	.assimilate_storage(&mut t).unwrap();
+	pallet_node_authorization::GenesisConfig::<Test> {
+		nodes: vec![
+				(
+					OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()),
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+				),
+				(
+					OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap()),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+				),
+				(
+					OpaquePeerId(bs58::decode("12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ").into_vec().unwrap()),
+					get_account_id_from_seed::<sr25519::Public>("Charlie"),
+				),
+				(
+					OpaquePeerId(bs58::decode("12D3KooWPHWFrfaJzxPnqnAYAoRUyAHHKqACmEycGTVmeVhQYuZN").into_vec().unwrap()),
+					get_account_id_from_seed::<sr25519::Public>("Dave"),
+				)
+			]
 	}
 	.assimilate_storage(&mut t).unwrap();
 	let mut ext = sp_io::TestExternalities::new(t);

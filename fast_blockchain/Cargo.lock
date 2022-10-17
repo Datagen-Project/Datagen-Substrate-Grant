@@ -4108,11 +4108,13 @@ dependencies = [
 name = "pallet-computational-work"
 version = "0.1.0"
 dependencies = [
+ "bs58",
  "frame-benchmarking",
  "frame-support",
  "frame-support-test",
  "frame-system",
  "pallet-aura",
+ "pallet-node-authorization",
  "pallet-session",
  "pallet-timestamp",
  "parity-scale-codec",
