@@ -5,11 +5,11 @@
 /// <https://docs.substrate.io/reference/frame-pallets/>
 pub use pallet::*;
 
-#[cfg(test)]
-mod mock;
+// #[cfg(test)]
+// mod mock;
 
-#[cfg(test)]
-mod tests;
+// #[cfg(test)]
+// mod tests;
 
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
@@ -80,23 +80,23 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// An example dispatchable that may throw a custom error.
-		#[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
-		pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
-			let _who = ensure_signed(origin)?;
+		// An example dispatchable that may throw a custom error.
+		// #[pallet::weight(10_000 + T::DbWeight::get().reads_writes(1,1))]
+		// pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
+		// 	let _who = ensure_signed(origin)?;
 
-			// Read a value from storage.
-			match <Something<T>>::get() {
-				// Return an error if the value has not been set.
-				None => return Err(Error::<T>::NoneValue.into()),
-				Some(old) => {
-					// Increment the value read from storage; will error in the event of overflow.
-					let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-					// Update the value in storage with the incremented result.
-					<Something<T>>::put(new);
-					Ok(())
-				},
-			}
-		}
+		// 	// Read a value from storage.
+		// 	match <Something<T>>::get() {
+		// 		// Return an error if the value has not been set.
+		// 		None => return Err(Error::<T>::NoneValue.into()),
+		// 		Some(old) => {
+		// 			// Increment the value read from storage; will error in the event of overflow.
+		// 			let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
+		// 			// Update the value in storage with the incremented result.
+		// 			<Something<T>>::put(new);
+		// 			Ok(())
+		// 		},
+		// 	}
+		// }
 	}
 }
