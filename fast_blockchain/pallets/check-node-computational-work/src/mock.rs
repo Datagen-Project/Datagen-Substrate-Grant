@@ -13,6 +13,8 @@ type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 type BlockNumber = u64;
 
+use sp_runtime::SaturatedConversion;
+
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
 // Configure a mock runtime to test the pallet.
@@ -71,8 +73,19 @@ impl FindAuthor<AccountId> for AuthorGiven {
     where
         I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
     {
-        Some(get_account_id_from_seed::<sr25519::Public>("Alice"))
+        Some(set_author())
     }
+}
+
+// Simulate the author of the blocks.
+pub fn set_author() -> AccountId {
+	let n = System::block_number().saturated_into::<u32>();
+	match n % 4 {
+		0 => get_account_id_from_seed::<sr25519::Public>("Alice"),
+		1 => get_account_id_from_seed::<sr25519::Public>("Bob"),
+		2 => get_account_id_from_seed::<sr25519::Public>("Charlie"),
+		_ => get_account_id_from_seed::<sr25519::Public>("Dave"),
+	}
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
@@ -88,11 +101,13 @@ pub fn run_to_block(n: u64) {
 	while System::block_number() < n {
 	 if System::block_number() > 1 {
 		ComputationalWork::on_finalize(System::block_number());
+		CheckNodeComputationalWork::on_finalize(System::block_number());
 	  System::on_finalize(System::block_number());
 	 }
 	 System::set_block_number(System::block_number() + 1);
 	 System::on_initialize(System::block_number());
 	 ComputationalWork::on_initialize(System::block_number());
+	 CheckNodeComputationalWork::on_initialize(System::block_number());
 	}
 }
 
