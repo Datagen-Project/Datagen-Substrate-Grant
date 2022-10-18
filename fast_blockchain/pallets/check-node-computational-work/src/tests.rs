@@ -4,7 +4,7 @@ use frame_support::{assert_ok, assert_noop};
 
 /// Has to check the correct event when hash_work is called.
 #[test]
-fn correct_event_when_hash_work_is_called() {
+fn correct_hook_event_when_hash_work_is_called() {
 	new_test_ext().execute_with(|| {
 		run_to_block(8);
 
@@ -69,5 +69,75 @@ fn correct_event_when_hash_work_is_called() {
 			is_passed: true,
 		}));
 
-	})
+	});
+}
+
+#[test]
+fn correct_hook_event_when_hash_work_is_called_2() {
+	new_test_ext().execute_with(|| {
+
+		run_to_block(10);
+
+		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
+		let row_hash_to_check = hash_number(10);
+		let elaborated_hash_to_check = hash_number(0);
+
+		System::assert_last_event(Event::ComputationalWork(pallet_computational_work::Event::ResultsComputationalWork {
+			// The not hashed raw data, it's for testing purposes.
+			raw_data: 10,
+			// The not hashed elaborated data.
+			elaborated_data: 0,
+			raw_hash: row_hash_to_check,
+			elaborated_hash: elaborated_hash_to_check,
+			author: get_account_id_from_seed::<sr25519::Public>("Charlie"),
+			block_height: 10,
+		}));
+
+		run_to_block(11);
+
+		System::assert_last_event(Event::CheckNodeComputationalWork(crate::Event::CheckResult {
+			raw_hash: row_hash_to_check,
+			elaborated_hash: elaborated_hash_to_check,
+			checked_author: get_account_id_from_seed::<sr25519::Public>("Charlie"),
+			block_height: 11,
+			current_author: get_account_id_from_seed::<sr25519::Public>("Dave"),
+			is_passed: false,
+		}));
+
+		run_to_block(12);
+
+		System::assert_last_event(Event::CheckNodeComputationalWork(crate::Event::CheckResult {
+			raw_hash: row_hash_to_check,
+			elaborated_hash: elaborated_hash_to_check,
+			checked_author: get_account_id_from_seed::<sr25519::Public>("Charlie"),
+			block_height: 12,
+			current_author: get_account_id_from_seed::<sr25519::Public>("Alice"),
+			is_passed: false,
+		}));
+
+		run_to_block(13);
+
+		System::assert_last_event(Event::CheckNodeComputationalWork(crate::Event::CheckResult {
+			raw_hash: row_hash_to_check,
+			elaborated_hash: elaborated_hash_to_check,
+			checked_author: get_account_id_from_seed::<sr25519::Public>("Charlie"),
+			block_height: 13,
+			current_author: get_account_id_from_seed::<sr25519::Public>("Bob"),
+			is_passed: false,
+		}));
+
+		run_to_block(14);
+
+		System::assert_last_event(Event::CheckNodeComputationalWork(crate::Event::FinalResult {
+			checked_author: get_account_id_from_seed::<sr25519::Public>("Charlie"),
+			controller1: get_account_id_from_seed::<sr25519::Public>("Dave"),
+			result1: false,
+			controller2: get_account_id_from_seed::<sr25519::Public>("Alice"),
+			result2: false,
+			controller3: get_account_id_from_seed::<sr25519::Public>("Bob"),
+			result3: false,
+			is_passed: false,
+		}));
+
+	});
 }
