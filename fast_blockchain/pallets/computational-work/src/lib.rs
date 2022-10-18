@@ -52,7 +52,6 @@ pub mod pallet {
 	/// -  `elaborated_hashed_data` - The elaborated hashed data.
 	/// -  `author` - The author of the block.
 	/// -  `block_number` - The block number.
-	/// -  `is_checked` - Is true if the last computational work has been checked.
 	///
 	/// This storage is picked up by the heavy blockchain every x (to define and implement in the M2) blocks for checking the computational work.
 	#[pallet::storage]
@@ -199,7 +198,7 @@ pub mod pallet {
 
 		/// Get the last computational work.
 		#[pallet::weight(100)]
-		pub fn get_last_raw_and_elaborated_data(
+		pub fn get_last_computational_work(
 			origin: OriginFor<T>,
 		) -> DispatchResult{
 			let _sender = ensure_signed(origin)?;
