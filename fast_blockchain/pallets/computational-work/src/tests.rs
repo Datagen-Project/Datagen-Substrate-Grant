@@ -6,7 +6,7 @@ use frame_support::assert_ok;
 
 /// Has to check the default value of x_block, should be 0.
 #[test]
-fn check_default_x_block() {
+fn default_x_block() {
 	new_test_ext().execute_with(|| {
 		let x_block = ComputationalWork::x_block();
 		assert_eq!(x_block, 0);
@@ -43,7 +43,7 @@ fn set_check_every_x_blocks_2() {
 
 /// Has to check the default value of x_block_index, should be 0.
 #[test]
-fn check_default_x_block_index() {
+fn default_x_block_index() {
 	new_test_ext().execute_with(|| {
 		let x_block_index = ComputationalWork::x_block_index();
 		assert_eq!(x_block_index, 0);
@@ -52,18 +52,56 @@ fn check_default_x_block_index() {
 
 /// Has to change the index by 1 when hash_work is called.
 #[test]
-fn check_x_block_index_change_by_1() {
+fn x_block_index_change_by_1() {
 	new_test_ext().execute_with(|| {
 
 		assert_ok!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 2));
 		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
 
-		run_to_block(10);
+		run_to_block(1);
 
 		let x_block_index = ComputationalWork::x_block_index();
 
 		// Should be 1 because is counting from 0.
 		assert_eq!(x_block_index, 1);
+	})
+}
+
+/// Ha to change the index by 2 when hash_work is called twice.
+#[test]
+fn x_block_index_change_by_1_2_times() {
+	new_test_ext().execute_with(|| {
+
+		assert_ok!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 3));
+		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
+		run_to_block(1);
+
+		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
+		run_to_block(1);
+
+		let x_block_index = ComputationalWork::x_block_index();
+
+		// Should be 2 because is counting from 0.
+		assert_eq!(x_block_index, 2);
+	})
+}
+
+/// Has to reset the index to 0 when the index is equal to x_block.
+#[test]
+fn x_block_index_reset() {
+	new_test_ext().execute_with(|| {
+
+		assert_ok!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 2));
+		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
+		run_to_block(1);
+
+		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
+		run_to_block(1);
+
+		let x_block_index = ComputationalWork::x_block_index();
+
+		// Should be 0 because is counting from 0.
+		assert_eq!(x_block_index, 0);
 	})
 }
 
