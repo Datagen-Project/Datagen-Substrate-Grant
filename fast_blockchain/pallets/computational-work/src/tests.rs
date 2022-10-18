@@ -67,7 +67,7 @@ fn x_block_index_change_by_1() {
 	})
 }
 
-/// Ha to change the index by 2 when hash_work is called twice.
+/// Has to change the index by 2 when hash_work is called twice.
 #[test]
 fn x_block_index_change_by_1_2_times() {
 	new_test_ext().execute_with(|| {
