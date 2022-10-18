@@ -4,7 +4,7 @@ use frame_system as system;
 use sp_core::{H256, sr25519, crypto::{Public, Pair}};
 use sp_runtime::{
 	testing::Header,
-	traits::{BlakeTwo256, IdentityLookup, Verify, IdentifyAccount}, MultiSignature,
+	traits::{BlakeTwo256, IdentityLookup, Verify, IdentifyAccount, Hash}, MultiSignature,
 };
 use sp_runtime::ConsensusEngineId;
 use frame_support::traits::FindAuthor;
@@ -89,6 +89,12 @@ pub fn run_to_block(n: u64) {
 	 ComputationalWork::on_initialize(System::block_number());
 	}
 }
+
+/// Helper function that hash a number to a H256.
+pub fn hash_number(n: u32) -> H256 {
+	BlakeTwo256::hash_of(&n)
+}
+
 
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
 	TPublic::Pair::from_string(&format!("//{}", seed), None)
