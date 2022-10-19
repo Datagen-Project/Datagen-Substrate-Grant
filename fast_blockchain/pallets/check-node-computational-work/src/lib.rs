@@ -46,10 +46,12 @@ pub mod pallet {
 
 	// Store the first author.
 	#[pallet::storage]
+	#[pallet::getter(fn first_author)]
 	pub type FirstAuthor<T: Config> = StorageValue<_, T::AccountId>;
 
 	// Store the check result of the first author.
 	#[pallet::storage]
+	#[pallet::getter(fn first_author_check_result)]
 	pub type FirstAuthorIsPassed<T: Config> = StorageValue<_, bool>;
 
 
@@ -61,10 +63,12 @@ pub mod pallet {
 
 	// Store the second author.
 	#[pallet::storage]
+	#[pallet::getter(fn second_author)]
 	pub type SecondAuthor<T: Config> = StorageValue<_, T::AccountId>;
 
 	// Store the check result of the second author.
 	#[pallet::storage]
+	#[pallet::getter(fn second_author_check_result)]
 	pub type SecondAuthorIsPassed<T: Config> = StorageValue<_, bool>;
 
 
@@ -76,10 +80,12 @@ pub mod pallet {
 
 	// Store the third author.
 	#[pallet::storage]
+	#[pallet::getter(fn third_author)]
 	pub type ThirdAuthor<T: Config> = StorageValue<_, T::AccountId>;
 
 	// Store the check result of the third author.
 	#[pallet::storage]
+	#[pallet::getter(fn third_author_check_result)]
 	pub type ThirdAuthorIsPassed<T: Config> = StorageValue<_, bool>;
 
 
