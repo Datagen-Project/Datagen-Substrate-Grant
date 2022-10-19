@@ -45,9 +45,6 @@ pub use sp_runtime::{Perbill, Permill};
 
 pub use pallet_randomness_collective_flip;
 
-/// Import the template pallet.
-pub use pallet_template;
-
 /// Import the random-node-selector pallet.
 pub use pallet_random_node_selector;
 
@@ -270,11 +267,6 @@ impl pallet_sudo::Config for Runtime {
 	type Call = Call;
 }
 
-/// Configure the pallet-template in pallets/template.
-impl pallet_template::Config for Runtime {
-	type Event = Event;
-}
-
 impl pallet_random_node_selector::Config for Runtime {
 	type Event = Event;
 	type Randomness = RandomnessCollectiveFlip;
@@ -295,8 +287,6 @@ construct_runtime!(
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
-		// Include the custom logic from the pallet-template in the runtime.
-		TemplateModule: pallet_template,
 		RandomNodeSelector: pallet_random_node_selector,
 	}
 );
