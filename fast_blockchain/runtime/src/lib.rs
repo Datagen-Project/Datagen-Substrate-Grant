@@ -45,9 +45,6 @@ pub use pallet_timestamp::Call as TimestampCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 
-/// Import the template pallet.
-pub use pallet_template;
-
 /// Import the computational work pallet.
 pub use pallet_computational_work;
 

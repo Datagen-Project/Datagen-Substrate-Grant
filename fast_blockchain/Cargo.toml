@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "node",
-    "pallets/template",
 	"pallets/computational-work",
 	"pallets/check-node-computational-work",
     "runtime",
