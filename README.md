@@ -167,7 +167,7 @@ For example if you call `hash_work` on the 175th block it should submit 0 as com
 
 Same thing for the checkers that could check with malicious intent.
 
-Go to the network event you should see a `computationalWork.ResultsComputationalWork` with some info about the computational work, see more details in the inline documentation in the testing code.
+Go to the network event you should see a `computationalWork.ResultsComputationalWork` with some info about the computational work, see more details in the inline documentation in the test code.
 Then you should see 3 `checkNodeComputationalWork.CheckResult` event triggered by the computational work submission, and a `checkNodeComputationalWork.FinalResult` event with the final result about the checking process.
 
 If the 2/3 of the checkers agree with the checked node you should see a true value as `is_passed` value in the `FinalResult` event.
