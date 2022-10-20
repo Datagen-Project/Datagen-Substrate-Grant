@@ -1,4 +1,4 @@
-#### Testing heavy_blockchain
+# Testing heavy_blockchain
 
 Navigate to `heavy_blockchain/pallets/` and run the below command:
 ```shell
