@@ -162,7 +162,7 @@ Select `computationalWork` pallet from the extrinsics.
 
 To submit computational work (an easy math work in this case for testing) call `hash_work`.
 
-To simulate malicious intent every computational work or checking on a multiply of 5 blocks should be a wrong number (0).
+To simulate malicious intent every computational work or check on block that is a multiply of 5 should be a wrong number (0).
 For example if I call `hash_work` on the 175th block it should submit 0 as computational work and it should be check as invalid and malicious submission.
 
 Same thing for the checkers that could check with malicious intent.
