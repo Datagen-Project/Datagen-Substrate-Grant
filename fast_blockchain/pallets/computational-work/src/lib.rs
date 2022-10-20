@@ -69,12 +69,12 @@ pub mod pallet {
 
 
 	#[pallet::storage]
-	#[pallet::getter(fn x_block_index)]
-	pub type CheckEveryXBlocksIndex<T: Config> = StorageValue<_, u32, ValueQuery, DefaultXBlock<T>>;
+	#[pallet::getter(fn x_work_index)]
+	pub type CheckEveryXWorkIndex<T: Config> = StorageValue<_, u32, ValueQuery, DefaultXBlock<T>>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn x_block)]
-	pub type CheckEveryXBlocks<T: Config> = StorageValue<_, u32, ValueQuery, DefaultXBlock<T>>;
+	#[pallet::getter(fn x_work)]
+	pub type CheckEveryXWorks<T: Config> = StorageValue<_, u32, ValueQuery, DefaultXBlock<T>>;
 
 	// Events of the pallet.
 
@@ -140,7 +140,7 @@ pub mod pallet {
 
 
 			if Self::last_computational_work_is_checked() {
-				if Self::x_block_index() == Self::x_block() {
+				if Self::x_work_index() == Self::x_work() {
 					// Store data for possible checks.
 					<LastComputationalWork<T>>::put((raw_hashed_data, elaborated_hashed_data, author.clone(), block_height.saturated_into::<u32>()));
 
@@ -148,9 +148,9 @@ pub mod pallet {
 					<LastComputationalWorkIsChecked<T>>::put(false);
 
 					// Reset the x block index.
-					<CheckEveryXBlocksIndex<T>>::put(0);
+					<CheckEveryXWorkIndex<T>>::put(0);
 				} else {
-					<CheckEveryXBlocksIndex<T>>::mutate(|x| *x += 1);
+					<CheckEveryXWorkIndex<T>>::mutate(|x| *x += 1);
 				}
 			}
 
@@ -167,10 +167,10 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Set the check every x blocks value.
+		/// Set the check every x works value.
 		/// Must be more than 0.
 		#[pallet::weight(100)]
-		pub fn set_check_every_x_blocks(
+		pub fn set_check_every_x_works(
 			origin: OriginFor<T>,
 			x: u32,
 		) -> DispatchResult{
@@ -183,10 +183,10 @@ pub mod pallet {
 			let x_one_based = x - 1;
 
 			// Set the check every x blocks value.
-			<CheckEveryXBlocks<T>>::put(x_one_based);
+			<CheckEveryXWorks<T>>::put(x_one_based);
 
 			// Reset the x block index.
-			<CheckEveryXBlocksIndex<T>>::put(0);
+			<CheckEveryXWorkIndex<T>>::put(0);
 
 			// Emit an event.
 			Self::deposit_event(Event::XBlockSet {

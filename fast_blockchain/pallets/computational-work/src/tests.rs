@@ -2,51 +2,51 @@ use crate::mock::*;
 use sp_core::sr25519;
 use frame_support::{assert_ok, assert_noop};
 
-// Testing x_block getter function of the storage CheckEveryXBlocks and set_check_every_x_blocks.
+// Testing x_work getter function of the storage CheckEveryXBlocks and set_check_every_x_works.
 
-/// Has to check the default value of x_block, should be 0.
+/// Has to check the default value of x_work, should be 0.
 #[test]
 fn default_x_block() {
 	new_test_ext().execute_with(|| {
-		let x_block = ComputationalWork::x_block();
-		assert_eq!(x_block, 0);
+		let x_work = ComputationalWork::x_work();
+		assert_eq!(x_work, 0);
 	});
 }
 
-/// Has to set x_block to 9, this means that the checking of the computational work is done every 10 blocks.
+/// Has to set x_work to 9, this means that the checking of the computational work is done every 10 blocks.
 #[test]
-fn set_check_every_x_blocks() {
+fn set_check_every_x_works() {
 	new_test_ext().execute_with(|| {
 
-		// Check if function set_check_every_x_blocks works.
-		assert_ok!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 10));
+		// Check if function set_check_every_x_works works.
+		assert_ok!(ComputationalWork::set_check_every_x_works(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 10));
 
 		// Should be 9 because is counting from 0.
-		assert_eq!(ComputationalWork::x_block(), 9);
+		assert_eq!(ComputationalWork::x_work(), 9);
 	});
 }
 
-/// Ha to set x_block to 5, this means that the checking of the computational work is done every 6 blocks.
+/// Ha to set x_work to 5, this means that the checking of the computational work is done every 6 blocks.
 #[test]
 fn set_check_every_x_blocks_2() {
 	new_test_ext().execute_with(|| {
 
-		// Check if function set_check_every_x_blocks works.
-		assert_ok!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 6));
+		// Check if function set_check_every_x_works works.
+		assert_ok!(ComputationalWork::set_check_every_x_works(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 6));
 
 		// Should be 5 because is counting from 0.
-		assert_eq!(ComputationalWork::x_block(), 5);
+		assert_eq!(ComputationalWork::x_work(), 5);
 	});
 }
 
-// Testing x_block_index function of the storage CheckEveryXBlocksIndex.
+// Testing x_work_index function of the storage CheckEveryXBlocksIndex.
 
-/// Has to check the default value of x_block_index, should be 0.
+/// Has to check the default value of x_work_index, should be 0.
 #[test]
 fn default_x_block_index() {
 	new_test_ext().execute_with(|| {
-		let x_block_index = ComputationalWork::x_block_index();
-		assert_eq!(x_block_index, 0);
+		let x_work_index = ComputationalWork::x_work_index();
+		assert_eq!(x_work_index, 0);
 	});
 }
 
@@ -55,15 +55,15 @@ fn default_x_block_index() {
 fn x_block_index_change_by_1() {
 	new_test_ext().execute_with(|| {
 
-		assert_ok!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 2));
+		assert_ok!(ComputationalWork::set_check_every_x_works(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 2));
 		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
 
 		run_to_block(1);
 
-		let x_block_index = ComputationalWork::x_block_index();
+		let x_work_index = ComputationalWork::x_work_index();
 
 		// Should be 1 because is counting from 0.
-		assert_eq!(x_block_index, 1);
+		assert_eq!(x_work_index, 1);
 	})
 }
 
@@ -72,36 +72,36 @@ fn x_block_index_change_by_1() {
 fn x_block_index_change_by_1_2_times() {
 	new_test_ext().execute_with(|| {
 
-		assert_ok!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 3));
+		assert_ok!(ComputationalWork::set_check_every_x_works(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 3));
 		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
 		run_to_block(1);
 
 		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
 		run_to_block(1);
 
-		let x_block_index = ComputationalWork::x_block_index();
+		let x_work_index = ComputationalWork::x_work_index();
 
 		// Should be 2 because is counting from 0.
-		assert_eq!(x_block_index, 2);
+		assert_eq!(x_work_index, 2);
 	})
 }
 
-/// Has to reset the index to 0 when the index is equal to x_block.
+/// Has to reset the index to 0 when the index is equal to x_work.
 #[test]
 fn x_block_index_reset() {
 	new_test_ext().execute_with(|| {
 
-		assert_ok!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 2));
+		assert_ok!(ComputationalWork::set_check_every_x_works(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 2));
 		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
 		run_to_block(1);
 
 		assert_ok!(ComputationalWork::hash_work(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))));
 		run_to_block(1);
 
-		let x_block_index = ComputationalWork::x_block_index();
+		let x_work_index = ComputationalWork::x_work_index();
 
 		// Should be 0 because is counting from 0.
-		assert_eq!(x_block_index, 0);
+		assert_eq!(x_work_index, 0);
 	})
 }
 
@@ -217,12 +217,12 @@ fn get_last_computational_work() {
 	})
 }
 
-/// Has to get error when trying to set x_block_index to 0.
+/// Has to get error when trying to set x_work_index to 0.
 #[test]
 fn set_x_block_index_1() {
 	new_test_ext().execute_with(|| {
 
 		run_to_block(1);
-		assert_noop!(ComputationalWork::set_check_every_x_blocks(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 0), crate::Error::<Test>::XBlockCannotBeZero);
+		assert_noop!(ComputationalWork::set_check_every_x_works(Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")), 0), crate::Error::<Test>::XBlockCannotBeZero);
 	})
 }
