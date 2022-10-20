@@ -1,6 +1,14 @@
-## Testing
+# Testing fast_blockchain
 
-Run 4 nodes for testing
+Navigate to `fast_blockchain/pallets/` adn run the below command:
+```shell
+cargo test
+```
+This command will run the tests for the `computational_work` and `check_node_computational_work` pallets.
+
+You could also run the blockchain and make some manual tests with the [Polkadot.js](https://polkadot.js.org/apps/#/extrinsics?rpc=ws://127.0.0.1:9944) web app, this time you have to run more nodes to simulate the blockchain.
+
+Run at least 4 nodes run every following commands in a new session:
 
 Node 1 - Alice
 ```shell
@@ -46,7 +54,29 @@ Node 4 - Dave
 --offchain-worker always
 ```
 
-to purge validator
+Now your blockchain should produce 1 block every second.
+
+Select `computationalWork` pallet from the extrinsics.
+
+To submit computational work (an easy math work in this case for testing) call `hash_work`.
+
+To simulate malicious intent every computational work or check on a block that is a multiply of 5 should be a wrong number (0).
+For example if you call `hash_work` on the 175th block it should submit 0 as computational work and it should be check as invalid and malicious submission.
+
+Same thing for the checkers that could check with malicious intent.
+
+Go to the network event you should see a `computationalWork.ResultsComputationalWork` with some info about the computational work, see more details in the inline documentation in the test code.
+Then you should see 3 `checkNodeComputationalWork.CheckResult` event triggered by the computational work submission, and a `checkNodeComputationalWork.FinalResult` event with the final result about the checking process.
+
+If the 2/3 of the checkers agree with the checked node you should see a true as `is_passed` value in the `FinalResult` event.
+
+You could also set every how many computational work the network should check the work.
+To do that call the `computationalWork` extrinsics `setCheckEveryXWorks(x)` and set the index.
+
+remember to delate the temp files for every validator if you want to rerun the tests with:
 ```shell
- ./target/release/node-template purge-chain --base-path /tmp/validator1 --chain local
+$ ./target/release/node-template purge-chain --base-path /tmp/validator1 --chain local
+$ ./target/release/node-template purge-chain --base-path /tmp/validator2 --chain local
+$ ./target/release/node-template purge-chain --base-path /tmp/validator3 --chain local
+$ ./target/release/node-template purge-chain --base-path /tmp/validator4 --chain local
 ```
