@@ -170,7 +170,7 @@ Same thing for the checkers that could check with malicious intent.
 Go to the network event you should see a `computationalWork.ResultsComputationalWork` with some info about the computational work, see more details in the inline documentation in the test code.
 Then you should see 3 `checkNodeComputationalWork.CheckResult` event triggered by the computational work submission, and a `checkNodeComputationalWork.FinalResult` event with the final result about the checking process.
 
-If the 2/3 of the checkers agree with the checked node you should see a true value as `is_passed` value in the `FinalResult` event.
+If the 2/3 of the checkers agree with the checked node you should see a true as `is_passed` value in the `FinalResult` event.
 
 You could also set every how many computational work the network should check the work.
 To do that call the `computationalWork` extrinsics `setCheckEveryXWorks(x)` and set the index.
