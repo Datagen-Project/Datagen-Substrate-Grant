@@ -98,7 +98,7 @@ Then connect to the he [Polkadot.js](https://polkadot.js.org/apps/#/extrinsics?r
 To select a random node submit the extrinsic of the `randomNodeSelector` called `randomNodeToCheck`.
 To select the 3 random node that will be the checkers call `randomCheckerNodeSelector`.
 
-Now you could visualize the event in the network inspector, note at the moment we have also an empty peerId value, this is correct we add this information for possible future implementation but we will use the owner account to do the check at the moment.
+Now you could visualize the event in the network inspector, note at the moment we have also an empty peerId value, this is correct we add this information for possible future implementation but we will use the owner account to do the check at the grant.
 
 #### Testing fast_blockchain
 
