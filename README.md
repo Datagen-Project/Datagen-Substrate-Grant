@@ -1,7 +1,7 @@
 # Datagen Project
 This repository is the main part of the work for Web3 Foundation grant submitted by B-Datagray's team.
 
-## Idex
+## Index
 
 - [Overview](#overview)
 - [Milestones](#milestones)
