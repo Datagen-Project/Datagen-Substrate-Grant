@@ -83,7 +83,6 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// Event emitted when a new data is hashed.
 		/// The data will be only hashed at production time, the not hashed data is shown for testing purposes.
-		/// [raw_data, elaborated_data, raw_hash, elaborated_hash]
 		ResultsComputationalWork {
 			raw_data: u32,
 			elaborated_data: u32,
@@ -103,7 +102,6 @@ pub mod pallet {
 		},
 
 		/// Event emitted when the x block is set.
-		/// [x_block]
 		XBlockSet {
 			x_block: u32,
 		},
