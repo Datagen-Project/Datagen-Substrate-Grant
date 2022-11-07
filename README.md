@@ -80,7 +80,7 @@ STATUS: <span style="color:red">TODO</span>.
 You could build an image for the fast blockchain running this command in the fast_blockchain directory:
 
 ```shell
-docker build -t fb-image
+docker build -t fb-image .
 ```
 Create the container with the fb-image and follow the instructions below:
 
