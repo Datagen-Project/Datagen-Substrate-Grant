@@ -1,5 +1,12 @@
 # Testing fast_blockchain
 
+You could build an image for the fast blockchain running this command in the fast_blockchain directory:
+
+```shell
+docker build -t fb-image
+```
+Create the container with the fb-image and follow the instructions below:
+
 Navigate to `fast_blockchain/pallets/` adn run the below command:
 ```shell
 cargo test

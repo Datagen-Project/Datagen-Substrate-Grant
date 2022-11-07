@@ -77,6 +77,13 @@ STATUS: <span style="color:red">TODO</span>.
 
 ### Instruction for Milestone 1
 
+You could build an image for the fast blockchain running this command in the fast_blockchain directory:
+
+```shell
+docker build -t fb-image
+```
+Create the container with the fb-image and follow the instructions below:
+
 The code is divided into two folders `fast_blockchain` and `heavy blockchain`.
 Right now we don't have interaction between the two blockchain (this will happen in the M2) so you have to testing them separately.
 
@@ -101,6 +108,18 @@ To select the 3 random node that will be the checkers call `randomCheckerNodeSel
 Now you could visualize the event in the network inspector, note at the moment we have also an empty peerId value, this is correct we add this information for possible future implementation but we will use the owner account to do the check at the grant.
 
 #### Testing fast_blockchain
+
+You could build an image for the fast blockchain running this command in the fast_blockchain directory:
+
+```shell
+docker build -t fb-image
+```
+Create the container with the hb-image and follow the instructions below:
+
+Navigate to `fast_blockchain/pallets/` adn run the below command:
+```shell
+cargo test
+```
 
 Navigate to `fast_blockchain/pallets/` adn run the below command:
 ```shell

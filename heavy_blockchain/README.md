@@ -1,5 +1,12 @@
 # Testing heavy_blockchain
 
+You could build an image for the heavy blockchain running this command in the heavy_blockchain directory:
+
+```shell
+docker build -t hb-image
+```
+Create the container with the hb-image and follow the instructions below:
+
 Navigate to `heavy_blockchain/pallets/` and run the below command:
 ```shell
 cargo test
