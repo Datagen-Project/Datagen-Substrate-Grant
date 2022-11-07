@@ -23,6 +23,16 @@ fn create_random_number() {
 	});
 }
 
+#[test]
+fn test_total_elements() {
+	new_test_ext().execute_with(|| {
+
+		// Test function should work 
+		assert_ok!(RandomNodeSelector::test_total_elements(Origin::signed(1)));
+	});
+}
+
+
 /// Test create_random_number with TestRandomness
 #[test]
 fn create_random_number_with_test_randomness() {
