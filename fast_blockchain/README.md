@@ -87,3 +87,5 @@ $ ./target/release/node-template purge-chain --base-path /tmp/validator2 --chain
 $ ./target/release/node-template purge-chain --base-path /tmp/validator3 --chain local
 $ ./target/release/node-template purge-chain --base-path /tmp/validator4 --chain local
 ```
+
+You could find a quick demo video at this [link](https://www.youtube.com/watch?v=4gwC2lOTazY)
