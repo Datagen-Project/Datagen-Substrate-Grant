@@ -83,7 +83,9 @@ pub mod pallet {
 		},
 
 		/// Number of elements in the map.
-		TotalItemsInMap(u32),
+		TotalItemsInMap {
+			total_items: u32,
+		}
 	}
 
 	// Errors inform users that something went wrong.
@@ -226,7 +228,7 @@ pub mod pallet {
 			// Count how many owners are in the list.
 			let total = <ReliableNode<T>>::count();
 
-			Self::deposit_event(Event::TotalItemsInMap(total));
+			Self::deposit_event(Event::TotalItemsInMap{total_items: total});
 
 			Ok(())
 		}
