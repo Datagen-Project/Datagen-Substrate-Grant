@@ -15,11 +15,10 @@ mod tests;
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::pallet_prelude::*;
-	use frame_system::pallet_prelude::*;
+	use frame_system::{pallet_prelude::*};
 	use frame_support::traits::Randomness;
 	use scale_info::prelude::vec::Vec;
 	use sp_core::OpaquePeerId as PeerId;
-
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -113,15 +112,9 @@ pub mod pallet {
 
 	/// The last owner to check.
 	#[pallet::storage]
+	#[pallet::getter(fn reliable_node_to_check)]
 	pub(super) type ReliableNodeToCheck<T: Config> =
 		StorageValue<_, (PeerId, T::AccountId)>;
-
-
-	/// The last controllers selected.
-	/// Should be 3 nodes.
-	#[pallet::storage]
-	pub(super) type Controllers<T: Config> =
-		StorageValue<_, Vec<(T::AccountId, PeerId)>>;
 
 	/// The last random number.
 	#[pallet::storage]
