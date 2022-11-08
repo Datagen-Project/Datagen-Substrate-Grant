@@ -20,6 +20,18 @@ fn create_random_number() {
 
 		// Create random number.
 		assert_ok!(RandomNodeSelector::test_create_random_number(Origin::signed(1)));
+
+		// Check the event
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::RandomNumber {
+			number: 0
+		}));
+
+		// Create random number.
+		assert_ok!(RandomNodeSelector::test_create_random_number(Origin::signed(1)));
+		// Check the event
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::RandomNumber {
+			number: 1
+		}));
 	});
 }
 
@@ -27,11 +39,15 @@ fn create_random_number() {
 fn test_total_elements() {
 	new_test_ext().execute_with(|| {
 
-		// Test function should work 
+
 		assert_ok!(RandomNodeSelector::test_total_elements(Origin::signed(1)));
+
+		// Check the event
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::TotalItemsInMap {
+			total_items: 10
+		}));
 	});
 }
-
 
 /// Test create_random_number with TestRandomness
 #[test]
@@ -106,17 +122,6 @@ fn check_random_node_to_check() {
 		// Dispatch a signed extrinsic.
 		assert_ok!(RandomNodeSelector::random_node_to_check(Origin::signed(1)));
 	})
-}
-
-
-/// Check total_elements function.
-#[test]
-fn check_total_items_in_map() {
-	new_test_ext().execute_with(|| {
-
-		assert_ok!(RandomNodeSelector::test_total_elements(Origin::signed(1)));
-		System::assert_last_event(crate::Event::TotalItemsInMap(10).into());
-	});
 }
 
 
