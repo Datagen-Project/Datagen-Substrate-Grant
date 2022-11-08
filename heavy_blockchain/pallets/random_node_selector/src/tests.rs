@@ -1,5 +1,5 @@
 use crate::mock::*;
-use frame_support::assert_ok;
+use frame_support::{assert_ok, assert_noop};
 use sp_core::OpaquePeerId;
 
 /// Test the random hash generator.
@@ -75,6 +75,9 @@ fn create_random_number_with_test_randomness() {
 fn check_add_owner() {
 	new_test_ext().execute_with(|| {
 
+		// Has to fail if the the owner already exists.
+		assert_noop!(RandomNodeSelector::add_reliable_node(Origin::signed(1), 1, OpaquePeerId(vec![1, 1, 1, 1])), crate::Error::<Test>::AlreadyTakenNode);
+
 		// Add owner.
 		// Need to set an free peer id.
 		assert_ok!(RandomNodeSelector::add_reliable_node(Origin::signed(1), 1, OpaquePeerId(vec![0, 1, 1, 1])));
@@ -85,6 +88,12 @@ fn check_add_owner() {
 #[test]
 fn check_remove_owner() {
 	new_test_ext().execute_with(|| {
+
+		// Has to fail if the the origin is not the owner.
+		assert_noop!(RandomNodeSelector::remove_reliable_node(Origin::signed(2), OpaquePeerId(vec![1, 1, 1, 1])), crate::Error::<Test>::NotOwner);
+
+		// Has to fail if there is no node to remove.
+		assert_noop!(RandomNodeSelector::remove_reliable_node(Origin::signed(1), OpaquePeerId(vec![1, 1, 1, 14])), crate::Error::<Test>::NoReliableNodeToCheck);
 
 		// Remove remove the peer id by the owner.
 		assert_ok!(RandomNodeSelector::remove_reliable_node(Origin::signed(1), OpaquePeerId(vec![1, 1, 1, 1])));
@@ -115,12 +124,79 @@ fn check_initial_owners_list() {
 	});
 }
 
+/// Test random number generator in a range.
 #[test]
-fn check_random_node_to_check() {
+fn random_node_range() {
+	new_test_ext().execute_with(|| {
+
+		assert_ok!(RandomNodeSelector::test_generate_random_number_range(Origin::signed(1), 2));
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::RandomNumber {
+			number: 0
+		}));
+
+		assert_ok!(RandomNodeSelector::test_generate_random_number_range(Origin::signed(1), 2));
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::RandomNumber {
+			number: 1
+		}));
+
+		assert_ok!(RandomNodeSelector::test_generate_random_number_range(Origin::signed(1), 2));
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::RandomNumber {
+			number: 0
+		}));
+
+		assert_ok!(RandomNodeSelector::test_generate_random_number_range(Origin::signed(1), 2));
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::RandomNumber {
+			number: 1
+		}));
+	})
+}
+
+#[test]
+fn random_node_to_check() {
 	new_test_ext().execute_with(|| {
 
 		// Dispatch a signed extrinsic.
 		assert_ok!(RandomNodeSelector::random_node_to_check(Origin::signed(1)));
+
+		// Check the event
+		// @dev it's possible that the initial_node_owners map is not in the same order as the one in the mock.
+		// if the test fails, it's because of that.
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::ReliableNodeToCheck {
+			owner: 8,
+			peer_id: OpaquePeerId(vec![8, 8, 8, 8]),
+			random_number: 0,
+		}));
+
+		// Check the storage ReliableNodeToCheck
+		assert_eq!(RandomNodeSelector::reliable_node_to_check(), Some((OpaquePeerId(vec![8, 8, 8, 8]), 8)));
+	})
+}
+
+#[test]
+fn random_checker_node_selector() {
+	new_test_ext().execute_with(|| {
+
+		// Has to fail if there in not a node to check.
+		assert_noop!(RandomNodeSelector::random_checker_node_selector(Origin::signed(1)), crate::Error::<Test>::NoReliableNodeToCheck);
+
+		// Set a node to check.
+		assert_ok!(RandomNodeSelector::random_node_to_check(Origin::signed(1)));
+
+		// Has to select 3 random nodes as a checkers.
+		assert_ok!(RandomNodeSelector::random_checker_node_selector(Origin::signed(1)));
+
+		// Check the event
+		System::assert_last_event(Event::RandomNodeSelector(crate::Event::Controllers {
+			controller_1_account_id: 2,
+			controller_1_peer_id: OpaquePeerId(vec![2, 2, 2, 2]),
+			random_number_1: 1,
+			controller_2_account_id: 4,
+			controller_2_peer_id: OpaquePeerId(vec![4, 4, 4, 4]),
+			random_number_2: 2,
+			controller_3_account_id: 3,
+			controller_3_peer_id: OpaquePeerId(vec![3, 3, 3, 3]),
+			random_number_3: 3,
+		}))
 	})
 }
 
