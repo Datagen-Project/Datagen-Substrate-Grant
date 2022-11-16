@@ -11,28 +11,6 @@
    </picture>
 </h1>
 
-<h4 align="center">
-   A first PoC of the Datagen cloud computing infrastructure using the Substrate framework.
-</h4>
-
-<p align="center">
-  <a href="https://twitter.com/b_datagray">
-    <img src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2Fb_datagray">
-  </a>
-  <a href="https://github.com/Datagen-Project/Datagen-Substrate-Grant/issues">
-    <img src="https://img.shields.io/github/issues/Datagen-Project/Datagen-Substrate-Grant">  
-  </a>
-  <a href="https://github.com/Datagen-Project/Datagen-Substrate-Grant/network/members">
-    <img src="https://img.shields.io/github/forks/Datagen-Project/Datagen-Substrate-Grant">      
-  </a>
-    <img src="https://img.shields.io/github/stars/Datagen-Project/Datagen-Substrate-Grant">
-  <a href="https://img.shields.io/github/license/Datagen-Project/Datagen-Substrate-Grant">
-    <img alt="GitHub" src="https://img.shields.io/github/license/Datagen-Project/Datagen-Substrate-Grant">
-  </a>
-</p>
-
-
-
 ## Index
 
 - [Overview](#overview)
