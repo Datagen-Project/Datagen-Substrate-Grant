@@ -1,5 +1,4 @@
 # Datagen Project
-This repository is the main part of the work for Web3 Foundation grant submitted by B-Datagray's team.
 
 <picture>
    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/64146594/202314071-cd33a04e-17b7-4256-989e-a0c872ece713.png">
