@@ -25,7 +25,7 @@ You could find more info on the project and about the grant visit our proposal a
 
 - [Milestones - 1](#milestone-1---implement-the-randomized-substrate-pallet-pallet_random_node_selector-and-pallet_check_node_computational_work)
 - [Milestones - 2](#milestone-2--connecting-the-two-blockchains)
-- [Milestones -3](#milestone-3--web-dapp)
+- [Milestones - 3](#milestone-3--web-dapp)
 
 ### Milestone 1 - Implement the randomized substrate pallet `pallet_random_node_selector` and `pallet_check_node_computational_work`
 
