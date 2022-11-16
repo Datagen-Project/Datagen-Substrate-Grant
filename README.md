@@ -4,7 +4,7 @@ This repository is the main part of the work for Web3 Foundation grant submitted
 <picture>
    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/64146594/202314071-cd33a04e-17b7-4256-989e-a0c872ece713.png">
   <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/64146594/202314049-da656451-794f-4cb4-a6cc-291a7aa73103.png">
-  <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png">
+  <img alt="Show an image with black background" src="https://user-images.githubusercontent.com/64146594/202315277-9d969707-943e-417f-830a-4d1aca58ab47.jpg">
 </picture>
 
 ## Index
