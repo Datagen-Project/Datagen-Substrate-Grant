@@ -1,10 +1,35 @@
-# Datagen Project
+<h1 align="center">
+  <a href="https://www.b-datagray.com/"> 
+    <img src="https://www.b-datagray.com/static/media/illustration-elements_token-logo.99d6bc5d.svg" height="200" width="200">
+  </a>
+  <br>
+  Datagen Project
+   <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/64146594/202314071-cd33a04e-17b7-4256-989e-a0c872ece713.png">
+      <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/64146594/202314049-da656451-794f-4cb4-a6cc-291a7aa73103.png">
+      <img alt="Show an image with black background" src="https://user-images.githubusercontent.com/64146594/202315277-9d969707-943e-417f-830a-4d1aca58ab47.jpg">
+   </picture>
+</h1>
 
-<picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/64146594/202314071-cd33a04e-17b7-4256-989e-a0c872ece713.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/64146594/202314049-da656451-794f-4cb4-a6cc-291a7aa73103.png">
-  <img alt="Show an image with black background" src="https://user-images.githubusercontent.com/64146594/202315277-9d969707-943e-417f-830a-4d1aca58ab47.jpg">
-</picture>
+<h4 align="center">
+   A first PoC of the Datagen cloud computing infrastructure using the Substrate framework.
+</h4>
+
+<p align="center">
+  <a href="https://twitter.com/b_datagray">
+    <img src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2Fb_datagray">
+  </a>
+  <a href="https://github.com/Datagen-Project/Datagen-Substrate-Grant/issues">
+    <img src="https://img.shields.io/github/issues/Datagen-Project/Datagen-Substrate-Grant">  
+  </a>
+  <a href="https://github.com/Datagen-Project/Datagen-Substrate-Grant/network/members">
+    <img src="https://img.shields.io/github/forks/Datagen-Project/Datagen-Substrate-Grant">      
+  </a>
+  <img src="https://img.shields.io/github/stars/Datagen-Project/Datagen-Substrate-Grant">
+  <a href="https://github.com/Datagen-Project/Datagen-Substrate-Grant/blob/main/LICENSE.md">
+    <img src="https://img.shields.io/github/license/Datagen-Project/Datagen-Substrate-Grant">
+  </a>
+</p>
 
 ## Index
 
@@ -208,3 +233,7 @@ $ ./target/release/node-template purge-chain --base-path /tmp/validator4 --chain
 ``` 
 
 You could find a quick demo video at this [link](https://www.youtube.com/watch?v=4gwC2lOTazY)
+
+## Licensing
+
+The code in this project is licensed under [GNU general Public License v3.0](https://github.com/Datagen-Project/DataGen-Smart-Contracts/blob/main/LICENSE.md).
