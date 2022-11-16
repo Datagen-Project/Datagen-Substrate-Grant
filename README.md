@@ -1,6 +1,12 @@
 # Datagen Project
 This repository is the main part of the work for Web3 Foundation grant submitted by B-Datagray's team.
 
+<picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/64146594/202314071-cd33a04e-17b7-4256-989e-a0c872ece713.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/64146594/202314049-da656451-794f-4cb4-a6cc-291a7aa73103.png">
+  <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="https://user-images.githubusercontent.com/25423296/163456779-a8556205-d0a5-45e2-ac17-42d089e3c3f8.png">
+</picture>
+
 ## Index
 
 - [Overview](#overview)
@@ -23,7 +29,7 @@ You could find more info on the project and about the grant visit our proposal a
 
 ### Milestone 1 - Implement the randomized substrate pallet `pallet_random_node_selector` and `pallet_check_node_computational_work`
 
-STATUS: <span style="color:orange">IN PROGRESS</span>.
+STATUS: [DELIVERED](https://github.com/w3f/Grant-Milestone-Delivery/pull/608#issuecomment-1317485561)
 
 | Number | Deliverable | Specification |
 | -----: | ----------- | ------------- |
@@ -57,7 +63,7 @@ STATUS: <span style="color:red">TODO</span>.
 
 ### Milestone 3 — Web Dapp
 
-STATUS: <span style="color:red">TODO</span>.
+STATUS: IN PROGRESS
 
 | Number | Deliverable | Specification |
 | -----: | ----------- | ------------- |
