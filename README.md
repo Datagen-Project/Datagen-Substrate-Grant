@@ -25,11 +25,13 @@
   <a href="https://github.com/Datagen-Project/Datagen-Substrate-Grant/network/members">
     <img src="https://img.shields.io/github/forks/Datagen-Project/Datagen-Substrate-Grant">      
   </a>
-  <img src="https://img.shields.io/github/stars/Datagen-Project/Datagen-Substrate-Grant">
-  <a href="https://github.com/Datagen-Project/Datagen-Substrate-Grant/blob/main/LICENSE.md">
-    <img src="https://img.shields.io/github/license/Datagen-Project/Datagen-Substrate-Grant">
+    <img src="https://img.shields.io/github/stars/Datagen-Project/Datagen-Substrate-Grant">
+  <a href="https://img.shields.io/github/license/Datagen-Project/Datagen-Substrate-Grant">
+    <img alt="GitHub" src="https://img.shields.io/github/license/Datagen-Project/Datagen-Substrate-Grant">
   </a>
 </p>
+
+
 
 ## Index
 
