@@ -51,7 +51,7 @@ STATUS: [DELIVERED](https://github.com/w3f/Grant-Milestone-Delivery/pull/608#iss
 
 ### Milestone 2 — Connecting the two blockchains
 
-STATUS: <span style="color:red">TODO</span>.
+STATUS: IN PROGREESS
 
 | Number | Deliverable | Specification |
 | -----: | ----------- | ------------- |
@@ -67,7 +67,7 @@ STATUS: <span style="color:red">TODO</span>.
 
 ### Milestone 3 — Web Dapp
 
-STATUS: IN PROGRESS
+STATUS: TODO
 
 | Number | Deliverable | Specification |
 | -----: | ----------- | ------------- |
