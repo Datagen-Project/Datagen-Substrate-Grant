@@ -212,7 +212,7 @@ $ ./target/release/node-template purge-chain --base-path /tmp/validator3 --chain
 $ ./target/release/node-template purge-chain --base-path /tmp/validator4 --chain local
 ``` 
 
-You could find a quick demo video at this [link](https://www.youtube.com/watch?v=4gwC2lOTazY)
+You can find a quick demo video at this [link](https://www.youtube.com/watch?v=4gwC2lOTazY)
 
 Here a link to a medium article https://medium.com/@viacc/datagen-project-dev-blog-web3-fundation-milestone-1-b3ec2bdb1a95
 where you can check the description of the First Milestone
