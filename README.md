@@ -23,7 +23,7 @@ We will implement only a PoC with this grant.
 
 The goal is to achieve a fully functional mechanism for the random selection of the nodes in the fast blockchain and smooth communication between the two blockchains.
 
-You could find more info on the project and about the grant visit our proposal at [this link](https://github.com/w3f/Grants-Program/blob/master/applications/Datagen_Project.md).
+You can find more info on the project and about the grant visit our proposal at [this link](https://github.com/w3f/Grants-Program/blob/master/applications/Datagen_Project.md).
 
 ## Milestones 
 
