@@ -87,17 +87,17 @@ STATUS: TODO
 
 ### Instruction for Milestone 1
 
-You could build an image for the fast blockchain running this command in the fast_blockchain directory:
+#### Testing heavy_blockchain 
+
+You could build an image for the heavy blockchain running this command in the heavy_blockchain directory:
 
 ```shell
-docker build -t fb-image .
+docker build -t hb-image .
 ```
-Create the container with the fb-image and follow the instructions below:
+Create the container with the hb-image and follow the instructions below:
 
 The code is divided into two folders `fast_blockchain` and `heavy blockchain`.
 Right now we don't have interaction between the two blockchain (this will happen in the M2) so you have to testing them separately.
-
-#### Testing heavy_blockchain 
 
 Navigate to `heavy_blockchain/pallets/` and run the below command:
 ```shell
