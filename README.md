@@ -51,7 +51,7 @@ STATUS: [DELIVERED](https://github.com/w3f/Grant-Milestone-Delivery/pull/608#iss
 
 ### Milestone 2 — Connecting the two blockchains
 
-STATUS: IN PROGREESS
+STATUS: IN PROGRESS
 
 | Number | Deliverable | Specification |
 | -----: | ----------- | ------------- |
