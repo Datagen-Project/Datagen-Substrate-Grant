@@ -97,7 +97,7 @@ docker build -t hb-image .
 Create the container with the hb-image and follow the instructions below:
 
 The code is divided into two folders `fast_blockchain` and `heavy blockchain`.
-Right now we don't have interaction between the two blockchain (this will happen in the M2) so you have to testing them separately.
+Right now we don't have interaction between the two blockchain (this will happen in the M2) so you have to test them separately.
 
 Navigate to `heavy_blockchain/pallets/` and run the below command:
 ```shell
