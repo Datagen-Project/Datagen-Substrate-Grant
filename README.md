@@ -202,7 +202,7 @@ Then you should see 3 `checkNodeComputationalWork.CheckResult` event triggered b
 If the 2/3 of the checkers agree with the checked node you should see a true as `is_passed` value in the `FinalResult` event.
 
 You could also set every how many computational work the network should check the work.
-To do that call the `computationalWork` extrinsics `setCheckEveryXWorks(x)` and set the index.
+To do that, call the `computationalWork` extrinsics `setCheckEveryXWorks(x)` and set the index.
 
 remember to delate the temp files for every validator if you want to rerun the tests with:
 ```shell
