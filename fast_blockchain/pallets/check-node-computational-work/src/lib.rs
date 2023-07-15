@@ -226,6 +226,7 @@ pub mod pallet {
 						}
 				}
 			}
+			
              frame_support::weights::Weight::from_all(0u64)
 			// Set weight to 0 just for testing.
 			

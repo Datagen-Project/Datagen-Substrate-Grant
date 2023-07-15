@@ -5,7 +5,7 @@ use node_template_runtime::{
 use sc_service::ChainType;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public, OpaquePeerId};
-use sp_finality_grandpa::AuthorityId as GrandpaId;
+use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use node_template_runtime::opaque::SessionKeys;
 
