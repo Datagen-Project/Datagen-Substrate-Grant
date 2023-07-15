@@ -9,6 +9,8 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 /// Import all the configuration types for the runtime.
 pub mod pallets_config;
 
+use pallets_config::frame_system_config::WEIGHT_PER_SECOND;
+
 // use frame_support::traits::ValidatorSet;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
@@ -34,7 +36,7 @@ pub use frame_support::{
 		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness, StorageInfo, FindAuthor
 	},
 	weights::{
-		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
+		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight},
 		Weight,
 	},
 	StorageValue,
@@ -142,7 +144,7 @@ construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system,
-		RandomnessCollectiveFlip: pallet_randomness_collective_flip,
+		RandomnessCollectiveFlip: pallet_insecure_randomness_collective_flip,
 		Timestamp: pallet_timestamp,
 		Aura: pallet_aura,
 		Grandpa: pallet_grandpa,
@@ -151,11 +153,11 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 
 		// Include the custom logic from the pallet-template in the runtime.
-		ComputationalWork: pallet_computational_work,
-		NodeAuthorization: pallet_node_authorization,
+		ComputationalWork: pallet_computational_work::{Pallet, Call, Storage, Event<T>},
+		NodeAuthorization: pallet_node_authorization::{Pallet, Call, Storage, Event<T>,Config<T>},
 		Authorship: pallet_authorship,
 		Session: pallet_session,
-		CheckNodeComputationalWork: pallet_check_node_computational_work,
+		CheckNodeComputationalWork: pallet_check_node_computational_work::{Pallet, Storage, Event<T>},
 	}
 );
 
@@ -177,9 +179,9 @@ pub type SignedExtra = (
 	pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
-pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
+pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
 /// The payload being signed in transactions.
-pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
+pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
 	Runtime,
@@ -336,17 +338,17 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentCallApi<Block, Balance, Call>
+	impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentCallApi<Block, Balance, RuntimeCall>
 		for Runtime
 	{
 		fn query_call_info(
-			call: Call,
+			call: RuntimeCall,
 			len: u32,
 		) -> pallet_transaction_payment::RuntimeDispatchInfo<Balance> {
 			TransactionPayment::query_call_info(call, len)
 		}
 		fn query_call_fee_details(
-			call: Call,
+			call: RuntimeCall,
 			len: u32,
 		) -> pallet_transaction_payment::FeeDetails<Balance> {
 			TransactionPayment::query_call_fee_details(call, len)

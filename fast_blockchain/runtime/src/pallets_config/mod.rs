@@ -1,6 +1,6 @@
 pub mod frame_system_config;
 pub mod pallet_aura_config;
-pub mod pallet_randomness_collective_flip_config;
+pub mod pallet_insecure_randomness_collective_flip_config;
 pub mod pallet_grandpa_config;
 pub mod pallet_timestamp_config;
 pub mod pallet_balances_config;

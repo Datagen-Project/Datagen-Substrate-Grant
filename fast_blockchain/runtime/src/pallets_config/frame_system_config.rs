@@ -5,8 +5,8 @@ use sp_runtime::{
 
 pub use frame_support::{
 	construct_runtime, parameter_types,
-	weights::constants::{RocksDbWeight, WEIGHT_PER_SECOND},
-	traits::Everything,
+	weights::constants::RocksDbWeight,
+	traits::Everything
 };
 
 use frame_system::Config;
@@ -14,8 +14,9 @@ use frame_system::Config;
 use crate::*;
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
-
+pub const WEIGHT_PER_SECOND: Weight = 1_000_000_000_000;
 parameter_types! {
+
 	pub BlockWeights: frame_system::limits::BlockWeights = frame_system::limits::BlockWeights::with_sensible_defaults(
 		2 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO
 	);
@@ -38,8 +39,6 @@ impl Config for Runtime {
 	type BlockLength = BlockLength;
 	/// The identifier used to distinguish between accounts.
 	type AccountId = AccountId;
-	/// The aggregated dispatch type that is available for extrinsics.
-	type Call = Call;
 	/// The lookup mechanism to get account ID from whatever is passed in dispatchers.
 	type Lookup = AccountIdLookup<AccountId, ()>;
 	/// The index type for storing how many extrinsics an account has signed.
@@ -52,10 +51,6 @@ impl Config for Runtime {
 	type Hashing = BlakeTwo256;
 	/// The header type.
 	type Header = generic::Header<BlockNumber, BlakeTwo256>;
-	/// The ubiquitous event type.
-	type Event = Event;
-	/// The ubiquitous origin type.
-	type Origin = Origin;
 	/// Maximum number of block number to block hash mappings to keep (oldest pruned first).
 	type BlockHashCount = BlockHashCount;
 	/// The weight of database operations that the runtime can invoke.
