@@ -11,3 +11,5 @@ pub mod pallet_node_authorization_config;
 pub mod pallet_session_config;
 pub mod pallet_authorship_config;
 pub mod pallet_check_node_computational_work_config;
+
+pub use frame_system_config::Nonce;

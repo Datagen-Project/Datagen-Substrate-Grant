@@ -53,18 +53,22 @@ pub fn development_config() -> Result<ChainSpec, String> {
 					(
 						get_account_id_from_seed::<sr25519::Public>("Alice"),
 						get_from_seed::<AuraId>("Alice"),
+						get_from_seed::<GrandpaId>("Alice"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Bob"),
 						get_from_seed::<AuraId>("Bob"),
+						get_from_seed::<GrandpaId>("Bob"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Charlie"),
 						get_from_seed::<AuraId>("Charlie"),
+						get_from_seed::<GrandpaId>("Charlie"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Dave"),
 						get_from_seed::<AuraId>("Dave"),
+						get_from_seed::<GrandpaId>("Dave"),
 					),
 				],
 				// Initial PoA authorities
@@ -113,18 +117,22 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					(
 						get_account_id_from_seed::<sr25519::Public>("Alice"),
 						get_from_seed::<AuraId>("Alice"),
+						get_from_seed::<GrandpaId>("Alice"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Bob"),
 						get_from_seed::<AuraId>("Bob"),
+						get_from_seed::<GrandpaId>("Bob"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Charlie"),
 						get_from_seed::<AuraId>("Charlie"),
+						get_from_seed::<GrandpaId>("Charlie"),
 					),
 					(
 						get_account_id_from_seed::<sr25519::Public>("Dave"),
 						get_from_seed::<AuraId>("Dave"),
+						get_from_seed::<GrandpaId>("Dave"),
 					),
 				],
 				// Initial PoA authorities
@@ -171,7 +179,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	authorities: Vec<(AccountId, AuraId)>,
+	authorities: Vec<(AccountId, AuraId, GrandpaId)>,
 	initial_authorities: Vec<(AuraId, GrandpaId)>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
@@ -181,11 +189,12 @@ fn testnet_genesis(
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
 			code: wasm_binary.to_vec(),
+			..Default::default()
 		},
 		session: SessionConfig {
 			keys: authorities
 				.iter()
-				.map(|x| (x.0.clone(), x.0.clone(), session_keys(x.1.clone())))
+				.map(|x| (x.0.clone(), x.0.clone(), session_keys(x.1.clone(), x.2.clone())))
 				.collect::<Vec<_>>(),
 		},
 		balances: BalancesConfig {
@@ -217,6 +226,7 @@ fn testnet_genesis(
 		},
 		grandpa: GrandpaConfig {
 			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
+			..Default::default()
 		},
 		sudo: SudoConfig {
 			// Assign network admin rights.
@@ -227,6 +237,6 @@ fn testnet_genesis(
 }
 
 /// Helper for session keys to map aura id
-fn session_keys(aura: AuraId) -> SessionKeys {
-	SessionKeys { aura }
+fn session_keys(aura: AuraId, grandpa: GrandpaId) -> SessionKeys {
+	SessionKeys { aura, grandpa }
 }
