@@ -21,6 +21,16 @@ log = { version = "0.4.17", default-features = false }
 scale-info = { version = "2.7.0", default-features = false, features = ["derive"] }
 smallvec = "1.10.0"
 
+# Brdige dependencies 
+bp-datagen = { path = "../../parity-bridges-common/primitives/chain-datagen", default-features = false }
+bp-relayers = { path = "../../parity-bridges-common/primitives/relayers", default-features = false }
+bp-runtime = { path = "../../parity-bridges-common/primitives/runtime", default-features = false }
+bp-datagen-parachain = { path = "../../parity-bridges-common/primitives/chain-datagen-parachain", default-features = false }
+bridge-runtime-common = {path = "../../parity-bridges-common/bin/runtime-common", default-features = false}
+pallet-bridge-grandpa = {path = "../../parity-bridges-common/modules/grandpa", default-features = false}
+pallet-bridge-messages = {path = "../../parity-bridges-common/modules/messages", default-features = false}
+pallet-bridge-relayers = {path = "../../parity-bridges-common/modules/relayers", default-features = false }
+
 # Local
 pallet-parachain-template = { path = "../pallets/template", default-features = false }
 pallet-xcm-handler = { path = "../pallets/xcm-handler", default-features = false }
@@ -126,6 +136,14 @@ std = [
 	"cumulus-ping/std",
 	"pallet-xcm-handler/std",
 	"pallet-random-node-selector/std",
+	"bp-relayers/std",
+	"bp-runtime/std",
+	"bp-datagen/std",
+	"bp-datagen-parachain/std",
+	"bridge-runtime-common/std",
+	"pallet-bridge-grandpa/std",
+	"pallet-bridge-messages/std",
+	"pallet-bridge-relayers/std",
 	"substrate-wasm-builder",
 ]
 
