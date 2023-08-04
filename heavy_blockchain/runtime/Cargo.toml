@@ -22,6 +22,8 @@ scale-info = { version = "2.7.0", default-features = false, features = ["derive"
 smallvec = "1.10.0"
 
 # Brdige dependencies 
+bp-header-chain = { path = "../../parity-bridges-common/primitives/header-chain", default-features = false }
+bp-messages = { path = "../../parity-bridges-common/primitives/messages", default-features = false }
 bp-datagen = { path = "../../parity-bridges-common/primitives/chain-datagen", default-features = false }
 bp-relayers = { path = "../../parity-bridges-common/primitives/relayers", default-features = false }
 bp-runtime = { path = "../../parity-bridges-common/primitives/runtime", default-features = false }
@@ -136,6 +138,8 @@ std = [
 	"cumulus-ping/std",
 	"pallet-xcm-handler/std",
 	"pallet-random-node-selector/std",
+	"bp-header-chain/std",
+	"bp-messages/std",
 	"bp-relayers/std",
 	"bp-runtime/std",
 	"bp-datagen/std",

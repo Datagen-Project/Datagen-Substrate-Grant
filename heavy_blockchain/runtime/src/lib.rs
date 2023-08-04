@@ -434,6 +434,14 @@ impl pallet_aura::Config for Runtime {
 	type MaxAuthorities = ConstU32<100_000>;
 }
 
+impl pallet_bridge_relayers::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Reward = Balance;
+	type PaymentProcedure = bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
+	type StakeAndSlash = ();
+	type WeightInfo = ();
+}
+
 parameter_types! {
 	pub const PotId: PalletId = PalletId(*b"PotStake");
 	pub const MaxCandidates: u32 = 1000;
@@ -530,6 +538,9 @@ construct_runtime!(
 		Pingu: cumulus_ping = 44,
 		MyXcmHandler: pallet_xcm_handler = 46,
 		RandomNodeSelector: pallet_random_node_selector = 47,
+
+		// Datagen Bridge Modules
+		BridgeRelayers: pallet_bridge_relayers::{Pallet, Call, Storage, Event<T>},
 	}
 );
 

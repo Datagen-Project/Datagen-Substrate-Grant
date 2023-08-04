@@ -7468,6 +7468,8 @@ version = "0.1.0"
 dependencies = [
  "bp-datagen",
  "bp-datagen-parachain",
+ "bp-header-chain",
+ "bp-messages",
  "bp-relayers",
  "bp-runtime",
  "bridge-runtime-common",
