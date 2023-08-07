@@ -68,7 +68,7 @@ pub mod pallet {
 	pub(super) type MessageCount<T: Config> = StorageValue<_, u32, ValueQuery>;
 
 	#[pallet::storage]
-	pub(super) type XcmMessages<T: Config> = StorageMap<_,Blake2_128Concat, u32, T::BlockNumber, OptionQuery>;
+	pub(super) type XcmMessages<T: Config> = StorageMap<_,Blake2_128Concat, u32, BlockNumberFor<T>, OptionQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(crate) fn deposit_event)]
@@ -107,7 +107,7 @@ pub mod pallet {
 			para: ParaId,
 			seq: u32,
 			payload: Vec<u8>,
-			block_number: T::BlockNumber
+			block_number: BlockNumberFor<T>
 		},
 		UnknwonXcmMessage {
 			para: ParaId,
@@ -126,7 +126,7 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T>{
-         fn on_finalize(n: T::BlockNumber) {
+         fn on_finalize(n: BlockNumberFor<T>) {
 			 Self::send_xcm_message(n);
 		 }
 	}
@@ -173,7 +173,7 @@ pub mod pallet {
 			(Parent, Junction::Parachain(para.into())).into(),
 			Xcm(vec![Transact {
 				origin_kind: OriginKind::Native,
-				require_weight_at_most: Weight::from_parts(1_000,1_000),
+				require_weight_at_most: xcm::v3::Weight::from_parts(1_000,1_000),
 				call: <T as Config>::RuntimeCall::from(
 					Call::<T>::handle_xcm_ack{
 						seq,
@@ -225,7 +225,7 @@ pub mod pallet {
 
 	// private functions
 	impl<T: Config> Pallet<T> {
-		fn send_xcm_message(n: T::BlockNumber){
+		fn send_xcm_message(n: BlockNumberFor<T>){
            for (para, payload) in XcmQueque::<T>::get().into_iter() {
 			  let seq = MessageCount::<T>::mutate(|seq| {
 				 *seq += 1;
@@ -236,7 +236,7 @@ pub mod pallet {
 				(Parent, Junction::Parachain(para.into())).into(),
 				Xcm(vec![Transact {
                    origin_kind: OriginKind::Native,
-				   require_weight_at_most: Weight::from_parts(1_00,1_000),
+				   require_weight_at_most: xcm::v3::Weight::from_parts(1_00,1_000),
 				   call: <T as Config>::RuntimeCall::from(Call::<T>::handle_xcm {
 					   seq,
 					   payload: payload.clone().to_vec(),
