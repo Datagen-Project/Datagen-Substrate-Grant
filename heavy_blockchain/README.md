@@ -1,26 +1,22 @@
-# Testing heavy_blockchain
+# Substrate Cumulus Parachain Template
 
-You could build an image for the heavy blockchain running this command in the heavy_blockchain directory:
+A new [Cumulus](https://github.com/paritytech/cumulus/)-based Substrate node, ready for hacking ☁️..
 
-```shell
-docker build -t hb-image .
-```
-Create the container with the hb-image and follow the instructions below:
+This project is originally a fork of the
+[Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template)
+modified to include dependencies required for registering this node as a **parathread** or
+**parachain** to a **relay chain**.
 
-Navigate to `heavy_blockchain/pallets/` and run the below command:
-```shell
-cargo test
-```
-This command will run the tests for the `random_node_selector` pallet.
+The stand-alone version of this template is hosted on the
+[Substrate Devhub Parachain Template](https://github.com/substrate-developer-hub/substrate-parachain-template/)
+for each release of Polkadot. It is generated directly to the upstream
+[Parachain Template in Cumulus](https://github.com/paritytech/cumulus/tree/master/parachain-template)
+at each release branch using the
+[Substrate Template Generator](https://github.com/paritytech/substrate-template-generator/).
 
-You could also run the blockchain and make some manual tests with the [Polkadot.js](https://polkadot.js.org/apps/#/extrinsics?rpc=ws://127.0.0.1:9944) web app, run the commands:
-```shell
-$ cargo build --release
-$ ./target/release/node-template --dev
-```
-Then connect to the he [Polkadot.js](https://polkadot.js.org/apps/#/extrinsics?rpc=ws://127.0.0.1:9944) web app.
+👉 Learn more about parachains [here](https://wiki.polkadot.network/docs/learn-parachains), and
+parathreads [here](https://wiki.polkadot.network/docs/learn-parathreads).
 
-To select a random node submit the extrinsic of the `randomNodeSelector` called `randomNodeToCheck`.
-To select the 3 random node that will be the checkers call `randomCheckerNodeSelector`.
 
-Now you could visualize the event in the network inspector, note at the moment we have also an empty peerId value, this is correct we add this information for possible future implementation but we will use the owner account to do the check at the grant.
+🧙 Learn about how to use this template and run your own parachain testnet for it in the
+[Devhub Cumulus Tutorial](https://docs.substrate.io/tutorials/v3/cumulus/start-relay/).

@@ -1,8 +1,9 @@
-[workspace]
-members = [
-    "node",
-	"pallets/random_node_selector",
-    "runtime",
-]
 [profile.release]
 panic = "unwind"
+
+[workspace]
+members = [
+	"node",
+	"pallets/*",
+	"runtime",
+]

@@ -5,8 +5,8 @@ use sp_runtime::{
 
 pub use frame_support::{
 	construct_runtime, parameter_types,
-	weights::constants::{RocksDbWeight, WEIGHT_PER_SECOND},
-	traits::Everything,
+	weights::constants::RocksDbWeight,
+	traits::Everything
 };
 
 use frame_system::Config;
@@ -14,10 +14,14 @@ use frame_system::Config;
 use crate::*;
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
+// pub type Weight = u64;
+pub const WEIGHT_PER_SECOND_INT:u64 = 1_000_000_000_000;
 
+pub const WEIGHT_PER_SECOND: Weight = Weight::from_all(WEIGHT_PER_SECOND_INT);
 parameter_types! {
+
 	pub BlockWeights: frame_system::limits::BlockWeights = frame_system::limits::BlockWeights::with_sensible_defaults(
-		2 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO
+		Weight::from_all(2 * WEIGHT_PER_SECOND_INT), NORMAL_DISPATCH_RATIO
 	);
 	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
 		::max_with_normal_ratio(
@@ -27,11 +31,15 @@ parameter_types! {
 	pub const SS58Prefix: u8 = 42;
 
 	pub const BlockHashCount: BlockNumber = 2400;
+	
+	
 }
-
-impl Config for Runtime {
+pub type Nonce = u32;
+impl frame_system::Config for Runtime {
 	/// The basic call filter to use in dispatchable.
-	type BaseCallFilter = Everything;
+	type BaseCallFilter = frame_support::traits::Everything;
+	/// The block type for the runtime.
+	type Block = Block;
 	/// Block & extrinsics weights: base values and limits.
 	type BlockWeights = BlockWeights;
 	/// The maximum length of a block (in bytes).
@@ -39,23 +47,19 @@ impl Config for Runtime {
 	/// The identifier used to distinguish between accounts.
 	type AccountId = AccountId;
 	/// The aggregated dispatch type that is available for extrinsics.
-	type Call = Call;
+	type RuntimeCall = RuntimeCall;
 	/// The lookup mechanism to get account ID from whatever is passed in dispatchers.
 	type Lookup = AccountIdLookup<AccountId, ()>;
-	/// The index type for storing how many extrinsics an account has signed.
-	type Index = Index;
-	/// The index type for blocks.
-	type BlockNumber = BlockNumber;
+	/// The type for storing how many extrinsics an account has signed.
+	type Nonce = Nonce;
 	/// The type for hashing blocks and tries.
 	type Hash = Hash;
 	/// The hashing algorithm used.
 	type Hashing = BlakeTwo256;
-	/// The header type.
-	type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	/// The ubiquitous event type.
-	type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
 	/// The ubiquitous origin type.
-	type Origin = Origin;
+	type RuntimeOrigin = RuntimeOrigin;
 	/// Maximum number of block number to block hash mappings to keep (oldest pruned first).
 	type BlockHashCount = BlockHashCount;
 	/// The weight of database operations that the runtime can invoke.
@@ -76,6 +80,7 @@ impl Config for Runtime {
 	type SystemWeightInfo = ();
 	/// This is used as an identifier of the chain. 42 is the generic substrate prefix.
 	type SS58Prefix = SS58Prefix;
+	/// The set code logic, just the default since we're not a parachain.
 	type OnSetCode = ();
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
