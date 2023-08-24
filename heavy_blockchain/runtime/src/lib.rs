@@ -8,6 +8,9 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 mod weights;
 pub mod xcm_config;
+pub mod datagen_messages;
+
+pub use xcm_config::{UnitWeightCost, OnDataGenParachainBlobDispatcher};
 
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use smallvec::smallvec;
@@ -478,13 +481,15 @@ impl pallet_random_node_selector::Config for Runtime {
 	type Randomness = RandomnessCollectiveFlip;
 }
 
-impl pallet_bridge_relayers::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Reward = Balance;
-	type PaymentProcedure = bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
-	type StakeAndSlash = ();
-	type WeightInfo = ();
-}
+// impl pallet_bridge_relayers::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type Reward = Balance;
+// 	type PaymentProcedure = bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
+// 	type StakeAndSlash = ();
+// 	type WeightInfo = ();
+// }
+
+pub type WithDataGenMessagesInstance = ();
 
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -524,7 +529,7 @@ construct_runtime!(
 		XcmHandler: pallet_xcm_handler = 54,
 		RandomNodeSelector: pallet_random_node_selector = 56,
 		//
-		BridgeRelayers: pallet_bridge_relayers::{Pallet, Call, Storage, Event<T>} = 70,
+		//BridgeRelayers: pallet_bridge_relayers::{Pallet, Call, Storage, Event<T>} = 70,
 	}
 );
 

@@ -79,7 +79,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
 
 parameter_types! {
 	// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
-	pub UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
+	pub const UnitWeightCost: Weight = Weight::from_parts(1_000_000_000, 64 * 1024);
 	pub const MaxInstructions: u32 = 100;
 	pub const MaxAssetsIntoHolding: u32 = 64;
 }
@@ -114,6 +114,10 @@ pub type Barrier = TrailingSetTopicAsId<
 		),
 	>,
 >;
+
+/// Dispatches received XCM messages from other chain.
+pub type OnDataGenParachainBlobDispatcher =
+	xcm_builder::BridgeBlobDispatcher<XcmRouter, UniversalLocation, ()>;
 
 pub struct XcmConfig;
 impl xcm_executor::Config for XcmConfig {
