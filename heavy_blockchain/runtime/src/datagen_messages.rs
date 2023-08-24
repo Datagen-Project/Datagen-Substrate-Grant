@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Everything required to serve Millau <-> RialtoParachain messages.
+//! Everything required to serve datagen <-> RialtoParachain messages.
 
-// TODO: this is almost exact copy of `millau_messages.rs` from Rialto runtime.
+// TODO: this is almost exact copy of `datagen_messages.rs` from Rialto runtime.
 // Should be extracted to a separate crate and reused here.
-use crate::{Runtime, WithDataGenMessagesInstance};
+use crate::{Runtime, WithDatagenMessagesInstance};
 
 use bp_messages::LaneId;
 use bridge_runtime_common::messages_xcm_extension::{
@@ -42,12 +42,84 @@ parameter_types! {
 }
 
 /// Call-dispatch based message dispatch for DataGen -> DatagenParachain messages.
-pub type FromDataGenMessageDispatch =
+pub type FromDatagenMessageDispatch =
 	bridge_runtime_common::messages_xcm_extension::XcmBlobMessageDispatch<
-		crate::OnDataGenParachainBlobDispatcher,
+		crate::OnDatagenParachainBlobDispatcher,
 		(),
 	>;
 
-// Export XCM messages to be relayed to Millau.
-// pub type ToDataGenBlobExporter =
-// 	HaulBlobExporter<XcmBlobHaulerAdapter<ToDataGenXcmBlobHauler>, crate::MillauNetwork, ()>;
+// Export XCM messages to be relayed to datagen.
+pub type ToDatagenBlobExporter =
+	HaulBlobExporter<XcmBlobHaulerAdapter<ToDatagenXcmBlobHauler>, crate::DatagenNetwork, ()>;
+
+/// To-datagen XCM hauler.
+pub struct ToDatagenXcmBlobHauler;
+
+impl XcmBlobHauler for ToDatagenXcmBlobHauler {
+	type MessageSender = pallet_bridge_messages::Pallet<Runtime, WithDatagenMessagesInstance>;
+
+	fn xcm_lane() -> LaneId {
+		LaneIdFromChainId::<Runtime, WithDatagenMessagesInstance>::get()
+	}
+}
+
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	use crate::{DatagenGrandpaInstance, Runtime, WithDatagenMessagesInstance};
+	use bridge_runtime_common::{
+		assert_complete_bridge_types,
+		integrity::{
+			assert_complete_with_relay_chain_bridge_constants, check_message_lane_weights,
+			AssertChainConstants, AssertCompleteBridgeConstants,
+		},
+	};
+
+	#[test]
+	fn ensure_datagen_message_lane_weights_are_correct() {
+		check_message_lane_weights::<
+			bp_datagen_parachain::DatagenParachain,
+			Runtime,
+			WithDataGenMessagesInstance,
+		>(
+			bp_datagen::EXTRA_STORAGE_PROOF_SIZE,
+			bp_datagen_parachain::MAX_UNREWARDED_RELAYERS_IN_CONFIRMATION_TX,
+			bp_datagen_parachain::MAX_UNCONFIRMED_MESSAGES_IN_CONFIRMATION_TX,
+			false,
+		);
+	}
+
+	#[test]
+	fn ensure_bridge_integrity() {
+		assert_complete_bridge_types!(
+			runtime: Runtime,
+			with_bridged_chain_grandpa_instance: DatagenGrandpaInstance,
+			with_bridged_chain_messages_instance: WithDatagenMessagesInstance,
+			this_chain: bp_datagen_parachain::DatagenParachain,
+			bridged_chain: bp_datagen::Datagen,
+		);
+
+		assert_complete_with_relay_chain_bridge_constants::<
+			Runtime,
+			DatagenGrandpaInstance,
+			WithDatagenMessagesInstance,
+		>(AssertCompleteBridgeConstants {
+			this_chain_constants: AssertChainConstants {
+				block_length: bp_datagen_parachain::BlockLength::get(),
+				block_weights: bp_datagen_parachain::BlockWeights::get(),
+			},
+		});
+	}
+
+	#[test]
+	fn rialto_parachain_datagen_bridge_identifier_did_not_changed() {
+		// there's nothing criminal if it is changed, but then thou need to fix it across
+		// all deployments scripts, alerts and so on
+		assert_eq!(
+			*ToDatagenXcmBlobHauler::xcm_lane().as_ref(),
+			hex_literal::hex!("6aa61bff567db6b5d5f0cb815ee6d8f5ac630e222a95700cb3d594134e3805de")
+				.into(),
+		);
+	}
+}

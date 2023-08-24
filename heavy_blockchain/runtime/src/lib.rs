@@ -10,8 +10,8 @@ mod weights;
 pub mod xcm_config;
 pub mod datagen_messages;
 
-pub use xcm_config::{UnitWeightCost, OnDataGenParachainBlobDispatcher};
-
+pub use xcm_config::{UnitWeightCost, OnDatagenParachainBlobDispatcher, DatagenNetwork};
+use bridge_runtime_common::generate_bridge_reject_obsolete_headers_and_messages;
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
@@ -22,6 +22,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
 };
+use bp_runtime::HeaderId;
 
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -124,6 +125,14 @@ pub type Executive = frame_executive::Executive<
 	Runtime,
 	AllPalletsWithSystem,
 >;
+
+generate_bridge_reject_obsolete_headers_and_messages! {
+	RuntimeCall, AccountId,
+	// Grandpa
+	BridgeDatagenGrandpa,
+	// Messages
+	BridgeDatagenMessages
+}
 
 /// Handles converting a weight scalar to a fee value, based on the scale and granularity of the
 /// node's balance type.
@@ -481,15 +490,45 @@ impl pallet_random_node_selector::Config for Runtime {
 	type Randomness = RandomnessCollectiveFlip;
 }
 
-// impl pallet_bridge_relayers::Config for Runtime {
-// 	type RuntimeEvent = RuntimeEvent;
-// 	type Reward = Balance;
-// 	type PaymentProcedure = bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
-// 	type StakeAndSlash = ();
-// 	type WeightInfo = ();
-// }
+impl pallet_bridge_relayers::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Reward = Balance;
+	type PaymentProcedure = bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
+	type StakeAndSlash = ();
+	type WeightInfo = ();
+}
 
-pub type WithDataGenMessagesInstance = ();
+pub type DatagenGrandpaInstance = ();
+impl pallet_bridge_grandpa::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type BridgedChain = bp_datagen::Datagen;
+	type MaxFreeMandatoryHeadersPerBlock = ConstU32<4>;
+	type HeadersToKeep = ConstU32<{ bp_datagen::DAYS as u32 }>;
+	type WeightInfo = pallet_bridge_grandpa::weights::BridgeWeight<Runtime>;
+}
+
+pub type WithDatagenMessagesInstance = ();
+
+impl pallet_bridge_messages::Config<WithDatagenMessagesInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_bridge_messages::weights::BridgeWeight<Runtime>;
+
+	type ThisChain = bp_datagen_parachain::DatagenParachain;
+	type BridgedChain = bp_datagen::Datagen;
+	type BridgedHeaderChain = BridgeDatagenGrandpa;
+
+	type OutboundPayload = bridge_runtime_common::messages_xcm_extension::XcmAsPlainPayload;
+	type InboundPayload = bridge_runtime_common::messages_xcm_extension::XcmAsPlainPayload;
+
+	type DeliveryPayments = ();
+	type DeliveryConfirmationPayments = pallet_bridge_relayers::DeliveryConfirmationPaymentsAdapter<
+		Runtime,
+		WithDatagenMessagesInstance,
+		frame_support::traits::ConstU128<100_000>,
+	>;
+
+	type MessageDispatch = crate::datagen_messages::FromDatagenMessageDispatch;
+}
 
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -528,8 +567,10 @@ construct_runtime!(
 		TemplatePallet: pallet_parachain_template = 50,
 		XcmHandler: pallet_xcm_handler = 54,
 		RandomNodeSelector: pallet_random_node_selector = 56,
-		//
-		//BridgeRelayers: pallet_bridge_relayers::{Pallet, Call, Storage, Event<T>} = 70,
+		// Datagen Bridge modules
+		BridgeRelayers: pallet_bridge_relayers::{Pallet, Call, Storage, Event<T>} = 70,
+		BridgeDatagenGrandpa: pallet_bridge_grandpa::{Pallet, Call, Storage, Event<T>}= 72,
+		BridgeDatagenMessages: pallet_bridge_messages::{Pallet, Call, Storage, Event<T>, Config<T>}=74,
 	}
 );
 
@@ -690,6 +731,43 @@ impl_runtime_apis! {
 		}
 	}
 
+	//
+	impl bp_datagen::DatagenFinalityApi<Block> for Runtime {
+		fn best_finalized() -> Option<HeaderId<bp_datagen::Hash, bp_datagen::BlockNumber>> {
+			BridgeDatagenGrandpa::best_finalized()
+		}
+
+		fn accepted_grandpa_finality_proofs(
+		) -> Vec<bp_header_chain::justification::GrandpaJustification<bp_datagen::Header>> {
+			BridgeDatagenGrandpa::accepted_finality_proofs()
+		}
+	}
+
+	impl bp_datagen::ToDatagenOutboundLaneApi<Block> for Runtime {
+		fn message_details(
+			lane: bp_messages::LaneId,
+			begin: bp_messages::MessageNonce,
+			end: bp_messages::MessageNonce,
+		) -> Vec<bp_messages::OutboundMessageDetails> {
+			bridge_runtime_common::messages_api::outbound_message_details::<
+				Runtime,
+				WithDatagenMessagesInstance,
+			>(lane, begin, end)
+		}
+	}
+
+	impl bp_datagen::FromDatagenInboundLaneApi<Block> for Runtime {
+		fn message_details(
+			lane: bp_messages::LaneId,
+			messages: Vec<(bp_messages::MessagePayload, bp_messages::OutboundMessageDetails)>,
+		) -> Vec<bp_messages::InboundMessageDetails> {
+			bridge_runtime_common::messages_api::inbound_message_details::<
+				Runtime,
+				WithDatagenMessagesInstance,
+			>(lane, messages)
+		}
+	}
+	
 	#[cfg(feature = "try-runtime")]
 	impl frame_try_runtime::TryRuntime<Block> for Runtime {
 		fn on_runtime_upgrade(checks: frame_try_runtime::UpgradeCheckSelect) -> (Weight, Weight) {

@@ -8,6 +8,7 @@ use frame_support::{
 	weights::Weight,
 };
 use frame_system::EnsureRoot;
+use bridge_runtime_common::CustomNetworkId;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain::primitives::Sibling;
 use polkadot_runtime_common::impls::ToAuthor;
@@ -28,6 +29,10 @@ parameter_types! {
 	pub const RelayNetwork: Option<NetworkId> = None;
 	pub RelayChainOrigin: RuntimeOrigin = cumulus_pallet_xcm::Origin::Relay.into();
 	pub UniversalLocation: InteriorMultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
+	/// The DataGen network ID.
+	pub const DatagenNetwork: NetworkId = CustomNetworkId::Datagen.as_network_id();
+	/// The DataGenParachain network ID.
+	pub const ThisNetwork: NetworkId = CustomNetworkId::DatagenParachain.as_network_id();
 }
 
 /// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used
@@ -116,7 +121,7 @@ pub type Barrier = TrailingSetTopicAsId<
 >;
 
 /// Dispatches received XCM messages from other chain.
-pub type OnDataGenParachainBlobDispatcher =
+pub type OnDatagenParachainBlobDispatcher =
 	xcm_builder::BridgeBlobDispatcher<XcmRouter, UniversalLocation, ()>;
 
 pub struct XcmConfig;
