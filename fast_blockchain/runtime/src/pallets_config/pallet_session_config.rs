@@ -1,7 +1,7 @@
 use crate::*;
 
 parameter_types! {
-	pub Period: u32 = 10 * MINUTES;
+	pub Period: u64 = 10 * MINUTES;
 	pub const Offset: u32 = 0;
 }
 

@@ -16,6 +16,27 @@ targets = ["x86_64-unknown-linux-gnu"]
 codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = ["derive"] }
 scale-info = { version = "2.5.0", default-features = false, features = ["derive"] }
 
+# Bridge dependencies
+bp-header-chain = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bp-datagen = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bp-parachains  = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bp-polkadot-core = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bp-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bp-runtime = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bp-westend = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bp-xcm-bridge-hub-router = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+pallet-bridge-parachains = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+pallet-shift-session-manager = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+pallet-xcm-bridge-hub-router = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+pallet-bridge-grandpa = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+pallet-bridge-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+pallet-bridge-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0"}
+bp-rialto = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+bp-datagen-parachain = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+
+sp-consensus-beefy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
 pallet-aura = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 pallet-balances = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 frame-support = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
@@ -38,10 +59,14 @@ sp-session = { version = "4.0.0-dev", default-features = false, git = "https://g
 sp-std = { version = "8.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sp-transaction-pool = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sp-version = { version = "22.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
- pallet-session = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git",branch = "polkadot-v1.0.0" }
- pallet-authorship = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
- pallet-insecure-randomness-collective-flip = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
- pallet-node-authorization = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+pallet-session = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git",branch = "polkadot-v1.0.0" }
+pallet-authorship = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+pallet-insecure-randomness-collective-flip = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+pallet-node-authorization = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+pallet-beefy = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+pallet-beefy-mmr = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+pallet-mmr = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0", default-features = false }
+
 # Local Dependencies
 pallet-computational-work = { default-features = false, path = "../pallets/computational-work"}
 pallet-check-node-computational-work = { default-features = false, path = "../pallets/check-node-computational-work"}
@@ -54,7 +79,11 @@ pallet-transaction-payment-rpc-runtime-api = { version = "4.0.0-dev", default-fe
 frame-benchmarking = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", optional = true , branch = "polkadot-v1.0.0" }
 frame-system-benchmarking = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", optional = true , branch = "polkadot-v1.0.0" }
 
-
+# xcm
+xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0", default-features = false }
+xcm-executor = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0", default-features = false }
+xcm-builder = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0", default-features = false }
+pallet-xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v1.0.0", default-features = false }
 
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", optional = true , branch = "polkadot-v1.0.0" }
@@ -82,6 +111,7 @@ std = [
 	"sp-api/std",
 	"sp-block-builder/std",
 	"sp-consensus-aura/std",
+	"sp-consensus-beefy/std",
 	"sp-consensus-grandpa/std",
 	"sp-core/std",
 	"sp-inherents/std",
@@ -95,6 +125,31 @@ std = [
 	"pallet-authorship/std",
 	"pallet-node-authorization/std",
 	"pallet-insecure-randomness-collective-flip/std",
+    "bp-header-chain/std",
+    "bp-messages/std",
+    "bp-datagen/std",
+    "bp-parachains/std",
+    "bp-polkadot-core/std",
+    "bp-relayers/std",
+    "bp-runtime/std",
+    "bp-westend/std",
+    "bp-xcm-bridge-hub-router/std",
+    "pallet-bridge-parachains/std",
+    "pallet-shift-session-manager/std",
+    "pallet-xcm-bridge-hub-router/std",
+    "bridge-runtime-common/std",
+    "pallet-bridge-grandpa/std",
+    "pallet-bridge-messages/std",
+    "pallet-bridge-relayers/std",
+    "bp-rialto/std",
+    "bp-datagen-parachain/std",
+	"pallet-beefy/std",
+    "pallet-beefy-mmr/std",
+    "pallet-mmr/std",
+	"xcm-builder/std",
+	"xcm-executor/std",
+	"pallet-xcm/std",
+	"xcm/std",
 	"substrate-wasm-builder",
 ]
 runtime-benchmarks = [
