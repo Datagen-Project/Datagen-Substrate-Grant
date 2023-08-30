@@ -1,6 +1,7 @@
 use cumulus_primitives_core::ParaId;
-use parachain_template_runtime::{AccountId,RandomNodeSelectorConfig, AuraId, Signature, EXISTENTIAL_DEPOSIT};
+use datagen_parachain_runtime::{AccountId,RandomNodeSelectorConfig,BridgeDatagenMessagesConfig, AuraId, Signature, EXISTENTIAL_DEPOSIT};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
+use bridge_runtime_common::messages_xcm_extension::XcmBlobHauler;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public, OpaquePeerId};
@@ -8,10 +9,13 @@ use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec =
-	sc_service::GenericChainSpec<parachain_template_runtime::RuntimeGenesisConfig, Extensions>;
+	sc_service::GenericChainSpec<datagen_parachain_runtime::RuntimeGenesisConfig, Extensions>;
 
 /// The default XCM version to set in genesis config.
 const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
+
+/// "Name" of the account, which owns the with-Millau messages pallet.
+const DATAGEN_MESSAGES_PALLET_OWNER: &str = "Datagen.MessagesOwner";
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -57,8 +61,8 @@ where
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn template_session_keys(keys: AuraId) -> parachain_template_runtime::SessionKeys {
-	parachain_template_runtime::SessionKeys { aura: keys }
+pub fn template_session_keys(keys: AuraId) -> datagen_parachain_runtime::SessionKeys {
+	datagen_parachain_runtime::SessionKeys { aura: keys }
 }
 
 pub fn development_config() -> ChainSpec {
@@ -100,6 +104,7 @@ pub fn development_config() -> ChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+					get_account_id_from_seed::<sr25519::Public>(DATAGEN_MESSAGES_PALLET_OWNER),
 				],
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				1000.into(),
@@ -156,6 +161,7 @@ pub fn local_testnet_config() -> ChainSpec {
 					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+					get_account_id_from_seed::<sr25519::Public>(DATAGEN_MESSAGES_PALLET_OWNER),
 				],
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				1000.into(),
@@ -184,7 +190,7 @@ fn testnet_genesis(
 	endowed_accounts: Vec<AccountId>,
 	root: AccountId,
 	id: ParaId,
-) -> parachain_template_runtime::RuntimeGenesisConfig {
+) -> datagen_parachain_runtime::RuntimeGenesisConfig {
 	let test_node_owners_list: Vec<(OpaquePeerId, AccountId)> =
 	vec![
 		(OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Alice")),
@@ -194,26 +200,26 @@ fn testnet_genesis(
 		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKp666").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Eve")),
 	];
 
-	parachain_template_runtime::RuntimeGenesisConfig {
-		system: parachain_template_runtime::SystemConfig {
-			code: parachain_template_runtime::WASM_BINARY
+	datagen_parachain_runtime::RuntimeGenesisConfig {
+		system: datagen_parachain_runtime::SystemConfig {
+			code: datagen_parachain_runtime::WASM_BINARY
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 			..Default::default()
 		},
-		balances: parachain_template_runtime::BalancesConfig {
+		balances: datagen_parachain_runtime::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
-		parachain_info: parachain_template_runtime::ParachainInfoConfig {
+		parachain_info: datagen_parachain_runtime::ParachainInfoConfig {
 			parachain_id: id,
 			..Default::default()
 		},
-		collator_selection: parachain_template_runtime::CollatorSelectionConfig {
+		collator_selection: datagen_parachain_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
 			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
 			..Default::default()
 		},
-		session: parachain_template_runtime::SessionConfig {
+		session: datagen_parachain_runtime::SessionConfig {
 			keys: invulnerables
 				.into_iter()
 				.map(|(acc, aura)| {
@@ -230,14 +236,21 @@ fn testnet_genesis(
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
-		polkadot_xcm: parachain_template_runtime::PolkadotXcmConfig {
+		polkadot_xcm: datagen_parachain_runtime::PolkadotXcmConfig {
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 			..Default::default()
 		},
 		transaction_payment: Default::default(),
-		sudo: parachain_template_runtime::SudoConfig { key: Some(root) },
+		sudo: datagen_parachain_runtime::SudoConfig { key: Some(root) },
 		random_node_selector: RandomNodeSelectorConfig {
 			initial_node_owners: test_node_owners_list,
+		},
+		bridge_datagen_messages: BridgeDatagenMessagesConfig {
+			owner: Some(get_account_id_from_seed::<sr25519::Public>(DATAGEN_MESSAGES_PALLET_OWNER)),
+			opened_lanes: vec![
+			    datagen_parachain_runtime::datagen_messages::ToDatagenXcmBlobHauler::xcm_lane(),
+			],
+			..Default::default()
 		},
 	}
 }

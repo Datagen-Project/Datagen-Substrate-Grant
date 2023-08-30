@@ -18,8 +18,8 @@ jsonrpsee = { version = "0.16.2", features = ["server"] }
 futures = "0.3.28"
 bs58 = { version = "0.4.0" }
 # Local
-parachain-template-runtime = { path = "../runtime" }
-
+datagen-parachain-runtime = { path = "../runtime" }
+bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
 # Substrate
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
 frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v1.0.0" }
@@ -74,10 +74,10 @@ substrate-build-script-utils = { git = "https://github.com/paritytech/substrate"
 [features]
 default = []
 runtime-benchmarks = [
-	"parachain-template-runtime/runtime-benchmarks",
+	"datagen-parachain-runtime/runtime-benchmarks",
 	"polkadot-cli/runtime-benchmarks",
 ]
 try-runtime = [
 	"try-runtime-cli/try-runtime",
-	"parachain-template-runtime/try-runtime"
+	"datagen-parachain-runtime/try-runtime"
 ]
