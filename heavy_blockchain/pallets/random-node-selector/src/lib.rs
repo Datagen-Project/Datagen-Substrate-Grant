@@ -27,8 +27,8 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-		type Randomness: Randomness<Self::Hash, Self::BlockNumber>;
+		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
+		type Randomness: Randomness<Self::Hash, BlockNumberFor<Self>>;
 	}
 
 	// Events of the pallet.
@@ -144,29 +144,20 @@ pub mod pallet {
 		>;
 
 	// Genesis config for the random node selector pallet.
-
 	#[pallet::genesis_config]
+	#[derive(frame_support::DefaultNoBound)]
 	pub struct GenesisConfig<T: Config> {
-		/// The initial node owners.
 		pub initial_node_owners: Vec<(PeerId, T::AccountId)>,
 	}
 
-	#[cfg(feature = "std")]
-	impl<T: Config> Default for GenesisConfig<T> {
-		fn default() -> Self {
-			Self { initial_node_owners: Default::default() }
-		}
-	}
-
 	#[pallet::genesis_build]
-	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
 			for (peer_id, owner) in &self.initial_node_owners {
 				<ReliableNode<T>>::insert(peer_id, owner);
 			}
 		}
 	}
-
 
 	// Dispatchable functions allow users to interact with the pallet and invoke state changes.
 	// These functions materialize as "extrinsics", which are often compared to transactions.
