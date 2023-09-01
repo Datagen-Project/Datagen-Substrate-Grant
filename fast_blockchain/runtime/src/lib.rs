@@ -8,15 +8,25 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 
 pub mod pallets_config;
+pub mod rialto_messages;
+pub mod datagen_parachain_messages;
+pub mod weights;
+pub mod xcm_config;
+use bp_runtime::HeaderId;
+use bp_parachains::SingleParaStoredHeaderDataBuilder;
 use pallets_config::Nonce;
-use pallet_grandpa::AuthorityId as GrandpaId;
+use pallet_grandpa::{
+	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
+};
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_beefy::{crypto::AuthorityId as BeefyId, mmr::MmrLeafVersion, ValidatorSet};
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
+use sp_runtime::traits::Keccak256;
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
-		AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, One, Verify,
+		AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, One, Verify,OpaqueKeys
 	},
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
@@ -26,6 +36,7 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
+pub use xcm_config::DatagenParachainNetwork;
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
 	construct_runtime, parameter_types,
@@ -53,7 +64,7 @@ pub use pallet_computational_work;
 pub use pallet_session;
 
 /// An index to a block.
-pub type BlockNumber = u32;
+pub type BlockNumber = u64;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
@@ -63,7 +74,7 @@ pub type Signature = MultiSignature;
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
 /// Balance of an account.
-pub type Balance = u128;
+pub type Balance = u64;
 
 /// Index of a transaction in the chain.
 pub type Index = u32;
@@ -92,6 +103,14 @@ pub mod opaque {
 			pub aura: Aura,
 			pub grandpa: Grandpa,
 		}
+	}
+}
+
+impl_opaque_keys! {
+	pub struct SessionKeys {
+		pub aura: Aura,
+		pub beefy: Beefy,
+		pub grandpa: Grandpa,
 	}
 }
 
@@ -153,7 +172,216 @@ parameter_types! {
 	pub const SS58Prefix: u8 = 42;
 }
 
- 
+
+
+impl pallet_shift_session_manager::Config for Runtime {}
+
+parameter_types! {
+	/// Version of the produced MMR leaf.
+	///
+	/// The version consists of two parts;
+	/// - `major` (3 bits)
+	/// - `minor` (5 bits)
+	///
+	/// `major` should be updated only if decoding the previous MMR Leaf format from the payload
+	/// is not possible (i.e. backward incompatible change).
+	/// `minor` should be updated if fields are added to the previous MMR Leaf, which given SCALE
+	/// encoding does not prevent old leafs from being decoded.
+	///
+	/// Hence we expect `major` to be changed really rarely (think never).
+	/// See [`MmrLeafVersion`] type documentation for more details.
+	pub LeafVersion: MmrLeafVersion = MmrLeafVersion::new(0, 0);
+}
+
+impl pallet_beefy::Config for Runtime {
+	type BeefyId = BeefyId;
+	type MaxAuthorities = ConstU32<10>;
+	type MaxSetIdSessionEntries = ConstU64<0>;
+	type OnNewValidatorSet = MmrLeaf;
+	type WeightInfo = ();
+	type KeyOwnerProof = sp_core::Void;
+	type EquivocationReportSystem = ();
+}
+
+pub struct BeefyDummyDataProvider;
+
+impl sp_consensus_beefy::mmr::BeefyDataProvider<()> for BeefyDummyDataProvider {
+	fn extra_data() {}
+}
+
+impl pallet_beefy_mmr::Config for Runtime {
+	type LeafVersion = LeafVersion;
+	type BeefyAuthorityToMerkleLeaf = pallet_beefy_mmr::BeefyEcdsaToEthereum;
+	type LeafExtra = ();
+	type BeefyDataProvider = BeefyDummyDataProvider;
+}
+
+/// MMR helper types.
+mod mmr {
+	use super::Runtime;
+	pub use pallet_mmr::primitives::*;
+
+	pub type Leaf = <<Runtime as pallet_mmr::Config>::LeafData as LeafDataProvider>::LeafData;
+	pub type Hashing = <Runtime as pallet_mmr::Config>::Hashing;
+	pub type Hash = <Hashing as sp_runtime::traits::Hash>::Output;
+}
+
+impl pallet_mmr::Config for Runtime {
+	const INDEXING_PREFIX: &'static [u8] = b"mmr";
+	type Hashing = Keccak256;
+	type OnNewRoot = pallet_beefy_mmr::DepositBeefyDigest<Runtime>;
+	type WeightInfo = ();
+	type LeafData = pallet_beefy_mmr::Pallet<Runtime>;
+}
+
+parameter_types! {
+	/// Authorities are changing every 5 minutes.
+	pub const Period: BlockNumber = bp_datagen::SESSION_LENGTH;
+	pub const Offset: BlockNumber = 0;
+	pub const RelayerStakeReserveId: [u8; 8] = *b"brdgrlrs";
+}
+
+impl pallet_bridge_relayers::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Reward = Balance;
+	type PaymentProcedure =
+		bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
+	type StakeAndSlash = pallet_bridge_relayers::StakeAndSlashNamed<
+		AccountId,
+		BlockNumber,
+		Balances,
+		RelayerStakeReserveId,
+		ConstU64<1_000>,
+		ConstU64<8>,
+	>;
+	type WeightInfo = ();
+}
+
+pub type RialtoGrandpaInstance = ();
+impl pallet_bridge_grandpa::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type BridgedChain = bp_rialto::Rialto;
+	type MaxFreeMandatoryHeadersPerBlock = ConstU32<4>;
+	type HeadersToKeep = ConstU32<{ bp_rialto::DAYS }>;
+	type WeightInfo = pallet_bridge_grandpa::weights::BridgeWeight<Runtime>;
+}
+
+parameter_types! {
+	pub const RialtoParasPalletName: &'static str = bp_rialto::PARAS_PALLET_NAME;
+	pub const WestendParasPalletName: &'static str = bp_westend::PARAS_PALLET_NAME;
+	pub const MaxDatagenParaHeadDataSize: u32 = bp_rialto::MAX_NESTED_PARACHAIN_HEAD_DATA_SIZE;
+	pub const MaxWestendParaHeadDataSize: u32 = bp_westend::MAX_NESTED_PARACHAIN_HEAD_DATA_SIZE;
+}
+
+
+/// Instance of the with-Rialto parachains pallet.
+pub type WithDatagenParachainsInstance = ();
+
+impl pallet_bridge_parachains::Config<WithDatagenParachainsInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_bridge_parachains::weights::BridgeWeight<Runtime>;
+	type BridgesGrandpaPalletInstance = RialtoGrandpaInstance;
+	type ParasPalletName = RialtoParasPalletName;
+	type ParaStoredHeaderDataBuilder =
+		SingleParaStoredHeaderDataBuilder<bp_datagen_parachain::DatagenParachain>;
+	type HeadsToKeep = ConstU32<1024>;
+	type MaxParaHeadDataSize = MaxDatagenParaHeadDataSize;
+}
+
+/// Instance of the with-Westend parachains pallet.
+pub type WithWestendParachainsInstance = pallet_bridge_parachains::Instance1;
+
+impl pallet_bridge_parachains::Config<WithWestendParachainsInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_bridge_parachains::weights::BridgeWeight<Runtime>;
+	type BridgesGrandpaPalletInstance = WestendGrandpaInstance;
+	type ParasPalletName = WestendParasPalletName;
+	type ParaStoredHeaderDataBuilder =
+		SingleParaStoredHeaderDataBuilder<bp_westend::AssetHubWestend>;
+	type HeadsToKeep = ConstU32<1024>;
+	type MaxParaHeadDataSize = MaxWestendParaHeadDataSize;
+}
+
+pub type WestendGrandpaInstance = pallet_bridge_grandpa::Instance1;
+impl pallet_bridge_grandpa::Config<WestendGrandpaInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type BridgedChain = bp_westend::Westend;
+	type MaxFreeMandatoryHeadersPerBlock = ConstU32<4>;
+	type HeadersToKeep = ConstU32<{ bp_westend::DAYS }>;
+	type WeightInfo = pallet_bridge_grandpa::weights::BridgeWeight<Runtime>;
+}
+
+
+/// Instance of the messages pallet used to relay messages to/from Rialto chain.
+pub type WithRialtoMessagesInstance = ();
+
+impl pallet_bridge_messages::Config<WithRialtoMessagesInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = weights::RialtoMessagesWeightInfo<Runtime>;
+
+	type ThisChain = bp_datagen::Datagen;
+	type BridgedChain = bp_rialto::Rialto;
+	type BridgedHeaderChain = BridgeRialtoGrandpa;
+
+	type OutboundPayload = bridge_runtime_common::messages_xcm_extension::XcmAsPlainPayload;
+	type InboundPayload = bridge_runtime_common::messages_xcm_extension::XcmAsPlainPayload;
+
+	type DeliveryPayments = ();
+	type DeliveryConfirmationPayments = pallet_bridge_relayers::DeliveryConfirmationPaymentsAdapter<
+		Runtime,
+		WithRialtoMessagesInstance,
+		frame_support::traits::ConstU64<100_000>,
+	>;
+
+	type MessageDispatch = crate::rialto_messages::FromRialtoMessageDispatch;
+}
+
+/// Instance of the messages pallet used to relay messages to/from RialtoParachain chain.
+pub type WithDatagenParachainMessagesInstance = pallet_bridge_messages::Instance1;
+
+impl pallet_bridge_messages::Config<WithDatagenParachainMessagesInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = weights::DatagenParachainMessagesWeightInfo<Runtime>;
+
+	type ThisChain = bp_datagen::Datagen;
+	type BridgedChain = bp_datagen_parachain::DatagenParachain;
+	type BridgedHeaderChain = pallet_bridge_parachains::ParachainHeaders<
+		Runtime,
+		WithDatagenParachainsInstance,
+		bp_datagen_parachain::DatagenParachain,
+	>;
+
+	type OutboundPayload = bridge_runtime_common::messages_xcm_extension::XcmAsPlainPayload;
+	type InboundPayload = bridge_runtime_common::messages_xcm_extension::XcmAsPlainPayload;
+
+	type DeliveryPayments = ();
+	type DeliveryConfirmationPayments = pallet_bridge_relayers::DeliveryConfirmationPaymentsAdapter<
+		Runtime,
+		WithDatagenParachainMessagesInstance,
+		frame_support::traits::ConstU64<100_000>,
+	>;
+
+	type MessageDispatch = crate::datagen_parachain_messages::FromDatagenParachainMessageDispatch;
+}
+
+// this config is totally incorrect - the pallet is not actually used at this runtime. We need
+// it only to be able to run benchmarks and make required traits (and default weights for tests).
+impl pallet_xcm_bridge_hub_router::Config for Runtime {
+	type WeightInfo = ();
+
+	type UniversalLocation = xcm_config::UniversalLocation;
+	type SiblingBridgeHubLocation = xcm_config::TokenLocation;
+	type BridgedNetworkId = xcm_config::RialtoNetwork;
+
+	type ToBridgeHubSender = xcm_config::XcmRouter;
+	type WithBridgeHubChannel = xcm_config::EmulatedSiblingXcmpChannel;
+
+	type BaseFee = ConstU128<1_000_000_000>;
+	type ByteFee = ConstU128<1_000>;
+	type FeeAsset = xcm_config::TokenAssetId;
+}
+
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
     pub struct Runtime
@@ -166,7 +394,6 @@ construct_runtime!(
         RandomnessCollectiveFlip: pallet_insecure_randomness_collective_flip,
         Timestamp: pallet_timestamp,
         Aura: pallet_aura,
-        Grandpa: pallet_grandpa,
         Balances: pallet_balances,
         TransactionPayment: pallet_transaction_payment,
         Sudo: pallet_sudo,
@@ -175,12 +402,42 @@ construct_runtime!(
         ComputationalWork: pallet_computational_work::{Pallet, Call, Storage, Event<T>},
         NodeAuthorization: pallet_node_authorization::{Pallet, Call, Storage, Event<T>,Config<T>},
         Authorship: pallet_authorship,
-        Session: pallet_session,
         CheckNodeComputationalWork: pallet_check_node_computational_work::{Pallet, Storage, Event<T>},
+		
+		// Consensus support.
+		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
+		Grandpa: pallet_grandpa::{Pallet, Call, Storage, Config<T>, Event},
+		ShiftSessionManager: pallet_shift_session_manager::{Pallet},
+
+		// BEEFY Bridges support.
+		Beefy: pallet_beefy::{Pallet, Storage, Config<T>},
+		Mmr: pallet_mmr::{Pallet, Storage},
+		MmrLeaf: pallet_beefy_mmr::{Pallet, Storage},
+
+		// Rialto bridge modules.
+		BridgeRelayers: pallet_bridge_relayers::{Pallet, Call, Storage, Event<T>},
+		BridgeRialtoGrandpa: pallet_bridge_grandpa::{Pallet, Call, Storage, Event<T>},
+		BridgeRialtoMessages: pallet_bridge_messages::{Pallet, Call, Storage, Event<T>, Config<T>},
+
+		// Westend bridge modules.
+		BridgeWestendGrandpa: pallet_bridge_grandpa::<Instance1>::{Pallet, Call, Config<T>, Storage, Event<T>},
+		BridgeWestendParachains: pallet_bridge_parachains::<Instance1>::{Pallet, Call, Storage, Event<T>},
+	
+
+		// RialtoParachain bridge modules.
+		BridgeRialtoParachains: pallet_bridge_parachains::{Pallet, Call, Storage, Event<T>},
+		BridgeRialtoParachainMessages: pallet_bridge_messages::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
+		
+		// Pallet for sending XCM.
+		XcmPallet: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config<T>} = 99,
+
+		// Pallets that are not actually used here (yet?), but we need to run benchmarks on it.
+		XcmBridgeHubRouter: pallet_xcm_bridge_hub_router::{Pallet, Storage} = 200,
+
     }
 );
 
-pub const EXISTENTIAL_DEPOSIT: u128 = 500;
+pub const EXISTENTIAL_DEPOSIT: u64 = 500;
 /// The address format for describing accounts.
 pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
 /// Block header type as expected by this runtime.
@@ -315,37 +572,7 @@ impl_runtime_apis! {
 			opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
 		}
 	}
-
-	impl sp_consensus_grandpa::GrandpaApi<Block> for Runtime {
-		fn grandpa_authorities() -> sp_consensus_grandpa::AuthorityList {
-			Grandpa::grandpa_authorities()
-		}
-
-		fn current_set_id() -> sp_consensus_grandpa::SetId {
-			Grandpa::current_set_id()
-		}
-
-		fn submit_report_equivocation_unsigned_extrinsic(
-			_equivocation_proof: sp_consensus_grandpa::EquivocationProof<
-				<Block as BlockT>::Hash,
-				NumberFor<Block>,
-			>,
-			_key_owner_proof: sp_consensus_grandpa::OpaqueKeyOwnershipProof,
-		) -> Option<()> {
-			None
-		}
-
-		fn generate_key_ownership_proof(
-			_set_id: sp_consensus_grandpa::SetId,
-			_authority_id: GrandpaId,
-		) -> Option<sp_consensus_grandpa::OpaqueKeyOwnershipProof> {
-			// NOTE: this is the only implementation possible since we've
-			// defined our key owner proof type as a bottom type (i.e. a type
-			// with no values).
-			None
-		}
-	}
-
+ 
 	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
 		fn account_nonce(account: AccountId) -> Nonce {
 			System::account_nonce(account)
@@ -393,6 +620,205 @@ impl_runtime_apis! {
 		}
 		fn query_length_to_fee(length: u32) -> Balance {
 			TransactionPayment::length_to_fee(length)
+		}
+	}
+
+	impl sp_consensus_beefy::BeefyApi<Block> for Runtime {
+		fn beefy_genesis() -> Option<BlockNumber> {
+			Beefy::genesis_block()
+		}
+
+		fn validator_set() -> Option<ValidatorSet<BeefyId>> {
+			Beefy::validator_set()
+		}
+
+		fn submit_report_equivocation_unsigned_extrinsic(
+			_equivocation_proof: sp_consensus_beefy::EquivocationProof<
+				NumberFor<Block>,
+				sp_consensus_beefy::crypto::AuthorityId,
+				sp_consensus_beefy::crypto::Signature
+			>,
+			_key_owner_proof: sp_consensus_beefy::OpaqueKeyOwnershipProof,
+		) -> Option<()> { None }
+
+		fn generate_key_ownership_proof(
+			_set_id: sp_consensus_beefy::ValidatorSetId,
+			_authority_id: sp_consensus_beefy::crypto::AuthorityId,
+		) -> Option<sp_consensus_beefy::OpaqueKeyOwnershipProof> { None }
+	}
+
+	impl pallet_mmr::primitives::MmrApi<
+		Block,
+		mmr::Hash,
+		BlockNumber,
+	> for Runtime {
+		fn mmr_root() -> Result<mmr::Hash, mmr::Error> {
+			Ok(Mmr::mmr_root())
+		}
+
+		fn mmr_leaf_count() -> Result<mmr::LeafIndex, mmr::Error> {
+			Ok(Mmr::mmr_leaves())
+		}
+
+		fn generate_proof(
+			block_numbers: Vec<BlockNumber>,
+			best_known_block_number: Option<BlockNumber>,
+		) -> Result<(Vec<mmr::EncodableOpaqueLeaf>, mmr::Proof<mmr::Hash>), mmr::Error> {
+			Mmr::generate_proof(block_numbers, best_known_block_number).map(
+				|(leaves, proof)| {
+					(
+						leaves
+							.into_iter()
+							.map(|leaf| mmr::EncodableOpaqueLeaf::from_leaf(&leaf))
+							.collect(),
+						proof,
+					)
+				},
+			)
+		}
+
+		fn verify_proof(leaves: Vec<mmr::EncodableOpaqueLeaf>, proof: mmr::Proof<mmr::Hash>)
+			-> Result<(), mmr::Error>
+		{
+			let leaves = leaves.into_iter().map(|leaf|
+				leaf.into_opaque_leaf()
+				.try_decode()
+				.ok_or(mmr::Error::Verify)).collect::<Result<Vec<mmr::Leaf>, mmr::Error>>()?;
+			Mmr::verify_leaves(leaves, proof)
+		}
+
+		fn verify_proof_stateless(
+			root: mmr::Hash,
+			leaves: Vec<mmr::EncodableOpaqueLeaf>,
+			proof: mmr::Proof<mmr::Hash>
+		) -> Result<(), mmr::Error> {
+			let nodes = leaves.into_iter().map(|leaf|mmr::DataOrHash::Data(leaf.into_opaque_leaf())).collect();
+			pallet_mmr::verify_leaves_proof::<mmr::Hashing, _>(root, nodes, proof)
+		}
+	}
+
+	impl fg_primitives::GrandpaApi<Block> for Runtime {
+		fn current_set_id() -> fg_primitives::SetId {
+			Grandpa::current_set_id()
+		}
+
+		fn grandpa_authorities() -> GrandpaAuthorityList {
+			Grandpa::grandpa_authorities()
+		}
+
+		fn submit_report_equivocation_unsigned_extrinsic(
+			equivocation_proof: fg_primitives::EquivocationProof<
+				<Block as BlockT>::Hash,
+				NumberFor<Block>,
+			>,
+			key_owner_proof: fg_primitives::OpaqueKeyOwnershipProof,
+		) -> Option<()> {
+			let key_owner_proof = key_owner_proof.decode()?;
+
+			Grandpa::submit_unsigned_equivocation_report(
+				equivocation_proof,
+				key_owner_proof,
+			)
+		}
+
+		fn generate_key_ownership_proof(
+			_set_id: fg_primitives::SetId,
+			_authority_id: GrandpaId,
+		) -> Option<fg_primitives::OpaqueKeyOwnershipProof> {
+			// NOTE: this is the only implementation possible since we've
+			// defined our key owner proof type as a bottom type (i.e. a type
+			// with no values).
+			None
+		}
+	}
+
+	impl bp_rialto::RialtoFinalityApi<Block> for Runtime {
+		fn best_finalized() -> Option<HeaderId<bp_rialto::Hash, bp_rialto::BlockNumber>> {
+			BridgeRialtoGrandpa::best_finalized()
+		}
+
+		fn accepted_grandpa_finality_proofs(
+		) -> Vec<bp_header_chain::justification::GrandpaJustification<bp_rialto::Header>> {
+			BridgeRialtoGrandpa::accepted_finality_proofs()
+		}
+	}
+
+	impl bp_westend::WestendFinalityApi<Block> for Runtime {
+		fn best_finalized() -> Option<HeaderId<bp_westend::Hash, bp_westend::BlockNumber>> {
+			BridgeWestendGrandpa::best_finalized()
+		}
+
+		fn accepted_grandpa_finality_proofs(
+		) -> Vec<bp_header_chain::justification::GrandpaJustification<bp_westend::Header>> {
+			BridgeWestendGrandpa::accepted_finality_proofs()
+		}
+	}
+
+	impl bp_westend::AssetHubWestendFinalityApi<Block> for Runtime {
+		fn best_finalized() -> Option<HeaderId<bp_westend::Hash, bp_westend::BlockNumber>> {
+			pallet_bridge_parachains::Pallet::<
+				Runtime,
+				WithWestendParachainsInstance,
+			>::best_parachain_head_id::<bp_westend::AssetHubWestend>().unwrap_or(None)
+		}
+	}
+
+	impl bp_datagen_parachain::DatagenParachainFinalityApi<Block> for Runtime {
+		fn best_finalized() -> Option<HeaderId<bp_rialto::Hash, bp_rialto::BlockNumber>> {
+			pallet_bridge_parachains::Pallet::<
+				Runtime,
+				WithDatagenParachainsInstance,
+			>::best_parachain_head_id::<bp_datagen_parachain::DatagenParachain>().unwrap_or(None)
+		}
+	}
+
+	impl bp_rialto::ToRialtoOutboundLaneApi<Block> for Runtime {
+		fn message_details(
+			lane: bp_messages::LaneId,
+			begin: bp_messages::MessageNonce,
+			end: bp_messages::MessageNonce,
+		) -> Vec<bp_messages::OutboundMessageDetails> {
+			bridge_runtime_common::messages_api::outbound_message_details::<
+				Runtime,
+				WithRialtoMessagesInstance,
+			>(lane, begin, end)
+		}
+	}
+
+	impl bp_rialto::FromRialtoInboundLaneApi<Block> for Runtime {
+		fn message_details(
+			lane: bp_messages::LaneId,
+			messages: Vec<(bp_messages::MessagePayload, bp_messages::OutboundMessageDetails)>,
+		) -> Vec<bp_messages::InboundMessageDetails> {
+			bridge_runtime_common::messages_api::inbound_message_details::<
+				Runtime,
+				WithRialtoMessagesInstance,
+			>(lane, messages)
+		}
+	}
+
+	impl bp_datagen_parachain::ToDatagenParachainOutboundLaneApi<Block> for Runtime {
+		fn message_details(
+			lane: bp_messages::LaneId,
+			begin: bp_messages::MessageNonce,
+			end: bp_messages::MessageNonce,
+		) -> Vec<bp_messages::OutboundMessageDetails> {
+			bridge_runtime_common::messages_api::outbound_message_details::<
+				Runtime,
+				WithDatagenParachainMessagesInstance,
+			>(lane, begin, end)
+		}
+	}
+
+	impl bp_datagen_parachain::FromDatagenParachainInboundLaneApi<Block> for Runtime {
+		fn message_details(
+			lane: bp_messages::LaneId,
+			messages: Vec<(bp_messages::MessagePayload, bp_messages::OutboundMessageDetails)>,
+		) -> Vec<bp_messages::InboundMessageDetails> {
+			bridge_runtime_common::messages_api::inbound_message_details::<
+				Runtime,
+				WithDatagenParachainMessagesInstance,
+			>(lane, messages)
 		}
 	}
 

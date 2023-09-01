@@ -1,5 +1,8 @@
-use node_template_runtime::{
-	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
+use bridge_runtime_common::messages_xcm_extension::XcmBlobHauler;
+use datagen_runtime::{
+	BridgeRialtoMessagesConfig,
+	BridgeRialtoParachainMessagesConfig, BridgeWestendGrandpaConfig,
+	AccountId, AuraConfig,BeefyConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
 	SystemConfig, SessionConfig, WASM_BINARY, NodeAuthorizationConfig
 };
 use sc_service::ChainType;
@@ -7,7 +10,14 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public, OpaquePeerId};
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use node_template_runtime::opaque::SessionKeys;
+use datagen_runtime::opaque::SessionKeys;
+
+/// "Name" of the account, which owns the with-Westend GRANDPA pallet.
+const WESTEND_GRANDPA_PALLET_OWNER: &str = "Westend.GrandpaOwner";
+/// "Name" of the account, which owns the with-Rialto messages pallet.
+const RIALTO_MESSAGES_PALLET_OWNER: &str = "Rialto.MessagesOwner";
+/// "Name" of the account, which owns the with-RialtoParachain messages pallet.
+const RIALTO_PARACHAIN_MESSAGES_PALLET_OWNER: &str = "RialtoParachain.MessagesOwner";
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
@@ -201,6 +211,7 @@ fn testnet_genesis(
 			// Configure endowed accounts with initial balance of 1 << 60.
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
+		beefy: BeefyConfig::default(),
 		aura: AuraConfig {
 			authorities: vec![]
 		},
@@ -233,6 +244,29 @@ fn testnet_genesis(
 			key: Some(root_key),
 		},
 		transaction_payment: Default::default(),
+		bridge_westend_grandpa: BridgeWestendGrandpaConfig {
+			// for our deployments to avoid multiple same-nonces transactions:
+			// //Alice is already used to initialize Rialto<->Millau bridge
+			// => let's use //Westend.GrandpaOwner to initialize Westend->Millau bridge
+			owner: Some(get_account_id_from_seed::<sr25519::Public>(WESTEND_GRANDPA_PALLET_OWNER)),
+			..Default::default()
+		},
+		bridge_rialto_messages: BridgeRialtoMessagesConfig {
+			owner: Some(get_account_id_from_seed::<sr25519::Public>(RIALTO_MESSAGES_PALLET_OWNER)),
+			opened_lanes: vec![datagen_runtime::rialto_messages::ToRialtoXcmBlobHauler::xcm_lane()],
+			..Default::default()
+		},
+		bridge_rialto_parachain_messages: BridgeRialtoParachainMessagesConfig {
+			owner: Some(get_account_id_from_seed::<sr25519::Public>(
+				RIALTO_PARACHAIN_MESSAGES_PALLET_OWNER,
+			)),
+			opened_lanes: vec![
+				datagen_runtime::datagen_parachain_messages::ToDatagenParachainXcmBlobHauler::xcm_lane(
+				),
+			],
+			..Default::default()
+		},
+		xcm_pallet: Default::default(),
 	}
 }
 
