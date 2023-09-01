@@ -1,5 +1,5 @@
 use bridge_runtime_common::messages_xcm_extension::XcmBlobHauler;
-use node_template_runtime::{
+use datagen_runtime::{
 	BridgeRialtoMessagesConfig,
 	BridgeRialtoParachainMessagesConfig, BridgeWestendGrandpaConfig,
 	AccountId, AuraConfig,BeefyConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig,
@@ -10,7 +10,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{sr25519, Pair, Public, OpaquePeerId};
 use sc_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use node_template_runtime::opaque::SessionKeys;
+use datagen_runtime::opaque::SessionKeys;
 
 /// "Name" of the account, which owns the with-Westend GRANDPA pallet.
 const WESTEND_GRANDPA_PALLET_OWNER: &str = "Westend.GrandpaOwner";
@@ -253,7 +253,7 @@ fn testnet_genesis(
 		},
 		bridge_rialto_messages: BridgeRialtoMessagesConfig {
 			owner: Some(get_account_id_from_seed::<sr25519::Public>(RIALTO_MESSAGES_PALLET_OWNER)),
-			opened_lanes: vec![node_template_runtime::rialto_messages::ToRialtoXcmBlobHauler::xcm_lane()],
+			opened_lanes: vec![datagen_runtime::rialto_messages::ToRialtoXcmBlobHauler::xcm_lane()],
 			..Default::default()
 		},
 		bridge_rialto_parachain_messages: BridgeRialtoParachainMessagesConfig {
@@ -261,7 +261,7 @@ fn testnet_genesis(
 				RIALTO_PARACHAIN_MESSAGES_PALLET_OWNER,
 			)),
 			opened_lanes: vec![
-				node_template_runtime::datagen_parachain_messages::ToDatagenParachainXcmBlobHauler::xcm_lane(
+				datagen_runtime::datagen_parachain_messages::ToDatagenParachainXcmBlobHauler::xcm_lane(
 				),
 			],
 			..Default::default()
