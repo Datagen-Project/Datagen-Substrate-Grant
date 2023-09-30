@@ -63,7 +63,6 @@ impl XcmBlobHauler for ToDatagenXcmBlobHauler {
 	}
 }
 
-
 #[cfg(test)]
 mod tests {
 	use super::*;

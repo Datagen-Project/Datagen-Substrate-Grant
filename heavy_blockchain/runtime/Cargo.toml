@@ -19,19 +19,20 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 hex-literal = { version = "0.4.1", optional = true }
 log = { version = "0.4.19", default-features = false }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
-smallvec = "1.11.0"
+smallvec = "1.11.1"
 
-# Bridge depedencies
-bp-header-chain = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
-bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
-bp-datagen = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
-bp-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
-bp-runtime = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0"  }
-bp-datagen-parachain = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
-bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
-pallet-bridge-grandpa = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
-pallet-bridge-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
-pallet-bridge-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0"}
+# Bridge depedencies  
+bp-header-chain = { path = "../../../parity-bridges-common/primitives/header-chain", default-features = false}
+bp-messages = { path = "../../../parity-bridges-common/primitives/messages",  default-features = false }
+bp-datagen = { path = "../../../parity-bridges-common/primitives/chain-datagen", default-features = false}
+bp-relayers = { path = "../../../parity-bridges-common/primitives/relayers", default-features = false }
+bp-datagen-parachain = { path = "../../../parity-bridges-common/primitives/chain-datagen-parachain", default-features = false}
+bp-runtime = { path = "../../../parity-bridges-common/primitives/runtime",  default-features = false} 
+
+bridge-runtime-common = { path = "../../../parity-bridges-common/bin/runtime-common", default-features = false }
+pallet-bridge-grandpa = { path = "../../../parity-bridges-common/modules/grandpa", default-features = false }
+pallet-bridge-messages = { path = "../../../parity-bridges-common/modules/messages", default-features = false }
+pallet-bridge-relayers = { path = "../../../parity-bridges-common/modules/relayers", default-features = false } 
 
 # Local
 pallet-parachain-template = { path = "../pallets/template", default-features = false }
@@ -149,6 +150,7 @@ std = [
     "pallet-bridge-messages/std",
     "pallet-bridge-relayers/std",
 	"substrate-wasm-builder",
+	"pallet-insecure-randomness-collective-flip/std"
 ]
 
 runtime-benchmarks = [

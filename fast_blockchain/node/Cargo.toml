@@ -22,8 +22,7 @@ futures = { version = "0.3.21", features = ["thread-pool"]}
 bs58 = { version = "0.4.0" }
 serde_json = "1.0.104"
 #bridge components 
-bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
-
+bridge-runtime-common = { path = "../../../parity-bridges-common/bin/runtime-common", default-features = false }
 #substrate 
 sc-rpc = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sc-cli = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }

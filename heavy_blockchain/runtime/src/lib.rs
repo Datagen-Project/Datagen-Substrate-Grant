@@ -6,11 +6,11 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+pub mod datagen_messages;
 mod weights;
 pub mod xcm_config;
-pub mod datagen_messages;
 
-pub use xcm_config::{UnitWeightCost, OnDatagenParachainBlobDispatcher, DatagenNetwork};
+use bp_runtime::HeaderId;
 use bridge_runtime_common::generate_bridge_reject_obsolete_headers_and_messages;
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use smallvec::smallvec;
@@ -22,7 +22,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionSource, TransactionValidity},
 	ApplyExtrinsicResult, MultiSignature,
 };
-use bp_runtime::HeaderId;
+pub use xcm_config::{DatagenNetwork, OnDatagenParachainBlobDispatcher, UnitWeightCost};
 
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -47,7 +47,7 @@ use frame_system::{
 use pallet_xcm::{EnsureXcm, IsVoiceOfBody};
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sp_runtime::{MultiAddress, Perbill, Permill};
-use xcm_config::{RelayLocation,XcmRouter, XcmConfig, XcmOriginToTransactDispatchOrigin};
+use xcm_config::{RelayLocation, XcmConfig, XcmOriginToTransactDispatchOrigin, XcmRouter};
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -475,7 +475,6 @@ impl pallet_parachain_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
 
-
 impl pallet_xcm_handler::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeOrigin = RuntimeOrigin;
@@ -493,7 +492,8 @@ impl pallet_random_node_selector::Config for Runtime {
 impl pallet_bridge_relayers::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Reward = Balance;
-	type PaymentProcedure = bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
+	type PaymentProcedure =
+		bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
 	type StakeAndSlash = ();
 	type WeightInfo = ();
 }
@@ -529,7 +529,6 @@ impl pallet_bridge_messages::Config<WithDatagenMessagesInstance> for Runtime {
 
 	type MessageDispatch = crate::datagen_messages::FromDatagenMessageDispatch;
 }
-
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
@@ -767,7 +766,7 @@ impl_runtime_apis! {
 			>(lane, messages)
 		}
 	}
-	
+
 	#[cfg(feature = "try-runtime")]
 	impl frame_try_runtime::TryRuntime<Block> for Runtime {
 		fn on_runtime_upgrade(checks: frame_try_runtime::UpgradeCheckSelect) -> (Weight, Weight) {

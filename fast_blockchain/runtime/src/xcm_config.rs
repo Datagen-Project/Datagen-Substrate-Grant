@@ -22,7 +22,8 @@ use super::{
 	Balances, Runtime, RuntimeCall, RuntimeEvent, RuntimeOrigin, XcmPallet,
 };
 use bp_datagen::WeightToFee;
-use bridge_runtime_common::CustomNetworkId;
+use bridge_runtime_common::CustomNetworkId
+;
 use frame_support::{
 	parameter_types,
 	traits::{ConstU32, Everything, Nothing},

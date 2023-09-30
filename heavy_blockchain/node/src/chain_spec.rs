@@ -1,10 +1,13 @@
-use cumulus_primitives_core::ParaId;
-use datagen_parachain_runtime::{AccountId,RandomNodeSelectorConfig,BridgeDatagenMessagesConfig, AuraId, Signature, EXISTENTIAL_DEPOSIT};
-use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use bridge_runtime_common::messages_xcm_extension::XcmBlobHauler;
+use cumulus_primitives_core::ParaId;
+use datagen_parachain_runtime::{
+	AccountId, AuraId, BridgeDatagenMessagesConfig, RandomNodeSelectorConfig, Signature,
+	EXISTENTIAL_DEPOSIT,
+};
+use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
-use sp_core::{sr25519, Pair, Public, OpaquePeerId};
+use sp_core::{sr25519, OpaquePeerId, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -191,13 +194,47 @@ fn testnet_genesis(
 	root: AccountId,
 	id: ParaId,
 ) -> datagen_parachain_runtime::RuntimeGenesisConfig {
-	let test_node_owners_list: Vec<(OpaquePeerId, AccountId)> =
-	vec![
-		(OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Alice")),
-		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Bob")),
-		(OpaquePeerId(bs58::decode("12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Charlie")),
-		(OpaquePeerId(bs58::decode("12D3KooWPHWFrfaJzxPnqnAYAoRUyAHHKqACmEycGTVmeVhQYuZN").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Dave")),
-		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKp666").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Eve")),
+	let test_node_owners_list: Vec<(OpaquePeerId, AccountId)> = vec![
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Alice"),
+		),
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Bob"),
+		),
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Charlie"),
+		),
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWPHWFrfaJzxPnqnAYAoRUyAHHKqACmEycGTVmeVhQYuZN")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Dave"),
+		),
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKp666")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Eve"),
+		),
 	];
 
 	datagen_parachain_runtime::RuntimeGenesisConfig {
@@ -248,7 +285,7 @@ fn testnet_genesis(
 		bridge_datagen_messages: BridgeDatagenMessagesConfig {
 			owner: Some(get_account_id_from_seed::<sr25519::Public>(DATAGEN_MESSAGES_PALLET_OWNER)),
 			opened_lanes: vec![
-			    datagen_parachain_runtime::datagen_messages::ToDatagenXcmBlobHauler::xcm_lane(),
+				datagen_parachain_runtime::datagen_messages::ToDatagenXcmBlobHauler::xcm_lane(),
 			],
 			..Default::default()
 		},

@@ -729,7 +729,6 @@ dependencies = [
 [[package]]
 name = "bp-beefy"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "binary-merkle-tree",
  "bp-runtime",
@@ -747,7 +746,6 @@ dependencies = [
 [[package]]
 name = "bp-bridge-hub-cumulus"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-messages",
  "bp-polkadot-core",
@@ -762,7 +760,6 @@ dependencies = [
 [[package]]
 name = "bp-datagen"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-beefy",
  "bp-header-chain",
@@ -788,7 +785,6 @@ dependencies = [
 [[package]]
 name = "bp-datagen-parachain"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-bridge-hub-cumulus",
  "bp-messages",
@@ -805,7 +801,6 @@ dependencies = [
 [[package]]
 name = "bp-header-chain"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-runtime",
  "finality-grandpa",
@@ -822,7 +817,6 @@ dependencies = [
 [[package]]
 name = "bp-messages"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-header-chain",
  "bp-runtime",
@@ -838,7 +832,6 @@ dependencies = [
 [[package]]
 name = "bp-parachains"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-header-chain",
  "bp-polkadot-core",
@@ -855,7 +848,6 @@ dependencies = [
 [[package]]
 name = "bp-polkadot-core"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-messages",
  "bp-runtime",
@@ -873,7 +865,6 @@ dependencies = [
 [[package]]
 name = "bp-relayers"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-messages",
  "bp-runtime",
@@ -887,7 +878,6 @@ dependencies = [
 [[package]]
 name = "bp-runtime"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -909,7 +899,6 @@ dependencies = [
 [[package]]
 name = "bp-test-utils"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-header-chain",
  "bp-parachains",
@@ -929,7 +918,6 @@ dependencies = [
 [[package]]
 name = "bridge-runtime-common"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-datagen",
  "bp-datagen-parachain",
@@ -6260,7 +6248,6 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-grandpa"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-header-chain",
  "bp-runtime",
@@ -6281,7 +6268,6 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-messages"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-header-chain",
  "bp-messages",
@@ -6302,7 +6288,6 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-parachains"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-header-chain",
  "bp-parachains",
@@ -6323,7 +6308,6 @@ dependencies = [
 [[package]]
 name = "pallet-bridge-relayers"
 version = "0.1.0"
-source = "git+https://github.com/Datagen-Project/parity-bridges-common?branch=release-v1.0.0#108bd0cd1a2902d396068ca3c3407e110bc39a3b"
 dependencies = [
  "bp-messages",
  "bp-relayers",
@@ -11429,9 +11413,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.11.0"
+version = "1.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62bb4feee49fdd9f707ef802e22365a35de4b7b299de4763d44bfea899442ff9"
+checksum = "942b4a808e05215192e39f4ab80813e599068285906cc91aa64f923db842bd5a"
 
 [[package]]
 name = "snap"

@@ -1,0 +1,18 @@
+# bp-datagen = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bp-header-chain = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bp-parachains  = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bp-polkadot-core = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bp-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bp-runtime = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bp-westend = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bp-xcm-bridge-hub-router = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# pallet-bridge-parachains = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# pallet-shift-session-manager = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# pallet-xcm-bridge-hub-router = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# pallet-bridge-grandpa = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# pallet-bridge-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# pallet-bridge-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0"}
+# bp-rialto = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
+# bp-datagen-parachain = { git = "https://github.com/Datagen-Project/parity-bridges-common", default-features = false, branch = "release-v1.0.0" }
