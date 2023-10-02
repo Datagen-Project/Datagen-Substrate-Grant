@@ -20,13 +20,13 @@ use crate::{
 	service::new_partial,
 };
 use frame_benchmarking_cli::BenchmarkCmd;
-use datagen_runtime::{Block, RuntimeApi};
+use millau_runtime::{Block, RuntimeApi};
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"datagen Bridge Node".into()
+		"Millau Bridge Node".into()
 	}
 
 	fn impl_version() -> String {
@@ -34,7 +34,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn description() -> String {
-		"Datagen Bridge Node".into()
+		"Millau Bridge Node".into()
 	}
 
 	fn author() -> String {
@@ -50,7 +50,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn executable_name() -> String {
-		"datagen-bridge-node".into()
+		"millau-bridge-node".into()
 	}
 
 	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
@@ -70,7 +70,7 @@ pub fn run() -> sc_cli::Result<()> {
 	let cli = Cli::from_args();
 	// make sure to set correct crypto version.
 	sp_core::crypto::set_default_ss58_version(sp_core::crypto::Ss58AddressFormat::custom(
-		datagen_runtime::SS58Prefix::get() as u16,
+		millau_runtime::SS58Prefix::get() as u16,
 	));
 
 	match &cli.subcommand {

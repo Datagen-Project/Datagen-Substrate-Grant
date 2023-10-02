@@ -1,8 +1,37 @@
+// Copyright 2020-2021 Parity Technologies (UK) Ltd.
+// This file is part of Parity Bridges Common.
+
+// Parity Bridges Common is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// Parity Bridges Common is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
+
+#![allow(clippy::large_enum_variant)]
+
+use crate::chain_spec;
+use clap::Parser;
+use cumulus_client_cli::{ExportGenesisStateCommand, ExportGenesisWasmCommand};
 use std::path::PathBuf;
 
 /// Sub-commands supported by the collator.
-#[derive(Debug, clap::Subcommand)]
+#[derive(Debug, Parser)]
 pub enum Subcommand {
+	/// Export the genesis state of the parachain.
+	#[clap(name = "export-genesis-state")]
+	ExportGenesisState(ExportGenesisStateCommand),
+
+	/// Export the genesis wasm of the parachain.
+	#[clap(name = "export-genesis-wasm")]
+	ExportGenesisWasm(ExportGenesisWasmCommand),
+
 	/// Build a chain specification.
 	BuildSpec(sc_cli::BuildSpecCmd),
 
@@ -18,76 +47,41 @@ pub enum Subcommand {
 	/// Import blocks.
 	ImportBlocks(sc_cli::ImportBlocksCmd),
 
-	/// Revert the chain to a previous state.
-	Revert(sc_cli::RevertCmd),
-
 	/// Remove the whole chain.
 	PurgeChain(cumulus_client_cli::PurgeChainCmd),
 
-	/// Export the genesis state of the parachain.
-	ExportGenesisState(cumulus_client_cli::ExportGenesisStateCommand),
+	/// Revert the chain to a previous state.
+	Revert(sc_cli::RevertCmd),
 
-	/// Export the genesis wasm of the parachain.
-	ExportGenesisWasm(cumulus_client_cli::ExportGenesisWasmCommand),
-
-	/// Sub-commands concerned with benchmarking.
-	/// The pallet benchmarking moved to the `pallet` sub-command.
-	#[command(subcommand)]
+	/// The custom benchmark subcommand benchmarking runtime pallets.
+	#[clap(subcommand)]
 	Benchmark(frame_benchmarking_cli::BenchmarkCmd),
-
-	/// Try some testing command against a specified runtime state.
-	#[cfg(feature = "try-runtime")]
-	TryRuntime(try_runtime_cli::TryRuntimeCmd),
-
-	/// Errors since the binary was not build with `--features try-runtime`.
-	#[cfg(not(feature = "try-runtime"))]
-	TryRuntime,
 }
 
-const AFTER_HELP_EXAMPLE: &str = color_print::cstr!(
-	r#"<bold><underline>Examples:</></>
-   <bold>parachain-template-node build-spec --disable-default-bootnode > plain-parachain-chainspec.json</>
-           Export a chainspec for a local testnet in json format.
-   <bold>parachain-template-node --chain plain-parachain-chainspec.json --tmp -- --chain rococo-local</>
-           Launch a full node with chain specification loaded from plain-parachain-chainspec.json.
-   <bold>parachain-template-node</>
-           Launch a full node with default parachain <italic>local-testnet</> and relay chain <italic>rococo-local</>.
-   <bold>parachain-template-node --collator</>
-           Launch a collator with default parachain <italic>local-testnet</> and relay chain <italic>rococo-local</>.
- "#
-);
-#[derive(Debug, clap::Parser)]
-#[command(
+#[derive(Debug, Parser)]
+#[clap(
 	propagate_version = true,
 	args_conflicts_with_subcommands = true,
 	subcommand_negates_reqs = true
 )]
-#[clap(after_help = AFTER_HELP_EXAMPLE)]
 pub struct Cli {
-	#[command(subcommand)]
+	#[clap(subcommand)]
 	pub subcommand: Option<Subcommand>,
 
-	#[command(flatten)]
+	#[clap(long)]
+	pub parachain_id: Option<u32>,
+
+	#[clap(flatten)]
 	pub run: cumulus_client_cli::RunCmd,
 
-	/// Disable automatic hardware benchmarks.
-	///
-	/// By default these benchmarks are automatically ran at startup and measure
-	/// the CPU speed, the memory bandwidth and the disk speed.
-	///
-	/// The results are then printed out in the logs, and also sent as part of
-	/// telemetry, if telemetry is enabled.
-	#[arg(long)]
-	pub no_hardware_benchmarks: bool,
-
-	/// Relay chain arguments
-	#[arg(raw = true)]
-	pub relay_chain_args: Vec<String>,
+	/// Relaychain arguments
+	#[clap(raw = true)]
+	pub relaychain_args: Vec<String>,
 }
 
 #[derive(Debug)]
 pub struct RelayChainCli {
-	/// The actual relay chain cli object.
+	/// The actual relay chain CLI object.
 	pub base: polkadot_cli::RunCmd,
 
 	/// Optional chain id that should be passed to the relay chain.
@@ -103,13 +97,13 @@ impl RelayChainCli {
 		para_config: &sc_service::Configuration,
 		relay_chain_args: impl Iterator<Item = &'a String>,
 	) -> Self {
-		let extension = crate::chain_spec::Extensions::try_get(&*para_config.chain_spec);
+		let extension = chain_spec::Extensions::try_get(&*para_config.chain_spec);
 		let chain_id = extension.map(|e| e.relay_chain.clone());
-		let base_path = para_config.base_path.path().join("polkadot");
+		let base_path = para_config.base_path.path().join("rialto-bridge-node");
 		Self {
 			base_path: Some(base_path),
 			chain_id,
-			base: clap::Parser::parse_from(relay_chain_args),
+			base: polkadot_cli::RunCmd::parse_from(relay_chain_args),
 		}
 	}
 }

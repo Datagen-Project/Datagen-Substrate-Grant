@@ -14,17 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
-use bridge_runtime_common::messages_xcm_extension::XcmBlobHauler;
-use datagen_runtime::{
+use millau_runtime::{
 	AccountId, AuraConfig, BalancesConfig, BeefyConfig, BridgeRialtoMessagesConfig,
-	BridgeDatagenParachainMessagesConfig, BridgeWestendGrandpaConfig, GrandpaConfig,
+	BridgeRialtoParachainMessagesConfig, BridgeWestendGrandpaConfig, GrandpaConfig,
 	RuntimeGenesisConfig, SessionConfig, SessionKeys, Signature, SudoConfig, SystemConfig,
-	WASM_BINARY,NodeAuthorizationConfig
+	XcmRialtoBridgeHubConfig, XcmRialtoParachainBridgeHubConfig, WASM_BINARY,
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_consensus_beefy::crypto::AuthorityId as BeefyId;
+use sp_consensus_beefy::ecdsa_crypto::AuthorityId as BeefyId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
-use sp_core::{sr25519, Pair, Public, OpaquePeerId};
+use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// "Names" of the authorities accounts at local testnet.
@@ -39,8 +38,8 @@ const SUDO_ACCOUNT: &str = "Sudo";
 const WESTEND_GRANDPA_PALLET_OWNER: &str = "Westend.GrandpaOwner";
 /// "Name" of the account, which owns the with-Rialto messages pallet.
 const RIALTO_MESSAGES_PALLET_OWNER: &str = "Rialto.MessagesOwner";
-/// "Name" of the account, which owns the with-DatagenParachain messages pallet.
-const DATAGEN_PARACHAIN_MESSAGES_PALLET_OWNER: &str = "DatagenParachain.MessagesOwner";
+/// "Name" of the account, which owns the with-RialtoParachain messages pallet.
+const RIALTO_PARACHAIN_MESSAGES_PALLET_OWNER: &str = "RialtoParachain.MessagesOwner";
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig>;
@@ -89,7 +88,7 @@ impl Alternative {
 		let properties = Some(
 			serde_json::json!({
 				"tokenDecimals": 9,
-				"tokenSymbol": "DGN"
+				"tokenSymbol": "MLAU"
 			})
 			.as_object()
 			.expect("Map given; qed")
@@ -97,8 +96,8 @@ impl Alternative {
 		);
 		match self {
 			Alternative::Development => ChainSpec::from_genesis(
-				"Datagen Development",
-				"datagen",
+				"Millau Development",
+				"millau_dev",
 				sc_service::ChainType::Development,
 				|| {
 					testnet_genesis(
@@ -119,8 +118,8 @@ impl Alternative {
 				None,
 			),
 			Alternative::LocalTestnet => ChainSpec::from_genesis(
-				"Datagen Local",
-				"datagen",
+				"Millau Local",
+				"millau_local",
 				sc_service::ChainType::Local,
 				|| {
 					testnet_genesis(
@@ -144,7 +143,7 @@ impl Alternative {
 	}
 }
 
-/// We're using the same set of endowed accounts on all Datagen chains (dev/local) to make
+/// We're using the same set of endowed accounts on all Millau chains (dev/local) to make
 /// sure that all accounts, required for bridge to be functional (e.g. relayers fund account,
 /// accounts used by relayers in our test deployments, accounts used for demonstration
 /// purposes), are all available on these chains.
@@ -161,25 +160,25 @@ fn endowed_accounts() -> Vec<AccountId> {
 		// Regular (unused) accounts
 		get_account_id_from_seed::<sr25519::Public>("Ferdie"),
 		get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-		// Accounts, used by Westend<>Datage bridge
+		// Accounts, used by Westend<>Millau bridge
 		get_account_id_from_seed::<sr25519::Public>(WESTEND_GRANDPA_PALLET_OWNER),
 		get_account_id_from_seed::<sr25519::Public>("Westend.HeadersRelay1"),
 		get_account_id_from_seed::<sr25519::Public>("Westend.HeadersRelay2"),
 		get_account_id_from_seed::<sr25519::Public>("Westend.AssetHubWestendHeaders1"),
 		get_account_id_from_seed::<sr25519::Public>("Westend.AssetHubWestendHeaders2"),
-		// Accounts, used by Rialto<>Datagen bridge
+		// Accounts, used by Rialto<>Millau bridge
 		get_account_id_from_seed::<sr25519::Public>(RIALTO_MESSAGES_PALLET_OWNER),
 		get_account_id_from_seed::<sr25519::Public>("Rialto.HeadersAndMessagesRelay"),
 		get_account_id_from_seed::<sr25519::Public>("Rialto.OutboundMessagesRelay.Lane00000001"),
 		get_account_id_from_seed::<sr25519::Public>("Rialto.InboundMessagesRelay.Lane00000001"),
 		get_account_id_from_seed::<sr25519::Public>("Rialto.MessagesSender"),
-		// Accounts, used by DatagenParachain<>Datagen bridge
-		get_account_id_from_seed::<sr25519::Public>(DATAGEN_PARACHAIN_MESSAGES_PALLET_OWNER),
-		get_account_id_from_seed::<sr25519::Public>("DatagenParachain.HeadersAndMessagesRelay1"),
-		get_account_id_from_seed::<sr25519::Public>("DatagenParachain.HeadersAndMessagesRelay2"),
-		get_account_id_from_seed::<sr25519::Public>("DatagenParachain.RialtoHeadersRelay1"),
-		get_account_id_from_seed::<sr25519::Public>("DatagenParachain.RialtoHeadersRelay2"),
-		get_account_id_from_seed::<sr25519::Public>("DatagenParachain.MessagesSender"),
+		// Accounts, used by RialtoParachain<>Millau bridge
+		get_account_id_from_seed::<sr25519::Public>(RIALTO_PARACHAIN_MESSAGES_PALLET_OWNER),
+		get_account_id_from_seed::<sr25519::Public>("RialtoParachain.HeadersAndMessagesRelay1"),
+		get_account_id_from_seed::<sr25519::Public>("RialtoParachain.HeadersAndMessagesRelay2"),
+		get_account_id_from_seed::<sr25519::Public>("RialtoParachain.RialtoHeadersRelay1"),
+		get_account_id_from_seed::<sr25519::Public>("RialtoParachain.RialtoHeadersRelay2"),
+		get_account_id_from_seed::<sr25519::Public>("RialtoParachain.MessagesSender"),
 	]
 	.into_iter()
 	.chain(all_authorities)
@@ -198,31 +197,11 @@ fn testnet_genesis(
 ) -> RuntimeGenesisConfig {
 	RuntimeGenesisConfig {
 		system: SystemConfig {
-			code: WASM_BINARY.expect("Datagen development WASM not available").to_vec(),
+			code: WASM_BINARY.expect("Millau development WASM not available").to_vec(),
 			..Default::default()
 		},
 		balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 50)).collect(),
-		},
-		node_authorization: NodeAuthorizationConfig {
-			nodes: vec![
-				(
-					OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()),
-					endowed_accounts[0].clone(),
-				),
-				(
-					OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap()),
-					endowed_accounts[1].clone(),
-				),
-				(
-					OpaquePeerId(bs58::decode("12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ").into_vec().unwrap()),
-					endowed_accounts[2].clone(),
-				),
-				(
-					OpaquePeerId(bs58::decode("12D3KooWPHWFrfaJzxPnqnAYAoRUyAHHKqACmEycGTVmeVhQYuZN").into_vec().unwrap()),
-					endowed_accounts[3].clone(),
-				)
-			]
 		},
 		aura: AuraConfig { authorities: Vec::new() },
 		beefy: BeefyConfig::default(),
@@ -238,26 +217,41 @@ fn testnet_genesis(
 		},
 		bridge_westend_grandpa: BridgeWestendGrandpaConfig {
 			// for our deployments to avoid multiple same-nonces transactions:
-			// //Alice is already used to initialize Rialto<->Datagen bridge
-			// => let's use //Westend.GrandpaOwner to initialize Westend->Datagen bridge
+			// //Alice is already used to initialize Rialto<->Millau bridge
+			// => let's use //Westend.GrandpaOwner to initialize Westend->Millau bridge
 			owner: Some(get_account_id_from_seed::<sr25519::Public>(WESTEND_GRANDPA_PALLET_OWNER)),
 			..Default::default()
 		},
 		bridge_rialto_messages: BridgeRialtoMessagesConfig {
 			owner: Some(get_account_id_from_seed::<sr25519::Public>(RIALTO_MESSAGES_PALLET_OWNER)),
-			opened_lanes: vec![datagen_runtime::rialto_messages::ToRialtoXcmBlobHauler::xcm_lane()],
+			opened_lanes: vec![millau_runtime::rialto_messages::Bridge::get().lane_id()],
 			..Default::default()
 		},
-		bridge_datagen_parachain_messages: BridgeDatagenParachainMessagesConfig {
+		bridge_rialto_parachain_messages: BridgeRialtoParachainMessagesConfig {
 			owner: Some(get_account_id_from_seed::<sr25519::Public>(
-				DATAGEN_PARACHAIN_MESSAGES_PALLET_OWNER,
+				RIALTO_PARACHAIN_MESSAGES_PALLET_OWNER,
 			)),
-			opened_lanes: vec![
-				datagen_runtime::datagen_parachain_messages::ToDatagenParachainXcmBlobHauler::xcm_lane(
-				),
-			],
+			opened_lanes: vec![millau_runtime::rialto_parachain_messages::Bridge::get().lane_id()],
 			..Default::default()
 		},
 		xcm_pallet: Default::default(),
+		xcm_rialto_bridge_hub: XcmRialtoBridgeHubConfig {
+			opened_bridges: vec![(
+				xcm::latest::Junctions::Here.into(),
+				xcm::latest::InteriorMultiLocation::from(
+					millau_runtime::xcm_config::RialtoNetwork::get(),
+				),
+			)],
+			..Default::default()
+		},
+		xcm_rialto_parachain_bridge_hub: XcmRialtoParachainBridgeHubConfig {
+			opened_bridges: vec![(
+				xcm::latest::Junctions::Here.into(),
+				xcm::latest::InteriorMultiLocation::from(
+					millau_runtime::xcm_config::RialtoParachainNetwork::get(),
+				),
+			)],
+			..Default::default()
+		},
 	}
 }
