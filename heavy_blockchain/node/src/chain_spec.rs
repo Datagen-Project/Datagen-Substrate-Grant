@@ -1,31 +1,55 @@
+// Copyright 2020-2021 Parity Technologies (UK) Ltd.
+// This file is part of Parity Bridges Common.
+
+// Parity Bridges Common is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// Parity Bridges Common is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
+
 use cumulus_primitives_core::ParaId;
-use datagen_parachain_runtime::{AccountId,RandomNodeSelectorConfig,BridgeDatagenMessagesConfig, AuraId, Signature, EXISTENTIAL_DEPOSIT};
+use rialto_parachain_runtime::{
+	AccountId, AuraId, BridgeMillauMessagesConfig, Signature, RandomNodeSelectorConfig, XcmMillauBridgeHubConfig,
+};
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
-use bridge_runtime_common::messages_xcm_extension::XcmBlobHauler;
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public, OpaquePeerId};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
+/// "Names" of the authorities accounts at local testnet.
+const LOCAL_AUTHORITIES_ACCOUNTS: [&str; 2] = ["Alice", "Bob"];
+/// "Names" of the authorities accounts at development testnet.
+const DEV_AUTHORITIES_ACCOUNTS: [&str; 2] = LOCAL_AUTHORITIES_ACCOUNTS;
+/// "Names" of all possible authorities accounts.
+const ALL_AUTHORITIES_ACCOUNTS: [&str; 2] = LOCAL_AUTHORITIES_ACCOUNTS;
+/// "Name" of the `sudo` account.
+const SUDO_ACCOUNT: &str = "Sudo";
+/// "Name" of the account, which owns the with-Millau messages pallet.
+const MILLAU_MESSAGES_PALLET_OWNER: &str = "Millau.MessagesOwner";
+
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec =
-	sc_service::GenericChainSpec<datagen_parachain_runtime::RuntimeGenesisConfig, Extensions>;
-
-/// The default XCM version to set in genesis config.
-const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
-
-/// "Name" of the account, which owns the with-Millau messages pallet.
-const DATAGEN_MESSAGES_PALLET_OWNER: &str = "Datagen.MessagesOwner";
+	sc_service::GenericChainSpec<rialto_parachain_runtime::RuntimeGenesisConfig, Extensions>;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
-	TPublic::Pair::from_string(&format!("//{}", seed), None)
+	TPublic::Pair::from_string(&format!("//{seed}"), None)
 		.expect("static values are valid; qed")
 		.public()
 }
 
 /// The extensions for the [`ChainSpec`].
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
+#[derive(
+	Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension,
+)]
 #[serde(deny_unknown_fields)]
 pub struct Extensions {
 	/// The relay chain of the Parachain.
@@ -43,13 +67,6 @@ impl Extensions {
 
 type AccountPublic = <Signature as Verify>::Signer;
 
-/// Generate collator keys from seed.
-///
-/// This function's return type must always match the session keys of the chain in tuple format.
-pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
-	get_from_seed::<AuraId>(seed)
-}
-
 /// Helper function to generate an account ID from seed
 pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
 where
@@ -58,76 +75,77 @@ where
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
-/// Generate the session keys from individual elements.
-///
-/// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn template_session_keys(keys: AuraId) -> datagen_parachain_runtime::SessionKeys {
-	datagen_parachain_runtime::SessionKeys { aura: keys }
+/// We're using the same set of endowed accounts on all RialtoParachain chains (dev/local) to make
+/// sure that all accounts, required for bridge to be functional (e.g. relayers fund account,
+/// accounts used by relayers in our test deployments, accounts used for demonstration
+/// purposes), are all available on these chains.
+fn endowed_accounts() -> Vec<AccountId> {
+	let all_authorities = ALL_AUTHORITIES_ACCOUNTS.iter().flat_map(|x| {
+		[
+			get_account_id_from_seed::<sr25519::Public>(x),
+			get_account_id_from_seed::<sr25519::Public>(&format!("{x}//stash")),
+		]
+	});
+	vec![
+		// Sudo account
+		get_account_id_from_seed::<sr25519::Public>(SUDO_ACCOUNT),
+		// Regular (unused) accounts
+		get_account_id_from_seed::<sr25519::Public>("Charlie"),
+		get_account_id_from_seed::<sr25519::Public>("Dave"),
+		get_account_id_from_seed::<sr25519::Public>("Eve"),
+		get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+		get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+		get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+		get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+		get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+		// Accounts, used by RialtoParachain<>Millau bridge
+		get_account_id_from_seed::<sr25519::Public>(MILLAU_MESSAGES_PALLET_OWNER),
+		get_account_id_from_seed::<sr25519::Public>("Millau.HeadersAndMessagesRelay1"),
+		get_account_id_from_seed::<sr25519::Public>("Millau.HeadersAndMessagesRelay2"),
+		get_account_id_from_seed::<sr25519::Public>("Millau.MessagesSender"),
+	]
+	.into_iter()
+	.chain(all_authorities)
+	.collect()
 }
 
-pub fn development_config() -> ChainSpec {
+pub fn development_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "UNIT".into());
 	properties.insert("tokenDecimals".into(), 12.into());
-	properties.insert("ss58Format".into(), 42.into());
 
 	ChainSpec::from_genesis(
 		// Name
 		"Development",
 		// ID
 		"dev",
-		ChainType::Development,
+		ChainType::Local,
 		move || {
 			testnet_genesis(
-				// initial collators.
-				vec![
-					(
-						get_account_id_from_seed::<sr25519::Public>("Alice"),
-						get_collator_keys_from_seed("Alice"),
-					),
-					(
-						get_account_id_from_seed::<sr25519::Public>("Bob"),
-						get_collator_keys_from_seed("Bob"),
-					),
-				],
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-					get_account_id_from_seed::<sr25519::Public>(DATAGEN_MESSAGES_PALLET_OWNER),
-				],
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				1000.into(),
+				get_account_id_from_seed::<sr25519::Public>(SUDO_ACCOUNT),
+				DEV_AUTHORITIES_ACCOUNTS.into_iter().map(get_from_seed::<AuraId>).collect(),
+				endowed_accounts(),
+				id,
 			)
 		},
-		Vec::new(),
+		vec![],
 		None,
 		None,
 		None,
 		None,
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
-			para_id: 1000,
+			para_id: id.into(),
 		},
 	)
 }
 
-pub fn local_testnet_config() -> ChainSpec {
+pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 	// Give your base currency a unit name and decimal places
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "UNIT".into());
 	properties.insert("tokenDecimals".into(), 12.into());
-	properties.insert("ss58Format".into(), 42.into());
 
 	ChainSpec::from_genesis(
 		// Name
@@ -137,120 +155,112 @@ pub fn local_testnet_config() -> ChainSpec {
 		ChainType::Local,
 		move || {
 			testnet_genesis(
-				// initial collators.
-				vec![
-					(
-						get_account_id_from_seed::<sr25519::Public>("Alice"),
-						get_collator_keys_from_seed("Alice"),
-					),
-					(
-						get_account_id_from_seed::<sr25519::Public>("Bob"),
-						get_collator_keys_from_seed("Bob"),
-					),
-				],
-				vec![
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie"),
-					get_account_id_from_seed::<sr25519::Public>("Dave"),
-					get_account_id_from_seed::<sr25519::Public>("Eve"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-					get_account_id_from_seed::<sr25519::Public>(DATAGEN_MESSAGES_PALLET_OWNER),
-				],
-				get_account_id_from_seed::<sr25519::Public>("Alice"),
-				1000.into(),
+				get_account_id_from_seed::<sr25519::Public>(SUDO_ACCOUNT),
+				LOCAL_AUTHORITIES_ACCOUNTS.into_iter().map(get_from_seed::<AuraId>).collect(),
+				endowed_accounts(),
+				id,
 			)
 		},
-		// Bootnodes
 		Vec::new(),
-		// Telemetry
 		None,
-		// Protocol ID
-		Some("template-local"),
-		// Fork ID
 		None,
-		// Properties
-		Some(properties),
-		// Extensions
+		None,
+		None,
 		Extensions {
 			relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
-			para_id: 1000,
+			para_id: id.into(),
 		},
 	)
 }
 
 fn testnet_genesis(
-	invulnerables: Vec<(AccountId, AuraId)>,
+	root_key: AccountId,
+	initial_authorities: Vec<AuraId>,
 	endowed_accounts: Vec<AccountId>,
-	root: AccountId,
 	id: ParaId,
-) -> datagen_parachain_runtime::RuntimeGenesisConfig {
-	let test_node_owners_list: Vec<(OpaquePeerId, AccountId)> =
-	vec![
-		(OpaquePeerId(bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Alice")),
-		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Bob")),
-		(OpaquePeerId(bs58::decode("12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Charlie")),
-		(OpaquePeerId(bs58::decode("12D3KooWPHWFrfaJzxPnqnAYAoRUyAHHKqACmEycGTVmeVhQYuZN").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Dave")),
-		(OpaquePeerId(bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKp666").into_vec().unwrap()), get_account_id_from_seed::<sr25519::Public>("Eve")),
-	];
-
-	datagen_parachain_runtime::RuntimeGenesisConfig {
-		system: datagen_parachain_runtime::SystemConfig {
-			code: datagen_parachain_runtime::WASM_BINARY
+) -> rialto_parachain_runtime::RuntimeGenesisConfig {
+	
+	rialto_parachain_runtime::RuntimeGenesisConfig {
+		random_node_selector: RandomNodeSelectorConfig {
+			initial_node_owners: get_node_owners(),
+		},
+		system: rialto_parachain_runtime::SystemConfig {
+			code: rialto_parachain_runtime::WASM_BINARY
 				.expect("WASM binary was not build, please build it!")
 				.to_vec(),
 			..Default::default()
 		},
-		balances: datagen_parachain_runtime::BalancesConfig {
+		balances: rialto_parachain_runtime::BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
 		},
-		parachain_info: datagen_parachain_runtime::ParachainInfoConfig {
+		sudo: rialto_parachain_runtime::SudoConfig { key: Some(root_key) },
+		parachain_info: rialto_parachain_runtime::ParachainInfoConfig {
 			parachain_id: id,
 			..Default::default()
 		},
-		collator_selection: datagen_parachain_runtime::CollatorSelectionConfig {
-			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
-			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
-			..Default::default()
-		},
-		session: datagen_parachain_runtime::SessionConfig {
-			keys: invulnerables
-				.into_iter()
-				.map(|(acc, aura)| {
-					(
-						acc.clone(),                 // account id
-						acc,                         // validator id
-						template_session_keys(aura), // session keys
-					)
-				})
-				.collect(),
-		},
-		// no need to pass anything to aura, in fact it will panic if we do. Session will take care
-		// of this.
-		aura: Default::default(),
+		aura: rialto_parachain_runtime::AuraConfig { authorities: initial_authorities },
 		aura_ext: Default::default(),
-		parachain_system: Default::default(),
-		polkadot_xcm: datagen_parachain_runtime::PolkadotXcmConfig {
-			safe_xcm_version: Some(SAFE_XCM_VERSION),
+		bridge_millau_messages: BridgeMillauMessagesConfig {
+			owner: Some(get_account_id_from_seed::<sr25519::Public>(MILLAU_MESSAGES_PALLET_OWNER)),
+			opened_lanes: vec![rialto_parachain_runtime::millau_messages::Bridge::get().lane_id()],
 			..Default::default()
 		},
-		transaction_payment: Default::default(),
-		sudo: datagen_parachain_runtime::SudoConfig { key: Some(root) },
-		random_node_selector: RandomNodeSelectorConfig {
-			initial_node_owners: test_node_owners_list,
-		},
-		bridge_datagen_messages: BridgeDatagenMessagesConfig {
-			owner: Some(get_account_id_from_seed::<sr25519::Public>(DATAGEN_MESSAGES_PALLET_OWNER)),
-			opened_lanes: vec![
-			    datagen_parachain_runtime::datagen_messages::ToDatagenXcmBlobHauler::xcm_lane(),
-			],
+		xcm_millau_bridge_hub: XcmMillauBridgeHubConfig {
+			opened_bridges: vec![(
+				xcm::latest::Junctions::Here.into(),
+				xcm::latest::InteriorMultiLocation::from(
+					rialto_parachain_runtime::MillauNetwork::get(),
+				),
+			)],
 			..Default::default()
 		},
+
 	}
+}
+
+
+fn get_node_owners() -> Vec<(OpaquePeerId, AccountId)> {
+	let test_node_owners_list: Vec<(OpaquePeerId, AccountId)> = vec![
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Alice"),
+		),
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKust")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Bob"),
+		),
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWJvyP3VJYymTqG7eH4PM5rN4T2agk5cdNCfNymAqwqcvZ")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Charlie"),
+		),
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWPHWFrfaJzxPnqnAYAoRUyAHHKqACmEycGTVmeVhQYuZN")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Dave"),
+		),
+		(
+			OpaquePeerId(
+				bs58::decode("12D3KooWQYV9dGMFoRzNStwpXztXaBUjtPqi6aU76ZgUriHhKp666")
+					.into_vec()
+					.unwrap(),
+			),
+			get_account_id_from_seed::<sr25519::Public>("Eve"),
+		),
+	];
+	test_node_owners_list
 }

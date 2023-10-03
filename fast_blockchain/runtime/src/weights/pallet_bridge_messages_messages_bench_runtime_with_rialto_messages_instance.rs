@@ -32,12 +32,12 @@ use core::marker::PhantomData;
 /// Weight functions for `pallet_bridge_messages`.
 pub struct WeightInfo<T>(PhantomData<T>);
 impl<T: frame_system::Config> pallet_bridge_messages::WeightInfo for WeightInfo<T> {
-	/// Storage: BridgeDatagenMessages PalletOperatingMode (r:1 w:0)
-	/// Proof: BridgeDatagenMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenGrandpa ImportedHeaders (r:1 w:0)
-	/// Proof: BridgeDatagenGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages InboundLanes (r:1 w:1)
-	/// Proof: BridgeDatagenMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages PalletOperatingMode (r:1 w:0)
+	/// Proof: BridgeRialtoMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoGrandpa ImportedHeaders (r:1 w:0)
+	/// Proof: BridgeRialtoGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages InboundLanes (r:1 w:1)
+	/// Proof: BridgeRialtoMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
 	fn receive_single_message_proof() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `653`
@@ -48,12 +48,12 @@ impl<T: frame_system::Config> pallet_bridge_messages::WeightInfo for WeightInfo<
 			.saturating_add(T::DbWeight::get().reads(3))
 			.saturating_add(T::DbWeight::get().writes(1))
 	}
-	/// Storage: BridgeDatagenMessages PalletOperatingMode (r:1 w:0)
-	/// Proof: BridgeDatagenMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenGrandpa ImportedHeaders (r:1 w:0)
-	/// Proof: BridgeDatagenGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages InboundLanes (r:1 w:1)
-	/// Proof: BridgeDatagenMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages PalletOperatingMode (r:1 w:0)
+	/// Proof: BridgeRialtoMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoGrandpa ImportedHeaders (r:1 w:0)
+	/// Proof: BridgeRialtoGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages InboundLanes (r:1 w:1)
+	/// Proof: BridgeRialtoMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
 	/// The range of component `n` is `[1, 1004]`.
 	/// The range of component `n` is `[1, 1004]`.
 	fn receive_n_messages_proof(n: u32, ) -> Weight {
@@ -68,12 +68,12 @@ impl<T: frame_system::Config> pallet_bridge_messages::WeightInfo for WeightInfo<
 			.saturating_add(T::DbWeight::get().reads(3))
 			.saturating_add(T::DbWeight::get().writes(1))
 	}
-	/// Storage: BridgeDatagenMessages PalletOperatingMode (r:1 w:0)
-	/// Proof: BridgeDatagenMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenGrandpa ImportedHeaders (r:1 w:0)
-	/// Proof: BridgeDatagenGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages InboundLanes (r:1 w:1)
-	/// Proof: BridgeDatagenMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages PalletOperatingMode (r:1 w:0)
+	/// Proof: BridgeRialtoMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoGrandpa ImportedHeaders (r:1 w:0)
+	/// Proof: BridgeRialtoGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages InboundLanes (r:1 w:1)
+	/// Proof: BridgeRialtoMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
 	fn receive_single_message_proof_with_outbound_lane_state() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `653`
@@ -84,12 +84,12 @@ impl<T: frame_system::Config> pallet_bridge_messages::WeightInfo for WeightInfo<
 			.saturating_add(T::DbWeight::get().reads(3))
 			.saturating_add(T::DbWeight::get().writes(1))
 	}
-	/// Storage: BridgeDatagenMessages PalletOperatingMode (r:1 w:0)
-	/// Proof: BridgeDatagenMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenGrandpa ImportedHeaders (r:1 w:0)
-	/// Proof: BridgeDatagenGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages InboundLanes (r:1 w:1)
-	/// Proof: BridgeDatagenMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages PalletOperatingMode (r:1 w:0)
+	/// Proof: BridgeRialtoMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoGrandpa ImportedHeaders (r:1 w:0)
+	/// Proof: BridgeRialtoGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages InboundLanes (r:1 w:1)
+	/// Proof: BridgeRialtoMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
 	/// The range of component `n` is `[1, 16384]`.
 	/// The range of component `n` is `[1, 16384]`.
 	fn receive_single_n_bytes_message_proof(n: u32, ) -> Weight {
@@ -104,16 +104,16 @@ impl<T: frame_system::Config> pallet_bridge_messages::WeightInfo for WeightInfo<
 			.saturating_add(T::DbWeight::get().reads(3))
 			.saturating_add(T::DbWeight::get().writes(1))
 	}
-	/// Storage: BridgeDatagenMessages PalletOperatingMode (r:1 w:0)
-	/// Proof: BridgeDatagenMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenGrandpa ImportedHeaders (r:1 w:0)
-	/// Proof: BridgeDatagenGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages OutboundLanes (r:1 w:1)
-	/// Proof: BridgeDatagenMessages OutboundLanes (max_values: None, max_size: Some(73), added: 2548, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages PalletOperatingMode (r:1 w:0)
+	/// Proof: BridgeRialtoMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoGrandpa ImportedHeaders (r:1 w:0)
+	/// Proof: BridgeRialtoGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages OutboundLanes (r:1 w:1)
+	/// Proof: BridgeRialtoMessages OutboundLanes (max_values: None, max_size: Some(73), added: 2548, mode: MaxEncodedLen)
 	/// Storage: BridgeRelayers RelayerRewards (r:1 w:1)
 	/// Proof: BridgeRelayers RelayerRewards (max_values: None, max_size: Some(93), added: 2568, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages OutboundMessages (r:0 w:1)
-	/// Proof: BridgeDatagenMessages OutboundMessages (max_values: None, max_size: Some(65596), added: 68071, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages OutboundMessages (r:0 w:1)
+	/// Proof: BridgeRialtoMessages OutboundMessages (max_values: None, max_size: Some(65596), added: 68071, mode: MaxEncodedLen)
 	fn receive_delivery_proof_for_single_message() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `701`
@@ -124,16 +124,16 @@ impl<T: frame_system::Config> pallet_bridge_messages::WeightInfo for WeightInfo<
 			.saturating_add(T::DbWeight::get().reads(4))
 			.saturating_add(T::DbWeight::get().writes(3))
 	}
-	/// Storage: BridgeDatagenMessages PalletOperatingMode (r:1 w:0)
-	/// Proof: BridgeDatagenMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenGrandpa ImportedHeaders (r:1 w:0)
-	/// Proof: BridgeDatagenGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages OutboundLanes (r:1 w:1)
-	/// Proof: BridgeDatagenMessages OutboundLanes (max_values: None, max_size: Some(73), added: 2548, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages PalletOperatingMode (r:1 w:0)
+	/// Proof: BridgeRialtoMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoGrandpa ImportedHeaders (r:1 w:0)
+	/// Proof: BridgeRialtoGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages OutboundLanes (r:1 w:1)
+	/// Proof: BridgeRialtoMessages OutboundLanes (max_values: None, max_size: Some(73), added: 2548, mode: MaxEncodedLen)
 	/// Storage: BridgeRelayers RelayerRewards (r:1 w:1)
 	/// Proof: BridgeRelayers RelayerRewards (max_values: None, max_size: Some(93), added: 2568, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages OutboundMessages (r:0 w:2)
-	/// Proof: BridgeDatagenMessages OutboundMessages (max_values: None, max_size: Some(65596), added: 68071, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages OutboundMessages (r:0 w:2)
+	/// Proof: BridgeRialtoMessages OutboundMessages (max_values: None, max_size: Some(65596), added: 68071, mode: MaxEncodedLen)
 	fn receive_delivery_proof_for_two_messages_by_single_relayer() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `701`
@@ -144,16 +144,16 @@ impl<T: frame_system::Config> pallet_bridge_messages::WeightInfo for WeightInfo<
 			.saturating_add(T::DbWeight::get().reads(4))
 			.saturating_add(T::DbWeight::get().writes(4))
 	}
-	/// Storage: BridgeDatagenMessages PalletOperatingMode (r:1 w:0)
-	/// Proof: BridgeDatagenMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenGrandpa ImportedHeaders (r:1 w:0)
-	/// Proof: BridgeDatagenGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages OutboundLanes (r:1 w:1)
-	/// Proof: BridgeDatagenMessages OutboundLanes (max_values: None, max_size: Some(73), added: 2548, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages PalletOperatingMode (r:1 w:0)
+	/// Proof: BridgeRialtoMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoGrandpa ImportedHeaders (r:1 w:0)
+	/// Proof: BridgeRialtoGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages OutboundLanes (r:1 w:1)
+	/// Proof: BridgeRialtoMessages OutboundLanes (max_values: None, max_size: Some(73), added: 2548, mode: MaxEncodedLen)
 	/// Storage: BridgeRelayers RelayerRewards (r:2 w:2)
 	/// Proof: BridgeRelayers RelayerRewards (max_values: None, max_size: Some(93), added: 2568, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages OutboundMessages (r:0 w:2)
-	/// Proof: BridgeDatagenMessages OutboundMessages (max_values: None, max_size: Some(65596), added: 68071, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages OutboundMessages (r:0 w:2)
+	/// Proof: BridgeRialtoMessages OutboundMessages (max_values: None, max_size: Some(65596), added: 68071, mode: MaxEncodedLen)
 	fn receive_delivery_proof_for_two_messages_by_two_relayers() -> Weight {
 		// Proof Size summary in bytes:
 		//  Measured:  `701`
@@ -164,12 +164,12 @@ impl<T: frame_system::Config> pallet_bridge_messages::WeightInfo for WeightInfo<
 			.saturating_add(T::DbWeight::get().reads(5))
 			.saturating_add(T::DbWeight::get().writes(5))
 	}
-	/// Storage: BridgeDatagenMessages PalletOperatingMode (r:1 w:0)
-	/// Proof: BridgeDatagenMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenGrandpa ImportedHeaders (r:1 w:0)
-	/// Proof: BridgeDatagenGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
-	/// Storage: BridgeDatagenMessages InboundLanes (r:1 w:1)
-	/// Proof: BridgeDatagenMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages PalletOperatingMode (r:1 w:0)
+	/// Proof: BridgeRialtoMessages PalletOperatingMode (max_values: Some(1), max_size: Some(2), added: 497, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoGrandpa ImportedHeaders (r:1 w:0)
+	/// Proof: BridgeRialtoGrandpa ImportedHeaders (max_values: Some(14400), max_size: Some(68), added: 2048, mode: MaxEncodedLen)
+	/// Storage: BridgeRialtoMessages InboundLanes (r:1 w:1)
+	/// Proof: BridgeRialtoMessages InboundLanes (max_values: None, max_size: Some(49208), added: 51683, mode: MaxEncodedLen)
 	/// The range of component `n` is `[1, 16384]`.
 	/// The range of component `n` is `[1, 16384]`.
 	fn receive_single_n_bytes_message_proof_with_dispatch(n: u32, ) -> Weight {
