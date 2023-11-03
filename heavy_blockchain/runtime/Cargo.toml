@@ -16,19 +16,19 @@ scale-info = { version = "2.9.0", default-features = false, features = ["derive"
 
 # Bridge depedencies
 
-bp-header-chain = { path = "../../parity-bridges-common/primitives/header-chain", default-features = false }
-bp-messages = { path = "../../parity-bridges-common/primitives/messages", default-features = false }
-bp-millau = { path = "../../parity-bridges-common/primitives/chain-millau", default-features = false }
-bp-polkadot-core = { path = "../../parity-bridges-common/primitives/polkadot-core", default-features = false }
-bp-relayers = { path = "../../parity-bridges-common/primitives/relayers", default-features = false }
-bp-runtime = { path = "../../parity-bridges-common/primitives/runtime", default-features = false }
-bp-rialto-parachain = { path = "../../parity-bridges-common/primitives/chain-rialto-parachain", default-features = false }
-bp-xcm-bridge-hub = { path = "../../parity-bridges-common/primitives/xcm-bridge-hub", default-features = false }
-bridge-runtime-common = { path = "../../parity-bridges-common/bin/runtime-common", default-features = false }
-pallet-bridge-grandpa = { path = "../../parity-bridges-common/modules/grandpa", default-features = false }
-pallet-bridge-messages = { path = "../../parity-bridges-common/modules/messages", default-features = false }
-pallet-bridge-relayers = { path = "../../parity-bridges-common/modules/relayers", default-features = false }
-pallet-xcm-bridge-hub = { path = "../../parity-bridges-common/modules/xcm-bridge-hub", default-features = false }
+bp-header-chain = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bp-millau = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bp-polkadot-core = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bp-relayers = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bp-rialto-parachain = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bp-runtime = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bp-xcm-bridge-hub = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bridge-runtime-common = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+pallet-bridge-grandpa = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+pallet-bridge-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+pallet-bridge-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false  }
+pallet-xcm-bridge-hub = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -82,7 +82,7 @@ pallet-xcm-handler = { path = "../pallets/xcm-handler", default-features = false
 pallet-random-node-selector = { path = "../pallets/random-node-selector", default-features = false }
 pallet-insecure-randomness-collective-flip  = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 [dev-dependencies]
-bridge-runtime-common = { path = "../../parity-bridges-common/bin/runtime-common", features = ["integrity-test"] }
+bridge-runtime-common = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
 static_assertions = "1.1"
 
 [features]

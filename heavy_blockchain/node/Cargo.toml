@@ -25,10 +25,10 @@ bs58 = { version = "0.4.0" }
 # RPC related Dependencies
 jsonrpsee = { version = "0.16.2", features = ["server"] }
 
-# Local Dependencies
+# Bridges Dependencies
 
-bp-messages = { path = "../../parity-bridges-common/primitives/messages" }
-bridge-runtime-common = { path = "../../parity-bridges-common/bin/runtime-common" }
+bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", default-features = false, branch = "master" }
+bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", default-features = false, branch = "master" }
 rialto-parachain-runtime = { path = '../runtime' }
 
 # Substrate Dependencies

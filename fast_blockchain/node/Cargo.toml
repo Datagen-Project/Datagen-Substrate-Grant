@@ -16,8 +16,8 @@ serde_json = "1.0.107"
 
 # Bridge dependencies
 
-bp-messages = { path = "../../parity-bridges-common/primitives/messages" }
-bridge-runtime-common = { path = "../../parity-bridges-common/bin/runtime-common" }
+bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch = "master" }
+bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch = "master" }
 millau-runtime = { path = "../runtime" }
 
 # Substrate Dependencies
@@ -27,7 +27,7 @@ sc-consensus-beefy-rpc = { git = "https://github.com/paritytech/polkadot-sdk", b
 sp-consensus-beefy = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-node-inspect = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+node-inspect = { package = "staging-node-inspect", git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 mmr-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sc-basic-authorship = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
