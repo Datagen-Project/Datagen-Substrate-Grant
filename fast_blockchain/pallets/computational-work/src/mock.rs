@@ -8,9 +8,7 @@ use sp_core::{
 };
 use sp_runtime::{
     traits::{BlakeTwo256, Hash, IdentifyAccount, IdentityLookup, Verify},
-    MultiSignature,
-    BuildStorage,
-    ConsensusEngineId
+    BuildStorage, ConsensusEngineId, MultiSignature,
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -21,7 +19,7 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
-    pub enum Test 
+    pub enum Test
     {
         System: frame_system,
         ComputationalWork: pallet_computational_work,
@@ -34,10 +32,10 @@ impl frame_system::Config for Test {
     type BlockLength = ();
     type Block = Block;
     type DbWeight = ();
-	type RuntimeOrigin = RuntimeOrigin;
-	type RuntimeCall = RuntimeCall;
-	type Nonce = u64;
-	type Hash = H256;
+    type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeCall = RuntimeCall;
+    type Nonce = u64;
+    type Hash = H256;
     type Hashing = BlakeTwo256;
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
@@ -55,7 +53,7 @@ impl frame_system::Config for Test {
 }
 
 impl pallet_computational_work::Config for Test {
-	type RuntimeEvent = RuntimeEvent;
+    type RuntimeEvent = RuntimeEvent;
     type FindAuthor = AuthorGiven;
 }
 
@@ -71,8 +69,10 @@ impl FindAuthor<AccountId> for AuthorGiven {
 
 /// Return test externalities to use in tests.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
-	sp_io::TestExternalities::new(t)
+    let t = frame_system::GenesisConfig::<Test>::default()
+        .build_storage()
+        .unwrap();
+    sp_io::TestExternalities::new(t)
 }
 
 /// Helper function to run a block.

@@ -36,7 +36,7 @@ pallet-xcm-bridge-hub-router = { git = "https://github.com/Datagen-Project/parit
 # Substrate Dependencies
 
 sp-consensus-beefy = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
-frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false, optional = true }
+frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false, optional = false }
 frame-executive = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 frame-support = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 frame-system = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
@@ -83,19 +83,18 @@ pallet-bridge-relayers = { git = "https://github.com/Datagen-Project/parity-brid
 static_assertions = "1.1"
 
 [build-dependencies]
-substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 
 [features]
-default = ["std"]
+default = [ "std" ]
 std = [
-	"sp-consensus-beefy/std",
 	"bp-messages/std",
 	"bp-millau/std",
 	"bp-parachains/std",
 	"bp-polkadot-core/std",
 	"bp-relayers/std",
-	"bp-rialto/std",
 	"bp-rialto-parachain/std",
+	"bp-rialto/std",
 	"bp-runtime/std",
 	"bp-westend/std",
 	"bp-xcm-bridge-hub/std",
@@ -107,12 +106,14 @@ std = [
 	"frame-system/std",
 	"pallet-aura/std",
 	"pallet-balances/std",
-	"pallet-beefy/std",
 	"pallet-beefy-mmr/std",
+	"pallet-beefy/std",
 	"pallet-bridge-grandpa/std",
 	"pallet-bridge-messages/std",
 	"pallet-bridge-parachains/std",
 	"pallet-bridge-relayers/std",
+	"pallet-check-node-computational-work/std",
+	"pallet-computational-work/std",
 	"pallet-grandpa/std",
 	"pallet-mmr/std",
 	"pallet-session/std",
@@ -122,13 +123,14 @@ std = [
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
 	"pallet-utility/std",
-	"pallet-xcm/std",
-	"pallet-xcm-bridge-hub/std",
 	"pallet-xcm-bridge-hub-router/std",
+	"pallet-xcm-bridge-hub/std",
+	"pallet-xcm/std",
 	"scale-info/std",
 	"sp-api/std",
 	"sp-block-builder/std",
 	"sp-consensus-aura/std",
+	"sp-consensus-beefy/std",
 	"sp-core/std",
 	"sp-inherents/std",
 	"sp-io/std",
@@ -138,11 +140,9 @@ std = [
 	"sp-std/std",
 	"sp-transaction-pool/std",
 	"sp-version/std",
-	"pallet-computational-work/std",
-	"pallet-check-node-computational-work/std",
-	"xcm/std",
 	"xcm-builder/std",
 	"xcm-executor/std",
+	"xcm/std",
 ]
 runtime-benchmarks = [
 	"bridge-runtime-common/runtime-benchmarks",
@@ -152,9 +152,9 @@ runtime-benchmarks = [
 	"pallet-bridge-messages/runtime-benchmarks",
 	"pallet-bridge-parachains/runtime-benchmarks",
 	"pallet-bridge-relayers/runtime-benchmarks",
-	"pallet-xcm/runtime-benchmarks",
-	"pallet-xcm-bridge-hub/runtime-benchmarks",
 	"pallet-xcm-bridge-hub-router/runtime-benchmarks",
+	"pallet-xcm-bridge-hub/runtime-benchmarks",
+	"pallet-xcm/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
 	"xcm-builder/runtime-benchmarks",
 ]

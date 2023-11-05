@@ -10,7 +10,7 @@ targets = ["x86_64-unknown-linux-ganu"]
 codec = { package = "parity-scale-codec", version = "3.1.5", default-features = false, features = ["derive"] }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 
-frame-benchmarking = {  default-features = false, optional = true, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+frame-benchmarking = {  default-features = false, optional = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 frame-support = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 frame-system = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-core = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
@@ -24,23 +24,23 @@ pallet-computational-work = { path = "../computational-work", default-features =
 
 [dev-dependencies]
 sp-io = { version = "23.0.0", default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-frame-support-test = { version = "3.0.0", git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+frame-support-test = { version = "3.0.0", git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 
 [features]
-default = ["std"]
+default = [ "std" ]
 std = [
 	"codec/std",
 	"frame-benchmarking/std",
 	"frame-support/std",
 	"frame-system/std",
+	"pallet-authorship/std",
+	"pallet-computational-work/std",
+	"pallet-insecure-randomness-collective-flip/std",
+	"pallet-session/std",
 	"scale-info/std",
 	"sp-core/std",
 	"sp-runtime/std",
-	"pallet-insecure-randomness-collective-flip/std",
-	"pallet-authorship/std",
-	"pallet-session/std",
-	"pallet-computational-work/std"
 ]
-runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
-try-runtime = ["frame-support/try-runtime"]
+#runtime-benchmarks = [ "frame-benchmarking/runtime-benchmarks" ]
+try-runtime = [ "frame-support/try-runtime" ]
 

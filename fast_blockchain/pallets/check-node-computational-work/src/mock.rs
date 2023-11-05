@@ -6,20 +6,19 @@ use sp_core::{
     crypto::{Pair, Public},
     sr25519, H256,
 };
-use sp_runtime::{BuildStorage, ConsensusEngineId, SaturatedConversion};
 use sp_runtime::{
     traits::{BlakeTwo256, Hash, IdentifyAccount, IdentityLookup, Verify},
     MultiSignature,
 };
+use sp_runtime::{BuildStorage, ConsensusEngineId, SaturatedConversion};
 
 type Block = frame_system::mocking::MockBlock<TestRuntime>;
-
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
 // Configure a mock runtime to TestRuntime the pallet.
 construct_runtime!(
-    pub enum TestRuntime 
+    pub enum TestRuntime
     {
         System: frame_system,
         ComputationalWork: pallet_computational_work,
@@ -33,10 +32,10 @@ impl frame_system::Config for TestRuntime {
     type BlockLength = ();
     type Block = Block;
     type DbWeight = ();
-	type RuntimeOrigin = RuntimeOrigin;
+    type RuntimeOrigin = RuntimeOrigin;
     type RuntimeCall = RuntimeCall;
-	type Nonce = u64;
-	type Hash = H256;
+    type Nonce = u64;
+    type Hash = H256;
     type Hashing = BlakeTwo256;
     type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
@@ -54,12 +53,12 @@ impl frame_system::Config for TestRuntime {
 }
 
 impl pallet_computational_work::Config for TestRuntime {
-	type RuntimeEvent = RuntimeEvent;
+    type RuntimeEvent = RuntimeEvent;
     type FindAuthor = AuthorGiven;
 }
 
 impl pallet_check_node_computational_work::Config for TestRuntime {
-	type RuntimeEvent = RuntimeEvent;
+    type RuntimeEvent = RuntimeEvent;
     type FindAuthor = AuthorGiven;
 }
 
@@ -86,8 +85,10 @@ pub fn set_author() -> AccountId {
 
 /// Return test externalities to use in tests.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let t = frame_system::GenesisConfig::<TestRuntime>::default().build_storage().unwrap();
-	sp_io::TestExternalities::new(t)
+    let t = frame_system::GenesisConfig::<TestRuntime>::default()
+        .build_storage()
+        .unwrap();
+    sp_io::TestExternalities::new(t)
 }
 
 /// Helper function to run a block.

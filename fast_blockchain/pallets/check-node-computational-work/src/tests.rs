@@ -64,7 +64,7 @@ fn correct_hook_event_when_hash_work_is_called() {
                 current_author: get_account_id_from_seed::<sr25519::Public>("Dave"),
                 is_passed: true,
             },
-    ));
+        ));
 
         run_to_block(12);
 
@@ -96,7 +96,7 @@ fn correct_hook_event_when_hash_work_is_called_2() {
         let elaborated_hash_to_check = hash_number(0);
 
         System::assert_last_event(RuntimeEvent::ComputationalWork(
-            pallet_computational_work::Event::ResultsComputationalWork {                
+            pallet_computational_work::Event::ResultsComputationalWork {
                 // The not hashed raw data, it's for testing purposes.
                 raw_data: 10,
                 // The not hashed elaborated data.
