@@ -19,8 +19,8 @@ pub mod pallet {
     use frame_support::traits::FindAuthor;
     use frame_system::pallet_prelude::*;
 
-    #[pallet::pallet]
-    #[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::pallet]
+	#[pallet::without_storage_info]
     pub struct Pallet<T>(_);
 
     /// Configure the pallet by specifying the parameters and types on which it depends.

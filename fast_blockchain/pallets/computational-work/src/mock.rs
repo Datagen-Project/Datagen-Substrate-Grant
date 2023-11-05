@@ -1,16 +1,16 @@
 use crate as pallet_computational_work;
 use frame_support::traits::FindAuthor;
 use frame_support::traits::{ConstU16, ConstU64, OnFinalize, OnInitialize};
-use frame_system as system;
+use frame_system;
 use sp_core::{
     crypto::{Pair, Public},
     sr25519, H256,
 };
-use sp_runtime::ConsensusEngineId;
 use sp_runtime::{
-    testing::Header,
     traits::{BlakeTwo256, Hash, IdentifyAccount, IdentityLookup, Verify},
     MultiSignature,
+    BuildStorage,
+    ConsensusEngineId
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -21,31 +21,27 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
-    pub enum Test where
-        Block = Block,
-        NodeBlock = Block,
-        UncheckedExtrinsic = UncheckedExtrinsic,
+    pub enum Test 
     {
         System: frame_system,
         ComputationalWork: pallet_computational_work,
     }
 );
 
-impl system::Config for Test {
+impl frame_system::Config for Test {
     type BaseCallFilter = frame_support::traits::Everything;
     type BlockWeights = ();
     type BlockLength = ();
+    type Block = Block;
     type DbWeight = ();
-    type Origin = Origin;
-    type Call = Call;
-    type Index = u64;
-    type BlockNumber = BlockNumber;
-    type Hash = H256;
+	type RuntimeOrigin = RuntimeOrigin;
+	type RuntimeCall = RuntimeCall;
+	type Nonce = u64;
+	type Hash = H256;
     type Hashing = BlakeTwo256;
+    type RuntimeEvent = RuntimeEvent;
     type AccountId = AccountId;
     type Lookup = IdentityLookup<Self::AccountId>;
-    type Header = Header;
-    type Event = Event;
     type BlockHashCount = ConstU64<250>;
     type Version = ();
     type PalletInfo = PalletInfo;
@@ -59,7 +55,7 @@ impl system::Config for Test {
 }
 
 impl pallet_computational_work::Config for Test {
-    type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
     type FindAuthor = AuthorGiven;
 }
 
@@ -73,13 +69,10 @@ impl FindAuthor<AccountId> for AuthorGiven {
     }
 }
 
+/// Return test externalities to use in tests.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    let t = frame_system::GenesisConfig::default()
-        .build_storage::<Test>()
-        .unwrap();
-    let mut ext = sp_io::TestExternalities::new(t);
-    ext.execute_with(|| System::set_block_number(1));
-    ext
+	let t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
+	sp_io::TestExternalities::new(t)
 }
 
 /// Helper function to run a block.

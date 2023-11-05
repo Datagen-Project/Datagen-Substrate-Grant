@@ -19,7 +19,7 @@ fn set_check_every_x_works() {
     new_test_ext().execute_with(|| {
         // Check if function set_check_every_x_works works.
         assert_ok!(ComputationalWork::set_check_every_x_works(
-            Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
+            RuntimeOrigin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
             10
         ));
 
@@ -34,7 +34,7 @@ fn set_check_every_x_blocks_2() {
     new_test_ext().execute_with(|| {
         // Check if function set_check_every_x_works works.
         assert_ok!(ComputationalWork::set_check_every_x_works(
-            Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
+            RuntimeOrigin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
             6
         ));
 
@@ -59,10 +59,10 @@ fn default_x_block_index() {
 fn x_block_index_change_by_1() {
     new_test_ext().execute_with(|| {
         assert_ok!(ComputationalWork::set_check_every_x_works(
-            Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
+            RuntimeOrigin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
             2
         ));
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
 
@@ -80,15 +80,15 @@ fn x_block_index_change_by_1() {
 fn x_block_index_change_by_1_2_times() {
     new_test_ext().execute_with(|| {
         assert_ok!(ComputationalWork::set_check_every_x_works(
-            Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
+            RuntimeOrigin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
             3
         ));
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         run_to_block(1);
 
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         run_to_block(1);
@@ -105,15 +105,15 @@ fn x_block_index_change_by_1_2_times() {
 fn x_block_index_reset() {
     new_test_ext().execute_with(|| {
         assert_ok!(ComputationalWork::set_check_every_x_works(
-            Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
+            RuntimeOrigin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
             2
         ));
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         run_to_block(1);
 
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         run_to_block(1);
@@ -130,7 +130,7 @@ fn x_block_index_reset() {
 fn hash_work() {
     new_test_ext().execute_with(|| {
         run_to_block(10);
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
     })
@@ -141,7 +141,7 @@ fn hash_work() {
 fn hash_work_2() {
     new_test_ext().execute_with(|| {
         run_to_block(8);
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
 
@@ -171,7 +171,7 @@ fn hash_work_3() {
         // On multiply of 5 blocks malicious computational work is submitted.
         // In this case a malicious computational work is submitted.
         run_to_block(10);
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
 
@@ -201,14 +201,14 @@ fn hash_work_4() {
         // On multiply of 5 blocks malicious computational work is submitted.
         // In this case a correct computational work is submitted.
         run_to_block(8);
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
 
         let row_hash_to_check = hash_number(8);
         let elaborated_hash_to_check = hash_number(55);
 
-        System::assert_last_event(Event::ComputationalWork(
+        System::assert_last_event(RuntimeEvent::ComputationalWork(
             crate::Event::ResultsComputationalWork {
                 // The not hashed raw data, it's for testing purposes.
                 raw_data: 8,
@@ -228,18 +228,18 @@ fn hash_work_4() {
 fn get_last_computational_work() {
     new_test_ext().execute_with(|| {
         run_to_block(8);
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
 
         assert_ok!(ComputationalWork::get_last_computational_work(
-            Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))
+            RuntimeOrigin::signed(get_account_id_from_seed::<sr25519::Public>("Alice"))
         ));
 
         let row_hash_to_check = hash_number(8);
         let elaborated_hash_to_check = hash_number(55);
 
-        System::assert_last_event(Event::ComputationalWork(
+        System::assert_last_event(RuntimeEvent::ComputationalWork(
             crate::Event::LastComputationalWork {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -258,7 +258,7 @@ fn set_x_block_index_1() {
         run_to_block(1);
         assert_noop!(
             ComputationalWork::set_check_every_x_works(
-                Origin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
+                RuntimeOrigin::signed(get_account_id_from_seed::<sr25519::Public>("Alice")),
                 0
             ),
             crate::Error::<Test>::XBlockCannotBeZero

@@ -8,13 +8,13 @@ fn correct_hook_event_when_hash_work_is_called() {
     new_test_ext().execute_with(|| {
         run_to_block(8);
 
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         let row_hash_to_check = hash_number(8);
         let elaborated_hash_to_check = hash_number(55);
 
-        System::assert_last_event(Event::ComputationalWork(
+        System::assert_last_event(RuntimeEvent::ComputationalWork(
             pallet_computational_work::Event::ResultsComputationalWork {
                 // The not hashed raw data, it's for testing purposes.
                 raw_data: 8,
@@ -29,7 +29,7 @@ fn correct_hook_event_when_hash_work_is_called() {
 
         run_to_block(9);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -42,7 +42,7 @@ fn correct_hook_event_when_hash_work_is_called() {
 
         run_to_block(10);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -55,7 +55,7 @@ fn correct_hook_event_when_hash_work_is_called() {
 
         run_to_block(11);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -64,11 +64,11 @@ fn correct_hook_event_when_hash_work_is_called() {
                 current_author: get_account_id_from_seed::<sr25519::Public>("Dave"),
                 is_passed: true,
             },
-        ));
+    ));
 
         run_to_block(12);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::FinalResult {
                 checked_author: get_account_id_from_seed::<sr25519::Public>("Alice"),
                 controller1: get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -89,14 +89,14 @@ fn correct_hook_event_when_hash_work_is_called_2() {
     new_test_ext().execute_with(|| {
         run_to_block(10);
 
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         let row_hash_to_check = hash_number(10);
         let elaborated_hash_to_check = hash_number(0);
 
-        System::assert_last_event(Event::ComputationalWork(
-            pallet_computational_work::Event::ResultsComputationalWork {
+        System::assert_last_event(RuntimeEvent::ComputationalWork(
+            pallet_computational_work::Event::ResultsComputationalWork {                
                 // The not hashed raw data, it's for testing purposes.
                 raw_data: 10,
                 // The not hashed elaborated data.
@@ -110,7 +110,7 @@ fn correct_hook_event_when_hash_work_is_called_2() {
 
         run_to_block(11);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -123,7 +123,7 @@ fn correct_hook_event_when_hash_work_is_called_2() {
 
         run_to_block(12);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -136,7 +136,7 @@ fn correct_hook_event_when_hash_work_is_called_2() {
 
         run_to_block(13);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -149,7 +149,7 @@ fn correct_hook_event_when_hash_work_is_called_2() {
 
         run_to_block(14);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::FinalResult {
                 checked_author: get_account_id_from_seed::<sr25519::Public>("Charlie"),
                 controller1: get_account_id_from_seed::<sr25519::Public>("Dave"),
@@ -171,7 +171,7 @@ fn correct_reset_when_final_result_is_emitted() {
     new_test_ext().execute_with(|| {
         run_to_block(8);
 
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         let last_computational_work_is_checked =
@@ -216,14 +216,14 @@ fn correct_reset_when_final_result_is_emitted() {
 fn not_change_last_computational_work_if_not_checked() {
     new_test_ext().execute_with(|| {
         run_to_block(10);
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
 
         let last_computational_work = ComputationalWork::last_computational_work();
 
         run_to_block(11);
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Bob")
         )));
 
@@ -239,7 +239,7 @@ fn not_change_last_computational_work_if_not_checked() {
 fn change_last_computational_work_if_is_checked() {
     new_test_ext().execute_with(|| {
         run_to_block(8);
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
 
@@ -251,7 +251,7 @@ fn change_last_computational_work_if_is_checked() {
 
         run_to_block(14);
 
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(RuntimeOrigin::signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         let last_computational_work = ComputationalWork::last_computational_work().unwrap();
