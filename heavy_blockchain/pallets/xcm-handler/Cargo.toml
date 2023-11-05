@@ -25,7 +25,7 @@ serde = { version = "1.0.144", default-features = false }
 sp-std = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 ## Substrate FRAME Dependencies
-frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, optional = true, branch = "master" }
+frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, optional = false, branch = "master" }
 frame-support = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 # Cumulus dependencies
@@ -41,7 +41,7 @@ xcm-executor = { package="staging-xcm-executor", git = "https://github.com/parit
 pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 # Cumulus dependencies
-parachain-info = { git = 'https://github.com/paritytech/polkadot-sdk', branch = 'master' }
+parachain-info = { package = "staging-parachain-info", git = 'https://github.com/paritytech/polkadot-sdk', branch = 'master' }
 # Polkadot Dependencies
 polkadot-parachain = { package="polkadot-parachain-primitives", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 pallet-xcm = { git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = "master" }

@@ -69,7 +69,7 @@ cumulus-pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", branc
 cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 cumulus-primitives-core = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 cumulus-primitives-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
-parachain-info = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
+parachain-info = { package = "staging-parachain-info", git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 
 # Polkadot Dependencies
 polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }

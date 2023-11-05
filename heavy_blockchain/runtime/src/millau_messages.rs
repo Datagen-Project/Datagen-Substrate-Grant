@@ -21,69 +21,69 @@ use frame_support::parameter_types;
 use xcm::prelude::*;
 
 parameter_types! {
-	/// Bridge identifier that is used to bridge with Millau.
-	pub Bridge: BridgeId = BridgeId::new(
-		&InteriorMultiLocation::from(crate::ThisNetwork::get()).into(),
-		&InteriorMultiLocation::from(crate::MillauNetwork::get()).into(),
-	);
+    /// Bridge identifier that is used to bridge with Millau.
+    pub Bridge: BridgeId = BridgeId::new(
+        &InteriorMultiLocation::from(crate::ThisNetwork::get()).into(),
+        &InteriorMultiLocation::from(crate::MillauNetwork::get()).into(),
+    );
 }
 
 #[cfg(test)]
 mod tests {
-	use super::*;
-	use crate::{MillauGrandpaInstance, Runtime, WithMillauMessagesInstance};
-	use bridge_runtime_common::{
-		assert_complete_bridge_types,
-		integrity::{
-			assert_complete_with_relay_chain_bridge_constants, check_message_lane_weights,
-			AssertChainConstants, AssertCompleteBridgeConstants,
-		},
-	};
+    use super::*;
+    use crate::{MillauGrandpaInstance, Runtime, WithMillauMessagesInstance};
+    use bridge_runtime_common::{
+        assert_complete_bridge_types,
+        integrity::{
+            assert_complete_with_relay_chain_bridge_constants, check_message_lane_weights,
+            AssertChainConstants, AssertCompleteBridgeConstants,
+        },
+    };
 
-	#[test]
-	fn ensure_millau_message_lane_weights_are_correct() {
-		check_message_lane_weights::<
-			bp_rialto_parachain::RialtoParachain,
-			Runtime,
-			WithMillauMessagesInstance,
-		>(
-			bp_millau::EXTRA_STORAGE_PROOF_SIZE,
-			bp_rialto_parachain::MAX_UNREWARDED_RELAYERS_IN_CONFIRMATION_TX,
-			bp_rialto_parachain::MAX_UNCONFIRMED_MESSAGES_IN_CONFIRMATION_TX,
-			false,
-		);
-	}
+    #[test]
+    fn ensure_millau_message_lane_weights_are_correct() {
+        check_message_lane_weights::<
+            bp_rialto_parachain::RialtoParachain,
+            Runtime,
+            WithMillauMessagesInstance,
+        >(
+            bp_millau::EXTRA_STORAGE_PROOF_SIZE,
+            bp_rialto_parachain::MAX_UNREWARDED_RELAYERS_IN_CONFIRMATION_TX,
+            bp_rialto_parachain::MAX_UNCONFIRMED_MESSAGES_IN_CONFIRMATION_TX,
+            false,
+        );
+    }
 
-	#[test]
-	fn ensure_bridge_integrity() {
-		assert_complete_bridge_types!(
-			runtime: Runtime,
-			with_bridged_chain_grandpa_instance: MillauGrandpaInstance,
-			with_bridged_chain_messages_instance: WithMillauMessagesInstance,
-			this_chain: bp_rialto_parachain::RialtoParachain,
-			bridged_chain: bp_millau::Millau,
-		);
+    #[test]
+    fn ensure_bridge_integrity() {
+        assert_complete_bridge_types!(
+            runtime: Runtime,
+            with_bridged_chain_grandpa_instance: MillauGrandpaInstance,
+            with_bridged_chain_messages_instance: WithMillauMessagesInstance,
+            this_chain: bp_rialto_parachain::RialtoParachain,
+            bridged_chain: bp_millau::Millau,
+        );
 
-		assert_complete_with_relay_chain_bridge_constants::<
-			Runtime,
-			MillauGrandpaInstance,
-			WithMillauMessagesInstance,
-		>(AssertCompleteBridgeConstants {
-			this_chain_constants: AssertChainConstants {
-				block_length: bp_rialto_parachain::BlockLength::get(),
-				block_weights: bp_rialto_parachain::BlockWeights::get(),
-			},
-		});
-	}
+        assert_complete_with_relay_chain_bridge_constants::<
+            Runtime,
+            MillauGrandpaInstance,
+            WithMillauMessagesInstance,
+        >(AssertCompleteBridgeConstants {
+            this_chain_constants: AssertChainConstants {
+                block_length: bp_rialto_parachain::BlockLength::get(),
+                block_weights: bp_rialto_parachain::BlockWeights::get(),
+            },
+        });
+    }
 
-	#[test]
-	fn rialto_parachain_millau_bridge_identifier_did_not_changed() {
-		// there's nothing criminal if it is changed, but then thou need to fix it across
-		// all deployments scripts, alerts and so on
-		assert_eq!(
-			*Bridge::get().lane_id().as_ref(),
-			hex_literal::hex!("ee7158d2a51c3c43853ced550cc25bd00eb2662b231b1ddbb92e495ec882969c")
-				.into(),
-		);
-	}
+    #[test]
+    fn rialto_parachain_millau_bridge_identifier_did_not_changed() {
+        // there's nothing criminal if it is changed, but then thou need to fix it across
+        // all deployments scripts, alerts and so on
+        assert_eq!(
+            *Bridge::get().lane_id().as_ref(),
+            hex_literal::hex!("ee7158d2a51c3c43853ced550cc25bd00eb2662b231b1ddbb92e495ec882969c")
+                .into(),
+        );
+    }
 }
