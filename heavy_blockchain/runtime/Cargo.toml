@@ -12,7 +12,7 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", b
 [dependencies]
 codec = { package = 'parity-scale-codec', version = '3.1.5', default-features = false, features = ['derive']}
 hex-literal = "0.4"
-scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
+scale-info = { version = "2.10.0", default-features = false, features = ["derive"] }
 
 # Bridge depedencies
 
@@ -81,6 +81,7 @@ pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", branch = "mas
 pallet-xcm-handler = { path = "../pallets/xcm-handler", default-features = false }
 pallet-random-node-selector = { path = "../pallets/random-node-selector", default-features = false }
 pallet-insecure-randomness-collective-flip  = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+
 [dev-dependencies]
 bridge-runtime-common = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
 static_assertions = "1.1"

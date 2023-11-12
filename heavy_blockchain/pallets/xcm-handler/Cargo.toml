@@ -11,37 +11,44 @@ repository = 'https://github.com/xyz'
 targets = ['x86_64-unknown-linux-gnu']
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.0.0", features = [
+codec = { package = "parity-scale-codec", version = "3.1.5", features = [
   "derive",
 ], default-features = false }
-scale-info = { version = "2.2.0", default-features = false, features = [
+scale-info = { version = "2.10.0", default-features = false, features = [
   "derive",
 ] }
 log = { version = "0.4.17", default-features = false }
 serde = { version = "1.0.144", default-features = false }
 
 # Substrate Dependencies
+
 ## Substrate Primitive Dependencies
 sp-std = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
+
 ## Substrate FRAME Dependencies
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, optional = false, branch = "master" }
 frame-support = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
+
 # Cumulus dependencies
 cumulus-primitives-core = { git = 'https://github.com/paritytech/polkadot-sdk', branch = 'master', default-features = false }
 cumulus-pallet-xcm = { git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = 'master' }
+
 # Polkadot Dependencies
 polkadot-parachain = { package="polkadot-parachain-primitives", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 xcm = { package="staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 xcm-executor = { package="staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 
 [dev-dependencies]
+
 # Substrate
 pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
+
 # Cumulus dependencies
 parachain-info = { package = "staging-parachain-info", git = 'https://github.com/paritytech/polkadot-sdk', branch = 'master' }
+
 # Polkadot Dependencies
 polkadot-parachain = { package="polkadot-parachain-primitives", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 pallet-xcm = { git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = "master" }

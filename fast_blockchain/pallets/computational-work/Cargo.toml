@@ -8,7 +8,7 @@ targets = ["x86_64-unknown-linux-ganu"]
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.1.5", default-features = false, features = ["derive"] }
-scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
+scale-info = { version = "2.10.0", default-features = false, features = ["derive"] }
 frame-benchmarking = {  default-features = false, optional = true, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 frame-support = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 frame-system = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
@@ -17,7 +17,7 @@ sp-runtime = {  default-features = false, git = "https://github.com/paritytech/p
 
 [dev-dependencies]
 sp-io = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-frame-support-test = {  default-features = false, git = "https://github.com/paritytech/substrate/", branch = "master" }
+frame-support-test = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 
 [features]
 default = [ "std" ]
