@@ -27,8 +27,8 @@ jsonrpsee = { version = "0.16.2", features = ["server"] }
 
 # Bridges Dependencies
 
-bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", default-features = false, branch = "master" }
-bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", default-features = false, branch = "master" }
+bp-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", default-features = false, branch = "ln-global-refresh" }
+bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common.git", default-features = false, branch = "ln-global-refresh" }
 rialto-parachain-runtime = { path = '../runtime' }
 
 # Substrate Dependencies

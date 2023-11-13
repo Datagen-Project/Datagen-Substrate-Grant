@@ -3,7 +3,6 @@ name = "rialto-parachain-runtime"
 version = "0.1.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
-repository = "https://github.com/paritytech/parity-bridges-common/"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
 
 [build-dependencies]
@@ -16,19 +15,19 @@ scale-info = { version = "2.10.0", default-features = false, features = ["derive
 
 # Bridge depedencies
 
-bp-header-chain = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-millau = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-polkadot-core = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-relayers = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-rialto-parachain = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-runtime = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-xcm-bridge-hub = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bridge-runtime-common = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-pallet-bridge-grandpa = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-pallet-bridge-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-pallet-bridge-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false  }
-pallet-xcm-bridge-hub = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bp-header-chain = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-millau = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-polkadot-core = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-relayers = {  git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-rialto-parachain = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-runtime = {  git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bridge-runtime-common = {  git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+pallet-bridge-grandpa = {  git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+pallet-bridge-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+pallet-bridge-relayers = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false  }
+pallet-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
 
 # Substrate Dependencies
 ## Substrate Primitive Dependencies
@@ -80,10 +79,10 @@ pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", branch = "mas
 
 pallet-xcm-handler = { path = "../pallets/xcm-handler", default-features = false }
 pallet-random-node-selector = { path = "../pallets/random-node-selector", default-features = false }
-pallet-insecure-randomness-collective-flip  = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+
 
 [dev-dependencies]
-bridge-runtime-common = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+pallet-insecure-randomness-collective-flip  = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 static_assertions = "1.1"
 
 [features]

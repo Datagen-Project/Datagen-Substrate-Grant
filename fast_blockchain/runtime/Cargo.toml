@@ -13,25 +13,25 @@ scale-info = { version = "2.10.0", default-features = false, features = ["derive
 
 # Bridge dependencies
 
-bp-header-chain = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-millau = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-parachains = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-polkadot-core = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-rialto = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-rialto-parachain = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-runtime = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bp-westend = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false  }
-bp-xcm-bridge-hub = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-bridge-runtime-common = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-pallet-bridge-grandpa = {  git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-pallet-bridge-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-pallet-bridge-parachains = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-pallet-bridge-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false  }
-pallet-shift-session-manager = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-pallet-xcm-bridge-hub = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
-pallet-xcm-bridge-hub-router = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bp-header-chain = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-millau = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-parachains = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-polkadot-core = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-relayers = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-rialto = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-rialto-parachain = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-runtime = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bp-westend = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false  }
+bp-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+bridge-runtime-common = {  git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+pallet-bridge-grandpa = {  git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+pallet-bridge-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+pallet-bridge-parachains = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+pallet-bridge-relayers = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false  }
+pallet-shift-session-manager = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+pallet-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
+pallet-xcm-bridge-hub-router = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
 
 # Substrate Dependencies
 
@@ -77,9 +77,9 @@ xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/parit
 xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 
 [dev-dependencies]
-bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false }
+bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common", branch="ln-global-refresh", default-features = false }
 env_logger = "0.10"
-pallet-bridge-relayers = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch="master", default-features = false  }
+pallet-bridge-relayers = { git = "https://github.com/lean-apple/dg-bridges-common", branch="ln-global-refresh", default-features = false  }
 static_assertions = "1.1"
 
 [build-dependencies]

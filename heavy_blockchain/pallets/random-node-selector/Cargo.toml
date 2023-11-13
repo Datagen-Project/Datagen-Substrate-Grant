@@ -14,11 +14,11 @@ frame-support = {   default-features = false, git = "https://github.com/parityte
 frame-system = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-core = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-runtime = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
- pallet-insecure-randomness-collective-flip  = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 
 [dev-dependencies]
 sp-io = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 frame-support-test = {  git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+pallet-insecure-randomness-collective-flip  = {  git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 
 [features]
 default = ["std"]

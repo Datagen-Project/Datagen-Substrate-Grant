@@ -5,7 +5,6 @@ version = "0.1.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 build = "build.rs"
-repository = "https://github.com/paritytech/parity-bridges-common/"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
 
 [dependencies]
@@ -16,8 +15,8 @@ serde_json = "1.0.107"
 
 # Bridge dependencies
 
-bp-messages = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch = "master" }
-bridge-runtime-common = { git = "https://github.com/Datagen-Project/parity-bridges-common.git", branch = "master" }
+bp-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch = "ln-global-refresh" }
+bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch = "ln-global-refresh" }
 millau-runtime = { path = "../runtime" }
 
 # Substrate Dependencies
