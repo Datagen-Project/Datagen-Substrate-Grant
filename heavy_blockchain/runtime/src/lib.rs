@@ -577,7 +577,8 @@ impl pallet_bridge_messages::Config<WithMillauMessagesInstance> for Runtime {
     type DeliveryConfirmationPayments = pallet_bridge_relayers::DeliveryConfirmationPaymentsAdapter<
         Runtime,
         WithMillauMessagesInstance,
-        frame_support::traits::ConstU128<100_000>,
+        frame_support::traits::ConstU64<100_000>,
+        frame_support::traits::ConstU64<100_000>
     >;
     type OnMessagesDelivered = XcmMillauBridgeHub;
 
