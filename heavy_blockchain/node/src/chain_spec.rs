@@ -142,6 +142,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
             relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
             para_id: id.into(),
         },
+        &vec![0, 1, 2, 4, 5, 6]
     )
 }
 
@@ -157,7 +158,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
         // ID
         "local_testnet",
         ChainType::Local,
-        move || {
+         || {
             testnet_genesis(
                 get_account_id_from_seed::<sr25519::Public>(SUDO_ACCOUNT),
                 LOCAL_AUTHORITIES_ACCOUNTS
@@ -172,11 +173,12 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
         None,
         None,
         None,
-        None,
+        None, 
         Extensions {
             relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
             para_id: id.into(),
         },
+        &vec![0, 1, 2, 4, 5, 6]
     )
 }
 
@@ -190,12 +192,7 @@ fn testnet_genesis(
         random_node_selector: RandomNodeSelectorConfig {
             initial_node_owners: get_node_owners(),
         },
-        system: rialto_parachain_runtime::SystemConfig {
-            code: rialto_parachain_runtime::WASM_BINARY
-                .expect("WASM binary was not build, please build it!")
-                .to_vec(),
-            ..Default::default()
-        },
+        system: rialto_parachain_runtime::SystemConfig::default(),
         balances: rialto_parachain_runtime::BalancesConfig {
             balances: endowed_accounts
                 .iter()

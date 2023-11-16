@@ -332,6 +332,7 @@ impl pallet_balances::Config for Runtime {
     type MaxReserves = ConstU32<50>;
     type ReserveIdentifier = [u8; 8];
     type RuntimeHoldReason = RuntimeHoldReason;
+    type RuntimeFreezeReason = RuntimeFreezeReason;
     type FreezeIdentifier = ();
     type MaxHolds = ConstU32<0>;
     type MaxFreezes = ConstU32<0>;
@@ -389,6 +390,13 @@ impl pallet_session::Config for Runtime {
     type WeightInfo = ();
 }
 
+parameter_types! {
+    pub MaxActiveRelayersPerLane: u32 = 4;
+	pub MaxNextRelayersPerLane: u32 = 16;
+	pub SlotLength: u32 = 16;
+	pub PriorityBoostForActiveLaneRelayer: TransactionPriority = 1;
+}
+
 impl pallet_bridge_relayers::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type Reward = Balance;
@@ -402,6 +410,11 @@ impl pallet_bridge_relayers::Config for Runtime {
         ConstU64<1_000>,
         ConstU64<8>,
     >;
+    type MaxActiveRelayersPerLane = MaxActiveRelayersPerLane;
+	type MaxNextRelayersPerLane = MaxNextRelayersPerLane;
+	type SlotLength = SlotLength;
+	type PriorityBoostPerMessage = ConstU64<1>;
+	type PriorityBoostForActiveLaneRelayer = PriorityBoostForActiveLaneRelayer;
     type WeightInfo = ();
 }
 
@@ -433,13 +446,19 @@ parameter_types! {
 /// Instance of the messages pallet used to relay messages to/from Rialto chain.
 pub type WithRialtoMessagesInstance = ();
 
+parameter_types! {
+    pub const MaxUnrewardedRelayerEntriesAtInboundLane: MessageNonce = 16;
+	pub const MaxUnconfirmedMessagesAtInboundLane: MessageNonce = 1_000;
+}
+
 impl pallet_bridge_messages::Config<WithRialtoMessagesInstance> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type WeightInfo = weights::RialtoMessagesWeightInfo<Runtime>;
 
+    type MaxUnrewardedRelayerEntriesAtInboundLane = MaxUnrewardedRelayerEntriesAtInboundLane;
+	type MaxUnconfirmedMessagesAtInboundLane = MaxUnconfirmedMessagesAtInboundLane;
+    
     type ThisChain = bp_millau::Millau;
-    type BridgedChain = bp_rialto::Rialto;
-    type BridgedHeaderChain = BridgeRialtoGrandpa;
 
     type OutboundPayload = bp_xcm_bridge_hub::XcmAsPlainPayload;
     type InboundPayload = bp_xcm_bridge_hub::XcmAsPlainPayload;
@@ -454,6 +473,10 @@ impl pallet_bridge_messages::Config<WithRialtoMessagesInstance> for Runtime {
     type OnMessagesDelivered = XcmRialtoBridgeHub;
 
     type MessageDispatch = XcmRialtoBridgeHub;
+        
+    type BridgedChain = bp_rialto::Rialto;
+    type BridgedHeaderChain = BridgeRialtoGrandpa;
+    type BridgedChainId = BridgedChainId;
 }
 
 /// Instance of the messages pallet used to relay messages to/from RialtoParachain chain.
@@ -532,7 +555,7 @@ impl pallet_utility::Config for Runtime {
 // it only to be able to run benchmarks and make required traits (and default weights for tests).
 
 parameter_types! {
-    pub BridgeTable: Vec<(xcm::prelude::NetworkId, xcm::prelude::MultiLocation, Option<xcm::prelude::MultiAsset>)>
+    pub BridgeTable: Vec<NetworkExportTableItem>
         = vec![(
             xcm_config::RialtoNetwork::get(),
             xcm_config::TokenLocation::get(),
