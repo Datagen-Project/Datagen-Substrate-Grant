@@ -35,7 +35,7 @@ use sp_core::{crypto::KeyTypeId, ConstBool, OpaqueMetadata};
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{AccountIdLookup, Block as BlockT, ConstU128, DispatchInfoOf, SignedExtension},
-    transaction_validity::{TransactionSource, TransactionValidity, TransactionValidityError},
+    transaction_validity::{TransactionSource, TransactionValidity, TransactionValidityError, TransactionPriority},
     ApplyExtrinsicResult,
 };
 
@@ -89,7 +89,7 @@ use xcm_builder::{
     SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
 };
 use xcm_executor::{Config, XcmExecutor};
-
+use bp_xcm_bridge_hub::{Bridge, BridgeId};
 pub mod millau_messages;
 
 // generate signed extension that rejects obsolete bridge transactions
@@ -500,8 +500,6 @@ impl pallet_xcm::Config for Runtime {
     type MaxLockers = frame_support::traits::ConstU32<8>;
     type UniversalLocation = UniversalLocation;
     type WeightInfo = pallet_xcm::TestWeightInfo;
-    #[cfg(feature = "runtime-benchmarks")]
-    type ReachableDest = ReachableDest;
     type AdminOrigin = frame_system::EnsureRoot<AccountId>;
     type MaxRemoteLockConsumers = ConstU32<0>;
     type RemoteLockConsumerIdentifier = ();
@@ -579,7 +577,7 @@ impl pallet_bridge_messages::Config<WithMillauMessagesInstance> for Runtime {
         Runtime,
         WithMillauMessagesInstance,
         frame_support::traits::ConstU64<100_000>,
-        frame_support::traits::ConstU64<100_000>
+        frame_support::traits::ConstU64<100_000>,
     >;
     type OnMessagesDelivered = XcmMillauBridgeHub;
 

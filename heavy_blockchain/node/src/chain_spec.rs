@@ -142,7 +142,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
             relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
             para_id: id.into(),
         },
-        &vec![0, 1, 2, 4, 5, 6]
+        &vec![0, 1, 2, 4, 5, 6],
     )
 }
 
@@ -158,7 +158,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
         // ID
         "local_testnet",
         ChainType::Local,
-         || {
+        || {
             testnet_genesis(
                 get_account_id_from_seed::<sr25519::Public>(SUDO_ACCOUNT),
                 LOCAL_AUTHORITIES_ACCOUNTS
@@ -173,12 +173,12 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
         None,
         None,
         None,
-        None, 
+        None,
         Extensions {
             relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
             para_id: id.into(),
         },
-        &vec![0, 1, 2, 4, 5, 6]
+        &vec![0, 1, 2, 4, 5, 6],
     )
 }
 
