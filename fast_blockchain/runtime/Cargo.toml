@@ -7,8 +7,8 @@ repository = "https://github.com/paritytech/parity-bridges-common/"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.1.5", default-features = false, features = ["derive"] }
-hex-literal = "0.4"
+codec = { package = "parity-scale-codec", version = "3.6.5", default-features = false, features = ["derive"] }
+hex-literal = "0.4.1"
 scale-info = { version = "2.10.0", default-features = false, features = ["derive"] }
 
 # Bridge dependencies
@@ -78,8 +78,8 @@ xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/par
 
 [dev-dependencies]
 bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common", branch="ln-global-refresh", default-features = false }
-env_logger = "0.10"
 pallet-bridge-relayers = { git = "https://github.com/lean-apple/dg-bridges-common", branch="ln-global-refresh", default-features = false  }
+env_logger = "0.10.1"
 static_assertions = "1.1"
 
 [build-dependencies]

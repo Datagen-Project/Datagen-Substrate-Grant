@@ -35,7 +35,9 @@ use sp_core::{crypto::KeyTypeId, ConstBool, OpaqueMetadata};
 use sp_runtime::{
     create_runtime_str, generic, impl_opaque_keys,
     traits::{AccountIdLookup, Block as BlockT, ConstU128, DispatchInfoOf, SignedExtension},
-    transaction_validity::{TransactionSource, TransactionValidity, TransactionValidityError, TransactionPriority},
+    transaction_validity::{
+        TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
+    },
     ApplyExtrinsicResult,
 };
 
@@ -78,6 +80,7 @@ pub use pallet_bridge_messages::Call as MessagesCall;
 pub use pallet_xcm::Call as XcmCall;
 
 // Polkadot & XCM imports
+use bp_xcm_bridge_hub::{Bridge, BridgeId};
 use bridge_runtime_common::CustomNetworkId;
 use pallet_xcm::XcmPassthrough;
 use polkadot_parachain_primitives::primitives::Sibling;
@@ -89,7 +92,6 @@ use xcm_builder::{
     SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
 };
 use xcm_executor::{Config, XcmExecutor};
-use bp_xcm_bridge_hub::{Bridge, BridgeId};
 pub mod millau_messages;
 
 // generate signed extension that rejects obsolete bridge transactions

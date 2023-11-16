@@ -7,16 +7,9 @@ authors = ["OAK Developement Team"]
 homepage = "https://test"
 repository = 'https://github.com/xyz'
 
-[package.metadata.docs.rs]
-targets = ['x86_64-unknown-linux-gnu']
-
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.1.5", features = [
-  "derive",
-], default-features = false }
-scale-info = { version = "2.10.0", default-features = false, features = [
-  "derive",
-] }
+codec = { package = "parity-scale-codec", version = "3.6.5", features = ["derive"], default-features = false }
+scale-info = { version = "2.10.0", default-features = false, features = ["derive"] }
 log = { version = "0.4.17", default-features = false }
 serde = { version = "1.0.144", default-features = false }
 
@@ -25,6 +18,7 @@ serde = { version = "1.0.144", default-features = false }
 ## Substrate Primitive Dependencies
 sp-std = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
+sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 
 ## Substrate FRAME Dependencies
 frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, optional = false, branch = "master" }
@@ -44,7 +38,6 @@ xcm-executor = { package="staging-xcm-executor", git = "https://github.com/parit
 
 # Substrate
 pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "master" }
 
 # Cumulus dependencies
 parachain-info = { package = "staging-parachain-info", git = 'https://github.com/paritytech/polkadot-sdk', branch = 'master' }
@@ -66,8 +59,12 @@ std = [
   "frame-support/std",
   "frame-system/std",
   "polkadot-parachain/std",
+  "pallet-balances/std",
+  "parachain-info/std",
+  "pallet-xcm/std",
   "scale-info/std",
   "sp-runtime/std",
+  "sp-core/std",
   "sp-std/std",
   "xcm/std",
   "xcm-builder/std",

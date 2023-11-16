@@ -3,11 +3,8 @@ name = "pallet-check-node-computational-work"
 version = "0.1.0"
 edition = "2021"
 
-[package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-ganu"]
-
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.1.5", default-features = false, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "3.6.5", default-features = false, features = ['derive']}
 scale-info = { version = "2.10.0", default-features = false, features = ["derive"] }
 
 frame-benchmarking = {  default-features = false, optional = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
@@ -23,8 +20,8 @@ pallet-session = {  default-features = false, git = "https://github.com/parityte
 pallet-computational-work = { path = "../computational-work", default-features = false }
 
 [dev-dependencies]
-sp-io = { version = "23.0.0", default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-frame-support-test = { version = "3.0.0", git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
+sp-io = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
+frame-support-test = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 
 [features]
 default = [ "std" ]

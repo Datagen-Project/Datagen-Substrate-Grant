@@ -9,8 +9,8 @@ license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
 substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 
 [dependencies]
-codec = { package = 'parity-scale-codec', version = '3.1.5', default-features = false, features = ['derive']}
-hex-literal = "0.4"
+codec = { package = 'parity-scale-codec', version = '3.6.5', default-features = false, features = ['derive']}
+hex-literal = "0.4.1"
 scale-info = { version = "2.10.0", default-features = false, features = ["derive"] }
 
 # Bridge depedencies
@@ -30,6 +30,7 @@ pallet-bridge-relayers = { git = "https://github.com/lean-apple/dg-bridges-commo
 pallet-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-global-refresh", default-features = false }
 
 # Substrate Dependencies
+
 ## Substrate Primitive Dependencies
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 sp-block-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
@@ -99,8 +100,10 @@ runtime-benchmarks = [
 	'xcm-builder/runtime-benchmarks',
 ]
 std = [
+	"bp-header-chain/std",
 	"bp-messages/std",
 	"bp-millau/std",
+	"bp-polkadot-core/std",
 	"bp-relayers/std",
 	"bp-runtime/std",
 	"bp-rialto-parachain/std",
