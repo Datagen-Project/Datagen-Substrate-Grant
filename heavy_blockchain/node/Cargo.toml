@@ -12,10 +12,6 @@ substrate-build-script-utils = { git = "https://github.com/paritytech/polkadot-s
 [[bin]]
 name = 'rialto-parachain-collator'
 
-[features]
-default = []
-runtime-benchmarks = ['rialto-parachain-runtime/runtime-benchmarks']
-
 [dependencies]
 clap = { version = "4.4.4", features = ["derive"] }
 log = '0.4.20'
@@ -83,3 +79,8 @@ polkadot-cli = { git = "https://github.com/paritytech/polkadot-sdk", branch = "m
 polkadot-primitives = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 polkadot-service = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+
+[features]
+default = [ "std" ]
+std = []
+runtime-benchmarks = [ 'rialto-parachain-runtime/runtime-benchmarks' ]

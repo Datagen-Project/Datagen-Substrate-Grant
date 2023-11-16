@@ -10,15 +10,15 @@ frame-benchmarking = {   default-features = false, optional = false, git = "http
 frame-support = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 frame-system = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-core = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+sp-io = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-runtime = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 
 [dev-dependencies]
-sp-io = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 frame-support-test = {  git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 pallet-insecure-randomness-collective-flip  = {  git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 
 [features]
-default = ["std"]
+default = [ "std" ]
 std = [
 	"codec/std",
 	"frame-benchmarking/std",
@@ -26,6 +26,6 @@ std = [
 	"frame-system/std",
 	"scale-info/std",
 ]
-runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
-try-runtime = ["frame-support/try-runtime"]
+runtime-benchmarks = [ "frame-benchmarking/runtime-benchmarks" ]
+try-runtime = [ "frame-support/try-runtime" ]
 

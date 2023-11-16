@@ -4,8 +4,6 @@ description = "Pallet to handle XCMP intricacies."
 version = "0.1.0"
 edition = "2021"
 authors = ["OAK Developement Team"]
-homepage = "https://test"
-repository = 'https://github.com/xyz'
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.6.5", features = ["derive"], default-features = false }
@@ -49,28 +47,28 @@ xcm-builder = { package="staging-xcm-builder", git = "https://github.com/parityt
 xcm-executor = { package="staging-xcm-executor", git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = "master" }
 
 [features]
-default = ["std"]
+default = [ "std" ]
 std = [
-  "log/std",
-  "serde/std",
-  "codec/std",
-  "cumulus-primitives-core/std",
-  "frame-benchmarking/std",
-  "frame-support/std",
-  "frame-system/std",
-  "polkadot-parachain/std",
-  "pallet-balances/std",
-  "parachain-info/std",
-  "pallet-xcm/std",
-  "scale-info/std",
-  "sp-runtime/std",
-  "sp-core/std",
-  "sp-std/std",
-  "xcm/std",
-  "xcm-builder/std",
-  "xcm-executor/std",
-  "cumulus-pallet-xcm/std"
+	"codec/std",
+	"cumulus-pallet-xcm/std",
+	"cumulus-primitives-core/std",
+	"frame-benchmarking/std",
+	"frame-support/std",
+	"frame-system/std",
+	"log/std",
+	"pallet-balances/std",
+	"pallet-xcm/std",
+	"parachain-info/std",
+	"polkadot-parachain/std",
+	"scale-info/std",
+	"serde/std",
+	"sp-core/std",
+	"sp-runtime/std",
+	"sp-std/std",
+	"xcm-builder/std",
+	"xcm-executor/std",
+	"xcm/std",
 ]
 
-runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
-try-runtime = ["frame-support/try-runtime"]
+runtime-benchmarks = [ "frame-benchmarking/runtime-benchmarks", 	"pallet-xcm/runtime-benchmarks", ]
+try-runtime = [ "frame-support/try-runtime" ]
