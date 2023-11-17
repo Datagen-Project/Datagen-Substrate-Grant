@@ -116,6 +116,7 @@ impl Alternative {
                 None,
                 properties,
                 None,
+                &[0, 1, 2, 4, 5, 6]
             ),
             Alternative::LocalTestnet => ChainSpec::from_genesis(
                 "Millau Local",
@@ -138,6 +139,7 @@ impl Alternative {
                 None,
                 properties,
                 None,
+                &vec![0, 1, 2, 4, 5, 6]
             ),
         }
     }
@@ -201,9 +203,9 @@ fn testnet_genesis(
 ) -> RuntimeGenesisConfig {
     RuntimeGenesisConfig {
         system: SystemConfig {
-            code: WASM_BINARY
-                .expect("Millau development WASM not available")
-                .to_vec(),
+            // code: WASM_BINARY
+            //     .expect("Millau development WASM not available")
+            //     .to_vec(),
             ..Default::default()
         },
         balances: BalancesConfig {

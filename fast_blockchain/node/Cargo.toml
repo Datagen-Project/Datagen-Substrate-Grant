@@ -20,7 +20,6 @@ bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common
 millau-runtime = { path = "../runtime" }
 
 # Substrate Dependencies
-
 sc-consensus-beefy = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sc-consensus-beefy-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-consensus-beefy = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }

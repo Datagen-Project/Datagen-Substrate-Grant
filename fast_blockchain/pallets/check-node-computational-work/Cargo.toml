@@ -12,7 +12,7 @@ frame-support = {  default-features = false, git = "https://github.com/paritytec
 frame-system = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-core = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 sp-runtime = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-pallet-insecure-randomness-collective-flip = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+
 pallet-authorship = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 pallet-session = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 
@@ -22,6 +22,7 @@ pallet-computational-work = { path = "../computational-work", default-features =
 [dev-dependencies]
 sp-io = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 frame-support-test = { git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
+pallet-insecure-randomness-collective-flip = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
 
 [features]
 default = [ "std" ]

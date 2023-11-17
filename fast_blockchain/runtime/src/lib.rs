@@ -706,12 +706,11 @@ pub type BridgeRefundRialtoParachainMessages =
     pallet_bridge_relayers::extension::BridgeRelayersSignedExtension<
         Runtime,
         pallet_bridge_relayers::extension::WithParachainExtensionConfig<
-            StrBridgeRefundRialtoPara2000Msgs,
+            StrBridgeRefundRialtoPara2000Msgs, //TODO: check for realId
             Runtime,
             bp_relayers::RuntimeWithUtilityPallet<Runtime>,
             WithRialtoParachainsInstance,
             WithRialtoParachainMessagesInstance,
-            PriorityBoostPerMessage,
         >,
     >;
 

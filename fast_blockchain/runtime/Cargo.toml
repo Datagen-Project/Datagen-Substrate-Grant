@@ -77,7 +77,7 @@ xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/parit
 xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk", branch = "master", default-features = false }
 
 [dev-dependencies]
-bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common", branch="ln-global-refresh", default-features = false }
+bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common", branch="ln-global-refresh", features = ["integrity-test"] }
 pallet-bridge-relayers = { git = "https://github.com/lean-apple/dg-bridges-common", branch="ln-global-refresh", default-features = false  }
 env_logger = "0.10.1"
 static_assertions = "1.1"
@@ -88,6 +88,7 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", b
 [features]
 default = [ "std" ]
 std = [
+	"bp-header-chain/std", 
 	"bp-messages/std",
 	"bp-millau/std",
 	"bp-parachains/std",
