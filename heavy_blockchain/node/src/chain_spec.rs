@@ -178,7 +178,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
             relay_chain: "rococo-local".into(), // You MUST set this to the correct network!
             para_id: id.into(),
         },
-        &vec![0, 1, 2, 4, 5, 6],
+        &[0, 1, 2, 4, 5, 6],
     )
 }
 
