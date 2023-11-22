@@ -3,28 +3,25 @@ name = "pallet-check-node-computational-work"
 version = "0.1.0"
 edition = "2021"
 
-[package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-ganu"]
-
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.1.5", default-features = false, features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = ["max-encoded-len"] }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 
-frame-benchmarking = {  default-features = false, optional = true, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-frame-support = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-frame-system = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-sp-core = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-sp-runtime = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-pallet-insecure-randomness-collective-flip = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-pallet-authorship = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-pallet-session = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+frame-benchmarking = {  default-features = false, optional = true, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
+frame-support = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
+frame-system = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
+sp-core = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
+sp-runtime = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
+pallet-insecure-randomness-collective-flip = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
+pallet-authorship = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
+pallet-session = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
 
 # Coupling with the pallet computational work
 pallet-computational-work = { path = "../computational-work", default-features = false }
 
 [dev-dependencies]
-sp-io = { version = "23.0.0", default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
-frame-support-test = { version = "3.0.0", git = "https://github.com/paritytech/polkadot-sdk", branch = "master" }
+sp-io = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
+frame-support-test = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 
 [features]
 default = ["std"]
