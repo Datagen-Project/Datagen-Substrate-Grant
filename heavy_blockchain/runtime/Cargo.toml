@@ -16,19 +16,21 @@ scale-info = { version = "2.9.0", default-features = false, features = ["derive"
 
 # Bridge depedencies
 
-# bp-header-chain = { path = "../../parity-bridges-common/primitives/header-chain", default-features = false }
-# bp-messages = { path = "../../parity-bridges-common/primitives/messages", default-features = false }
+bp-header-chain = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+bp-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+bp-polkadot-core = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+bp-relayers = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+bp-runtime = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+bp-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false}
+bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+pallet-bridge-grandpa = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+pallet-bridge-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+pallet-bridge-relayers = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+pallet-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+
+# Outdated Bridge depedencies
 # bp-millau = { path = "../../parity-bridges-common/primitives/chain-millau", default-features = false }
-# bp-polkadot-core = { path = "../../parity-bridges-common/primitives/polkadot-core", default-features = false }
-# bp-relayers = { path = "../../parity-bridges-common/primitives/relayers", default-features = false }
-# bp-runtime = { path = "../../parity-bridges-common/primitives/runtime", default-features = false }
 # bp-rialto-parachain = { path = "../../parity-bridges-common/primitives/chain-rialto-parachain", default-features = false }
-# bp-xcm-bridge-hub = { path = "../../parity-bridges-common/primitives/xcm-bridge-hub", default-features = false }
-# bridge-runtime-common = { path = "../../parity-bridges-common/bin/runtime-common", default-features = false }
-# pallet-bridge-grandpa = { path = "../../parity-bridges-common/modules/grandpa", default-features = false }
-# pallet-bridge-messages = { path = "../../parity-bridges-common/modules/messages", default-features = false }
-# pallet-bridge-relayers = { path = "../../parity-bridges-common/modules/relayers", default-features = false }
-# pallet-xcm-bridge-hub = { path = "../../parity-bridges-common/modules/xcm-bridge-hub", default-features = false }
 
 # Substrate Dependencies
 
@@ -70,7 +72,7 @@ cumulus-pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", branc
 cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 cumulus-primitives-core = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 cumulus-primitives-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
-parachain-info = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
+parachain-info = { package="staging-parachain-info", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 
 # Polkadot Dependencies
 polkadot-parachain-primitives = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
@@ -83,7 +85,7 @@ pallet-xcm-handler = { path = "../pallets/xcm-handler", default-features = false
 pallet-random-node-selector = { path = "../pallets/random-node-selector", default-features = false }
 
 [dev-dependencies]
-bridge-runtime-common = { path = "../../parity-bridges-common/bin/runtime-common", features = ["integrity-test"] }
+bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", features = ["integrity-test"] }
 static_assertions = "1.1"
 pallet-insecure-randomness-collective-flip  = { default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
 
@@ -102,10 +104,8 @@ runtime-benchmarks = [
 ]
 std = [
 	"bp-messages/std",
-	"bp-millau/std",
 	"bp-relayers/std",
 	"bp-runtime/std",
-	"bp-rialto-parachain/std",
 	"bp-xcm-bridge-hub/std",
 	"bridge-runtime-common/std",
 	"codec/std",

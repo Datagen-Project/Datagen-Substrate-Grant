@@ -24,8 +24,10 @@ jsonrpsee = { version = "0.20.2", features = ["server"] }
 
 # Local Dependencies
 
-# bp-messages = { path = "../../parity-bridges-common/primitives/messages" }
-# bridge-runtime-common = { path = "../../parity-bridges-common/bin/runtime-common" }
+bp-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain" }
+bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain" }
+
+# Oudated Bridge Dependencies
 # rialto-parachain-runtime = { path = '../runtime' }
 
 # Substrate Dependencies
