@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
-use millau_runtime::{
-	AccountId, AuraConfig, BalancesConfig, BeefyConfig, BridgeRialtoMessagesConfig,
-	BridgeRialtoParachainMessagesConfig, BridgeWestendGrandpaConfig, GrandpaConfig,
+use westend_runtime::{ BalancesConfig, BeefyConfig, GrandpaConfig,
 	RuntimeGenesisConfig, SessionConfig, SessionKeys, Signature, SudoConfig, SystemConfig,
 	XcmRialtoBridgeHubConfig, XcmRialtoParachainBridgeHubConfig, WASM_BINARY,
 };
+use bridge_hub_rococo_runtime::BridgeWestendGrandpaConfig; 
+use bridge_hub_westend_runtime::{AccountId, BridgeWestendGrandpaConfig};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_beefy::ecdsa_crypto::AuthorityId as BeefyId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
-use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_runtime::traits::Verify;
 
 /// "Names" of the authorities accounts at local testnet.
 const LOCAL_AUTHORITIES_ACCOUNTS: [&str; 5] = ["Alice", "Bob", "Charlie", "Dave", "Eve"];
@@ -203,7 +203,6 @@ fn testnet_genesis(
 		balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 50)).collect(),
 		},
-		aura: AuraConfig { authorities: Vec::new() },
 		beefy: BeefyConfig::default(),
 		grandpa: GrandpaConfig { authorities: Vec::new(), ..Default::default() },
 		sudo: SudoConfig { key: Some(root_key) },

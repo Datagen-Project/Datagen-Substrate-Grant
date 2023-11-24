@@ -20,7 +20,7 @@ use crate::{
 	service::new_partial,
 };
 use frame_benchmarking_cli::BenchmarkCmd;
-use millau_runtime::{Block, RuntimeApi};
+use westend_runtime::{Block, RuntimeApi};
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 

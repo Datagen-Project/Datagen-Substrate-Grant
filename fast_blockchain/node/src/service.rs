@@ -17,7 +17,7 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 use jsonrpsee::RpcModule;
-use millau_runtime::{self, opaque::Block, RuntimeApi};
+use westend_runtime::{self, opaque::Block, RuntimeApi};
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus_aura::{CompatibilityMode, ImportQueueParams, SlotProportion, StartAuraParams};
 use sc_consensus_grandpa::SharedVoterState;

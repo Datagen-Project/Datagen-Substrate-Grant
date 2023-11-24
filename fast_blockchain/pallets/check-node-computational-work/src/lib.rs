@@ -16,11 +16,8 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-	use frame_support::traits::FindAuthor;
-
 
 	#[pallet::pallet]
-	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);
 
 	/// Configure the pallet by specifying the parameters and types on which it depends.
@@ -30,7 +27,7 @@ pub mod pallet {
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
 		/// The pallet computational work.
-		type FindAuthor: FindAuthor<Self::AccountId>;
+		type FindAuthor:Config::ComputationalWorkFindAuthor<Self::AccountId>;
 	}
 
 	// Set the default value for the author check condition.
@@ -98,9 +95,9 @@ pub mod pallet {
 
 		/// Emit an event when an author has been checked.
 		CheckResult {
-			raw_hash: T::Hash,
-			elaborated_hash: T::Hash,
-			checked_author: T::AccountId,
+			raw_hash: <T as pallet::Config>::Hash,
+			elaborated_hash: <T as pallet::Config>::Hash,
+			checked_author: <T as pallet::Config>::AccountId,
 			block_height: u32,
 			current_author: T::AccountId,
 			is_passed: bool,

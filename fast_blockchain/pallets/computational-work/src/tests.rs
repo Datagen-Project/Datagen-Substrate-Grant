@@ -1,6 +1,7 @@
 use crate::mock::*;
 use sp_core::sr25519;
 use frame_support::{assert_ok, assert_noop};
+type Origin = RuntimeOrigin;
 
 // Testing x_work getter function of the storage CheckEveryXBlocks and set_check_every_x_works.
 

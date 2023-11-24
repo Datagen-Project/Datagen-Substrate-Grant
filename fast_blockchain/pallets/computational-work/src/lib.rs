@@ -18,7 +18,6 @@ pub mod pallet {
 	use frame_support::sp_runtime::traits::Hash;
 
 	#[pallet::pallet]
-	#[pallet::generate_store(pub(super) trait Store)]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
@@ -27,7 +26,7 @@ pub mod pallet {
 	pub trait Config: frame_system::Config {
 		/// Because this pallet emits events, it depends on the runtime's definition of an event.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-		type FindAuthor: FindAuthor<Self::AccountId>;
+		type ComputationalWorkFindAuthor: FindAuthor<Self::AccountId>;
 	}
 
 	#[pallet::error]
@@ -116,7 +115,7 @@ pub mod pallet {
 
 		/// Hashes the raw data and elaborated and store them in the storage with the author and the block number
 		/// for future checks.
-		#[pallet::weight(100)]
+		#[pallet::weight(100)] 
 		pub fn hash_work(
 			origin: OriginFor<T>,
 		) -> DispatchResult{
@@ -135,7 +134,7 @@ pub mod pallet {
 			// Get the block author.
 			let block_digest = <frame_system::Pallet<T>>::digest();
 			let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
-			let author = T::FindAuthor::find_author(digests).unwrap();
+			let author = T::ComputationalWorkFindAuthor::find_author(digests).unwrap();
 
 
 			if Self::last_computational_work_is_checked() {

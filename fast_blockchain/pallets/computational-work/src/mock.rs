@@ -1,13 +1,12 @@
 use crate as pallet_computational_work;
-use frame_support::{traits::{ConstU16, ConstU64, OnFinalize, OnInitialize}};
+use frame_support::traits::{ConstU16, ConstU64, OnFinalize, OnInitialize, FindAuthor};
 use frame_system as system;
 use sp_core::{H256, sr25519, crypto::{Public, Pair}};
 use sp_runtime::{
-	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup, Verify, IdentifyAccount, Hash}, MultiSignature,
+	BuildStorage, 
+	ConsensusEngineId
 };
-use sp_runtime::ConsensusEngineId;
-use frame_support::traits::FindAuthor;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -17,10 +16,7 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
-	pub enum Test where
-		Block = Block,
-		NodeBlock = Block,
-		UncheckedExtrinsic = UncheckedExtrinsic,
+	pub enum Test 
 	{
 		System: frame_system,
 		ComputationalWork: pallet_computational_work,
@@ -28,20 +24,19 @@ frame_support::construct_runtime!(
 );
 
 impl system::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+    type RuntimeOrigin = RuntimeOrigin;
+    type Nonce = u64;
+    type RuntimeCall = RuntimeCall;
 	type BaseCallFilter = frame_support::traits::Everything;
+	type Block = Block ;
 	type BlockWeights = ();
 	type BlockLength = ();
 	type DbWeight = ();
-	type Origin = Origin;
-	type Call = Call;
-	type Index = u64;
-	type BlockNumber = BlockNumber;
 	type Hash = H256;
 	type Hashing = BlakeTwo256;
 	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
-	type Header = Header;
-	type Event = Event;
 	type BlockHashCount = ConstU64<250>;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -55,8 +50,8 @@ impl system::Config for Test {
 }
 
 impl pallet_computational_work::Config for Test {
-	type Event = Event;
-	type FindAuthor = AuthorGiven;
+	type RuntimeEvent = RuntimeEvent;
+	type ComputationalWorkFindAuthor = AuthorGiven;
 }
 
 pub struct AuthorGiven;
@@ -70,10 +65,7 @@ impl FindAuthor<AccountId> for AuthorGiven {
 }
 
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
-	let mut ext = sp_io::TestExternalities::new(t);
-	ext.execute_with(|| System::set_block_number(1));
-	ext
+	frame_system::GenesisConfig::<Test>::default().build_storage().unwrap().into()
 }
 
 /// Helper function to run a block.
