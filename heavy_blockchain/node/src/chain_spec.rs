@@ -205,7 +205,7 @@ fn testnet_genesis(
 			opened_lanes: vec![rialto_parachain_runtime::millau_messages::Bridge::get().lane_id()],
 			..Default::default()
 		},
-		xcm_millau_bridge_hub: XcmMillauBridgeHubConfig {
+		polkadot_xcm: XcmMillauBridgeHubConfig {
 			opened_bridges: vec![(
 				xcm::latest::Junctions::Here.into(),
 				xcm::latest::InteriorMultiLocation::from(

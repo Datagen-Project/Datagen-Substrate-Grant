@@ -25,94 +25,94 @@ use pallet_bridge_relayers::WeightInfoExt as _;
 use xcm::prelude::*;
 
 parameter_types! {
-	/// Bridge identifier that is used to bridge with RialtoParachain.
-	pub Bridge: BridgeId = BridgeId::new(
-		&InteriorMultiLocation::from(crate::xcm_config::ThisNetwork::get()).into(),
-		&InteriorMultiLocation::from(crate::xcm_config::RialtoParachainNetwork::get()).into(),
-	);
-	/// Lane identifier, used by with-RialtoParachain bridge.
-	pub Lane: LaneId = Bridge::get().lane_id();
+    /// Bridge identifier that is used to bridge with RialtoParachain.
+    pub Bridge: BridgeId = BridgeId::new(
+        &InteriorMultiLocation::from(crate::xcm_config::ThisNetwork::get()).into(),
+        &InteriorMultiLocation::from(crate::xcm_config::RialtoParachainNetwork::get()).into(),
+    );
+    /// Lane identifier, used by with-RialtoParachain bridge.
+    pub Lane: LaneId = Bridge::get().lane_id();
 }
 
 impl pallet_bridge_messages::WeightInfoExt
-	for crate::weights::RialtoParachainMessagesWeightInfo<Runtime>
+    for crate::weights::RialtoParachainMessagesWeightInfo<Runtime>
 {
-	fn expected_extra_storage_proof_size() -> u32 {
-		bp_rialto_parachain::EXTRA_STORAGE_PROOF_SIZE
-	}
+    fn expected_extra_storage_proof_size() -> u32 {
+        bp_rialto_parachain::EXTRA_STORAGE_PROOF_SIZE
+    }
 
-	fn receive_messages_proof_overhead_from_runtime() -> Weight {
-		pallet_bridge_relayers::weights::BridgeWeight::<Runtime>::receive_messages_proof_overhead_from_runtime()
-	}
+    fn receive_messages_proof_overhead_from_runtime() -> Weight {
+        pallet_bridge_relayers::weights::BridgeWeight::<Runtime>::receive_messages_proof_overhead_from_runtime()
+    }
 
-	fn receive_messages_delivery_proof_overhead_from_runtime() -> Weight {
-		pallet_bridge_relayers::weights::BridgeWeight::<Runtime>::receive_messages_delivery_proof_overhead_from_runtime()
-	}
+    fn receive_messages_delivery_proof_overhead_from_runtime() -> Weight {
+        pallet_bridge_relayers::weights::BridgeWeight::<Runtime>::receive_messages_delivery_proof_overhead_from_runtime()
+    }
 }
 
 #[cfg(test)]
 mod tests {
-	use super::*;
-	use crate::{
-		PriorityBoostPerMessage, RialtoGrandpaInstance, Runtime,
-		WithRialtoParachainMessagesInstance,
-	};
+    use super::*;
+    use crate::{
+        PriorityBoostPerMessage, RialtoGrandpaInstance, Runtime,
+        WithRialtoParachainMessagesInstance,
+    };
 
-	use bridge_runtime_common::{
-		assert_complete_bridge_types,
-		integrity::{
-			assert_complete_with_parachain_bridge_constants, check_message_lane_weights,
-			AssertChainConstants, AssertCompleteBridgeConstants,
-		},
-	};
+    use bridge_runtime_common::{
+        assert_complete_bridge_types,
+        integrity::{
+            assert_complete_with_parachain_bridge_constants, check_message_lane_weights,
+            AssertChainConstants, AssertCompleteBridgeConstants,
+        },
+    };
 
-	#[test]
-	fn ensure_millau_message_lane_weights_are_correct() {
-		check_message_lane_weights::<bp_millau::Millau, Runtime, WithRialtoParachainMessagesInstance>(
-			bp_rialto_parachain::EXTRA_STORAGE_PROOF_SIZE,
-			bp_millau::MAX_UNREWARDED_RELAYERS_IN_CONFIRMATION_TX,
-			bp_millau::MAX_UNCONFIRMED_MESSAGES_IN_CONFIRMATION_TX,
-			true,
-		);
-	}
+    #[test]
+    fn ensure_millau_message_lane_weights_are_correct() {
+        check_message_lane_weights::<bp_millau::Millau, Runtime, WithRialtoParachainMessagesInstance>(
+            bp_rialto_parachain::EXTRA_STORAGE_PROOF_SIZE,
+            bp_millau::MAX_UNREWARDED_RELAYERS_IN_CONFIRMATION_TX,
+            bp_millau::MAX_UNCONFIRMED_MESSAGES_IN_CONFIRMATION_TX,
+            true,
+        );
+    }
 
-	#[test]
-	fn ensure_bridge_integrity() {
-		assert_complete_bridge_types!(
-			runtime: Runtime,
-			with_bridged_chain_grandpa_instance: RialtoGrandpaInstance,
-			with_bridged_chain_messages_instance: WithRialtoParachainMessagesInstance,
-			this_chain: bp_millau::Millau,
-			bridged_chain: bp_rialto_parachain::RialtoParachain,
-		);
+    #[test]
+    fn ensure_bridge_integrity() {
+        assert_complete_bridge_types!(
+            runtime: Runtime,
+            with_bridged_chain_grandpa_instance: RialtoGrandpaInstance,
+            with_bridged_chain_messages_instance: WithRialtoParachainMessagesInstance,
+            this_chain: bp_millau::Millau,
+            bridged_chain: bp_rialto_parachain::RialtoParachain,
+        );
 
-		assert_complete_with_parachain_bridge_constants::<
-			Runtime,
-			RialtoGrandpaInstance,
-			WithRialtoParachainMessagesInstance,
-			bp_rialto::Rialto,
-		>(AssertCompleteBridgeConstants {
-			this_chain_constants: AssertChainConstants {
-				block_length: bp_millau::BlockLength::get(),
-				block_weights: bp_millau::BlockWeights::get(),
-			},
-		});
+        assert_complete_with_parachain_bridge_constants::<
+            Runtime,
+            RialtoGrandpaInstance,
+            WithRialtoParachainMessagesInstance,
+            bp_rialto::Rialto,
+        >(AssertCompleteBridgeConstants {
+            this_chain_constants: AssertChainConstants {
+                block_length: bp_millau::BlockLength::get(),
+                block_weights: bp_millau::BlockWeights::get(),
+            },
+        });
 
-		pallet_bridge_relayers::extension::ensure_priority_boost_is_sane::<
-			Runtime,
-			WithRialtoParachainMessagesInstance,
-			PriorityBoostPerMessage,
-		>(1_000_000);
-	}
+        pallet_bridge_relayers::extension::ensure_priority_boost_is_sane::<
+            Runtime,
+            WithRialtoParachainMessagesInstance,
+            PriorityBoostPerMessage,
+        >(1_000_000);
+    }
 
-	#[test]
-	fn rialto_parachain_millau_bridge_identifier_did_not_changed() {
-		// there's nothing criminal if it is changed, but then thou need to fix it across
-		// all deployments scripts, alerts and so on
-		assert_eq!(
-			*Bridge::get().lane_id().as_ref(),
-			hex_literal::hex!("ee7158d2a51c3c43853ced550cc25bd00eb2662b231b1ddbb92e495ec882969c")
-				.into(),
-		);
-	}
+    #[test]
+    fn rialto_parachain_millau_bridge_identifier_did_not_changed() {
+        // there's nothing criminal if it is changed, but then thou need to fix it across
+        // all deployments scripts, alerts and so on
+        assert_eq!(
+            *Bridge::get().lane_id().as_ref(),
+            hex_literal::hex!("ee7158d2a51c3c43853ced550cc25bd00eb2662b231b1ddbb92e495ec882969c")
+                .into(),
+        );
+    }
 }
