@@ -1,4 +1,5 @@
 use crate as pallet_check_node_computational_work;
+use frame_support::traits::{ConstU16, FindAuthor};
 use frame_system as system;
 use sp_core::{
     crypto::{Pair, Public},
@@ -9,7 +10,6 @@ use sp_runtime::{
     traits::{BlakeTwo256, Hash, IdentifyAccount, IdentityLookup, Verify},
     MultiSignature,
 };
-use frame_support::traits::{FindAuthor, ConstU16};
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 type BlockNumber = u64;

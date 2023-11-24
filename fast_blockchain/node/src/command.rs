@@ -15,140 +15,162 @@
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-	cli::{Cli, Subcommand},
-	service,
-	service::new_partial,
+    cli::{Cli, Subcommand},
+    service,
+    service::new_partial,
 };
 use frame_benchmarking_cli::BenchmarkCmd;
-use westend_runtime::{Block, RuntimeApi};
 use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
+use westend_runtime::{Block, RuntimeApi};
 
 impl SubstrateCli for Cli {
-	fn impl_name() -> String {
-		"Millau Bridge Node".into()
-	}
+    fn impl_name() -> String {
+        "Millau Bridge Node".into()
+    }
 
-	fn impl_version() -> String {
-		env!("CARGO_PKG_VERSION").into()
-	}
+    fn impl_version() -> String {
+        env!("CARGO_PKG_VERSION").into()
+    }
 
-	fn description() -> String {
-		"Millau Bridge Node".into()
-	}
+    fn description() -> String {
+        "Millau Bridge Node".into()
+    }
 
-	fn author() -> String {
-		"Parity Technologies".into()
-	}
+    fn author() -> String {
+        "Parity Technologies".into()
+    }
 
-	fn support_url() -> String {
-		"https://github.com/paritytech/parity-bridges-common/".into()
-	}
+    fn support_url() -> String {
+        "https://github.com/paritytech/parity-bridges-common/".into()
+    }
 
-	fn copyright_start_year() -> i32 {
-		2019
-	}
+    fn copyright_start_year() -> i32 {
+        2019
+    }
 
-	fn executable_name() -> String {
-		"millau-bridge-node".into()
-	}
+    fn executable_name() -> String {
+        "millau-bridge-node".into()
+    }
 
-	fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
-		Ok(Box::new(
-			match id {
-				"" | "dev" => crate::chain_spec::Alternative::Development,
-				"local" => crate::chain_spec::Alternative::LocalTestnet,
-				_ => return Err(format!("Unsupported chain specification: {id}")),
-			}
-			.load(),
-		))
-	}
+    fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
+        Ok(Box::new(
+            match id {
+                "" | "dev" => crate::chain_spec::Alternative::Development,
+                "local" => crate::chain_spec::Alternative::LocalTestnet,
+                _ => return Err(format!("Unsupported chain specification: {id}")),
+            }
+            .load(),
+        ))
+    }
 }
 
 /// Parse and run command line arguments
 pub fn run() -> sc_cli::Result<()> {
-	let cli = Cli::from_args();
-	// make sure to set correct crypto version.
-	sp_core::crypto::set_default_ss58_version(sp_core::crypto::Ss58AddressFormat::custom(
-		millau_runtime::SS58Prefix::get() as u16,
-	));
+    let cli = Cli::from_args();
+    // make sure to set correct crypto version.
+    sp_core::crypto::set_default_ss58_version(sp_core::crypto::Ss58AddressFormat::custom(
+        westend_runtime::SS58Prefix::get() as u16,
+    ));
 
-	match &cli.subcommand {
-		Some(Subcommand::Benchmark(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			match cmd {
-				BenchmarkCmd::Pallet(cmd) =>
-					if cfg!(feature = "runtime-benchmarks") {
-						runner.sync_run(|config| cmd.run::<Block, ()>(config))
-					} else {
-						println!(
-							"Benchmarking wasn't enabled when building the node. \
+    match &cli.subcommand {
+        Some(Subcommand::Benchmark(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            match cmd {
+                BenchmarkCmd::Pallet(cmd) => {
+                    if cfg!(feature = "runtime-benchmarks") {
+                        runner.sync_run(|config| cmd.run::<Block, ()>(config))
+                    } else {
+                        println!(
+                            "Benchmarking wasn't enabled when building the node. \
 					You can enable it with `--features runtime-benchmarks`."
-						);
-						Ok(())
-					},
-				_ => Err("Unsupported benchmarking subcommand".into()),
-			}
-		},
-		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
-		Some(Subcommand::Sign(cmd)) => cmd.run(),
-		Some(Subcommand::Verify(cmd)) => cmd.run(),
-		Some(Subcommand::Vanity(cmd)) => cmd.run(),
-		Some(Subcommand::BuildSpec(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
-		},
-		Some(Subcommand::CheckBlock(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, import_queue, .. } =
-					new_partial(&config)?;
-				Ok((cmd.run(client, import_queue), task_manager))
-			})
-		},
-		Some(Subcommand::ExportBlocks(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, .. } = new_partial(&config)?;
-				Ok((cmd.run(client, config.database), task_manager))
-			})
-		},
-		Some(Subcommand::ExportState(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, .. } = new_partial(&config)?;
-				Ok((cmd.run(client, config.chain_spec), task_manager))
-			})
-		},
-		Some(Subcommand::ImportBlocks(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, import_queue, .. } =
-					new_partial(&config)?;
-				Ok((cmd.run(client, import_queue), task_manager))
-			})
-		},
-		Some(Subcommand::PurgeChain(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner.sync_run(|config| cmd.run(config.database))
-		},
-		Some(Subcommand::Revert(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner.async_run(|config| {
-				let PartialComponents { client, task_manager, backend, .. } = new_partial(&config)?;
-				Ok((cmd.run(client, backend, None), task_manager))
-			})
-		},
-		Some(Subcommand::Inspect(cmd)) => {
-			let runner = cli.create_runner(cmd)?;
-			runner
-				.sync_run(|config| cmd.run::<Block, RuntimeApi, service::ExecutorDispatch>(config))
-		},
-		None => {
-			let runner = cli.create_runner(&cli.run)?;
-			runner.run_node_until_exit(|config| async move {
-				service::new_full(config).map_err(sc_cli::Error::Service)
-			})
-		},
-	}
+                        );
+                        Ok(())
+                    }
+                }
+                _ => Err("Unsupported benchmarking subcommand".into()),
+            }
+        }
+        Some(Subcommand::Key(cmd)) => cmd.run(&cli),
+        Some(Subcommand::Sign(cmd)) => cmd.run(),
+        Some(Subcommand::Verify(cmd)) => cmd.run(),
+        Some(Subcommand::Vanity(cmd)) => cmd.run(),
+        Some(Subcommand::BuildSpec(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
+        }
+        Some(Subcommand::CheckBlock(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner.async_run(|config| {
+                let PartialComponents {
+                    client,
+                    task_manager,
+                    import_queue,
+                    ..
+                } = new_partial(&config)?;
+                Ok((cmd.run(client, import_queue), task_manager))
+            })
+        }
+        Some(Subcommand::ExportBlocks(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner.async_run(|config| {
+                let PartialComponents {
+                    client,
+                    task_manager,
+                    ..
+                } = new_partial(&config)?;
+                Ok((cmd.run(client, config.database), task_manager))
+            })
+        }
+        Some(Subcommand::ExportState(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner.async_run(|config| {
+                let PartialComponents {
+                    client,
+                    task_manager,
+                    ..
+                } = new_partial(&config)?;
+                Ok((cmd.run(client, config.chain_spec), task_manager))
+            })
+        }
+        Some(Subcommand::ImportBlocks(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner.async_run(|config| {
+                let PartialComponents {
+                    client,
+                    task_manager,
+                    import_queue,
+                    ..
+                } = new_partial(&config)?;
+                Ok((cmd.run(client, import_queue), task_manager))
+            })
+        }
+        Some(Subcommand::PurgeChain(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner.sync_run(|config| cmd.run(config.database))
+        }
+        Some(Subcommand::Revert(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner.async_run(|config| {
+                let PartialComponents {
+                    client,
+                    task_manager,
+                    backend,
+                    ..
+                } = new_partial(&config)?;
+                Ok((cmd.run(client, backend, None), task_manager))
+            })
+        }
+        Some(Subcommand::Inspect(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner
+                .sync_run(|config| cmd.run::<Block, RuntimeApi, service::ExecutorDispatch>(config))
+        }
+        None => {
+            let runner = cli.create_runner(&cli.run)?;
+            runner.run_node_until_exit(|config| async move {
+                service::new_full(config).map_err(sc_cli::Error::Service)
+            })
+        }
+    }
 }
