@@ -5,7 +5,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = ["max-encoded-len"] }
+codec = { package = "parity-scale-codec", version = "3.6.5", default-features = false, features = ["max-encoded-len"] }
 scale-info = { version = "2.9.0", default-features = false, features = ["derive"] }
 log = { version = "0.4.17", default-features = false }
 serde = { version = "1.0.144", default-features = false }
@@ -13,37 +13,37 @@ serde = { version = "1.0.144", default-features = false }
 # Substrate Dependencies
 
 ## Substrate Primitive Dependencies
-sp-std = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
-sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
+sp-std = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
+sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
 
 ## Substrate FRAME Dependencies
-frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
-frame-support = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
-frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
+frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
+frame-support = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
+frame-system = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
 
 # Cumulus dependencies
-cumulus-primitives-core = { git = 'https://github.com/paritytech/polkadot-sdk', branch = "release-polkadot-v1.3.0", default-features = false }
-cumulus-pallet-xcm = { git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = "release-polkadot-v1.3.0" }
+cumulus-primitives-core = { git = 'https://github.com/paritytech/polkadot-sdk', branch = "release-polkadot-v1.4.0", default-features = false }
+cumulus-pallet-xcm = { git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = "release-polkadot-v1.4.0" }
 
 # Polkadot Dependencies
-polkadot-parachain = { package="polkadot-parachain-primitives", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
-xcm = { package="staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
-xcm-executor = { package="staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
+polkadot-parachain = { package="polkadot-parachain-primitives", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
+xcm = { package="staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
+xcm-executor = { package="staging-xcm-executor", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
 
 [dev-dependencies]
 
 # Substrate
-pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
-sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
+pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
+sp-core = { git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
 
 # Cumulus dependencies
 parachain-info = { package="staging-parachain-info", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 
 # Polkadot Dependencies
-polkadot-parachain = { package="polkadot-parachain-primitives", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.3.0" }
-pallet-xcm = { git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = "release-polkadot-v1.3.0" }
-xcm-builder = { package="staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0" }
-xcm-executor = { package="staging-xcm-executor", git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = "release-polkadot-v1.3.0" }
+polkadot-parachain = { package="polkadot-parachain-primitives", git = "https://github.com/paritytech/polkadot-sdk", default-features = false, branch = "release-polkadot-v1.4.0" }
+pallet-xcm = { git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = "release-polkadot-v1.4.0" }
+xcm-builder = { package="staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
+xcm-executor = { package="staging-xcm-executor", git = 'https://github.com/paritytech/polkadot-sdk', default-features = false, branch = "release-polkadot-v1.4.0" }
 
 [features]
 default = ["std"]
