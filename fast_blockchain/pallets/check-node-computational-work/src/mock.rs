@@ -1,38 +1,32 @@
 use crate as pallet_check_node_computational_work;
 use frame_support::traits::{ConstU16, FindAuthor};
-use frame_system as system;
 use sp_core::{
     crypto::{Pair, Public},
     sr25519, H256,
 };
-use sp_runtime::ConsensusEngineId;
 use sp_runtime::{
-    traits::{BlakeTwo256, Hash, IdentifyAccount, IdentityLookup, Verify},
+    traits::{BlakeTwo256, Hash, IdentifyAccount, IdentityLookup, Verify, ConstU64},
+    SaturatedConversion,
     MultiSignature,
+    ConsensusEngineId
 };
+
+pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 type BlockNumber = u64;
 
-use sp_runtime::{traits::ConstU64, SaturatedConversion};
-
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
-
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
     pub enum Test
-
     {
-        Block: Block,
-        NodeBlock: Block,
-        UncheckedExtrinsic: UncheckedExtrinsic,
         System: frame_system,
         ComputationalWork: pallet_computational_work,
         CheckNodeComputationalWork: pallet_check_node_computational_work,
     }
 );
 
-impl system::Config for Test {
+impl frame_system::Config for Test {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeOrigin = RuntimeOrigin;
     type Nonce = u64;
@@ -65,7 +59,6 @@ impl pallet_computational_work::Config for Test {
 
 impl pallet_check_node_computational_work::Config for Test {
     type RuntimeEvent = RuntimeEvent;
-    type Event = Event;
     type FindAuthor = AuthorGiven;
 }
 

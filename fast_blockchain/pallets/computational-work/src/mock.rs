@@ -1,6 +1,5 @@
 use crate as pallet_computational_work;
 use frame_support::traits::{ConstU16, ConstU64, FindAuthor, OnFinalize, OnInitialize};
-use frame_system as system;
 use sp_core::{
     crypto::{Pair, Public},
     sr25519, H256,
@@ -10,11 +9,8 @@ use sp_runtime::{
     BuildStorage, ConsensusEngineId, MultiSignature,
 };
 
-type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
-type BlockNumber = u64;
-
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
@@ -25,7 +21,7 @@ frame_support::construct_runtime!(
     }
 );
 
-impl system::Config for Test {
+impl frame_system::Config for Test {
     type RuntimeEvent = RuntimeEvent;
     type RuntimeOrigin = RuntimeOrigin;
     type Nonce = u64;
@@ -53,7 +49,7 @@ impl system::Config for Test {
 
 impl pallet_computational_work::Config for Test {
     type RuntimeEvent = RuntimeEvent;
-    type ComputationalWorkFindAuthor = AuthorGiven;
+    type FindAuthor = AuthorGiven;
 }
 
 pub struct AuthorGiven;

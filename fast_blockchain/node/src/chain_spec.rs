@@ -14,16 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
-use bridge_hub_rococo_runtime::BridgeWestendGrandpaConfig;
-use bridge_hub_westend_runtime::{BridgeRococoGrandpaConfig, BridgeRococoMessagesConfig};
+use bridge_hub_westend_runtime::{BridgeRococoMessagesConfig};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_beefy::ecdsa_crypto::AuthorityId as BeefyId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
-use sp_runtime::traits::Verify;
+use sp_runtime::{traits::Verify, MultiSignature as Signature, AccountId32 as AccountId};
 use westend_runtime::{
-    BalancesConfig, BeefyConfig, GrandpaConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys, SudoConfig, SystemConfig, WASM_BINARY,
+    BalancesConfig, BeefyConfig, GrandpaConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys, SudoConfig, SystemConfig, WASM_BINARY, 
 };
+
 use xcm::v3::{NetworkId::Rococo as RococoId, NetworkId::Westend as WestednId};
 /// The default XCM version to set in genesis config.
 pub const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;

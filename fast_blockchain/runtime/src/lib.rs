@@ -28,8 +28,8 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-pub mod rialto_messages;
-pub mod rialto_parachain_messages;
+pub mod rococo_messages;
+pub mod rococo_parachain_messages;
 pub mod weights;
 pub mod xcm_config;
 
@@ -341,7 +341,7 @@ parameter_types! {
     pub const TransactionBaseFee: Balance = 0;
     pub const TransactionByteFee: Balance = 1;
     // values for following parameters are copied from polkadot repo, but it is fine
-    // not to sync them - we're not going to make Rialto a full copy of one of Polkadot-like chains
+    // not to sync them - we're not going to make Rococo a full copy of one of Polkadot-like chains
     pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
     pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(3, 100_000);
     pub MinimumMultiplier: Multiplier = Multiplier::saturating_from_rational(1, 1_000_000u128);
@@ -405,7 +405,7 @@ impl pallet_bridge_relayers::Config for Runtime {
     type WeightInfo = ();
 }
 
-pub type RialtoGrandpaInstance = ();
+pub type RococoGrandpaInstance = ();
 impl pallet_bridge_grandpa::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type BridgedChain = bp_rialto::Rialto;

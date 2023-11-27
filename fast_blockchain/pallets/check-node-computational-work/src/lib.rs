@@ -14,11 +14,12 @@ mod tests;
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use crate::pallet::vec::Vec;
-	use core::fmt::{Debug, Formatter, Result};
-	use frame_support::{pallet_prelude::*, Blake2_128Concat};
+	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 	use scale_info::prelude::vec;
+    use frame_support::sp_runtime::traits::Hash;
+    use sp_runtime::traits::SaturatedConversion;
+    use frame_support::traits::FindAuthor;
 
     #[pallet::pallet]
     #[pallet::without_storage_info]
@@ -26,12 +27,14 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
+
     pub trait Config: frame_system::Config + pallet_computational_work::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         /// The pallet computational work.
-        type FindAuthor: pallet_computational_work::Config::ComputationalWorkAuthor<Self::AccountId>;
+        /// TODO: Change later for pallet computational work
+        type FindAuthor:  FindAuthor<<Self as frame_system::Config>::AccountId>;
     }
 
     // Set the default value for the author check condition.
@@ -50,7 +53,7 @@ pub mod pallet {
     // Store the first author.
     #[pallet::storage]
     #[pallet::getter(fn first_author)]
-    pub type FirstAuthor<T: Config> = StorageValue<_, T::AccountId>;
+    pub type FirstAuthor<T: Config> = StorageValue<_, <T as frame_system::Config>::AccountId>;
 
     // Store the check result of the first author.
     #[pallet::storage]
@@ -67,7 +70,7 @@ pub mod pallet {
     // Store the second author.
     #[pallet::storage]
     #[pallet::getter(fn second_author)]
-    pub type SecondAuthor<T: Config> = StorageValue<_, T::AccountId>;
+    pub type SecondAuthor<T: Config> = StorageValue<_, <T as frame_system::Config>::AccountId>;
 
     // Store the check result of the second author.
     #[pallet::storage]
@@ -84,7 +87,7 @@ pub mod pallet {
     // Store the third author.
     #[pallet::storage]
     #[pallet::getter(fn third_author)]
-    pub type ThirdAuthor<T: Config> = StorageValue<_, T::AccountId>;
+    pub type ThirdAuthor<T: Config> = StorageValue<_, <T as frame_system::Config>::AccountId>;
 
     // Store the check result of the third author.
     #[pallet::storage]
@@ -100,20 +103,20 @@ pub mod pallet {
         CheckResult {
             raw_hash: <T as frame_system::Config>::Hash,
             elaborated_hash: <T as frame_system::Config>::Hash,
-            checked_author: T::AccountId,
+            checked_author: <T as frame_system::Config>::AccountId,
             block_height: u32,
-            current_author: T::AccountId,
+            current_author: <T as frame_system::Config>::AccountId,
             is_passed: bool,
         },
 
         /// Emit an event whit the final result of the check.
         FinalResult {
-            checked_author: T::AccountId,
-            controller1: T::AccountId,
+            checked_author: <T as frame_system::Config>::AccountId,
+            controller1:<T as frame_system::Config>::AccountId,
             result1: bool,
-            controller2: T::AccountId,
+            controller2: <T as frame_system::Config>::AccountId,
             result2: bool,
-            controller3: T::AccountId,
+            controller3: <T as frame_system::Config>::AccountId,
             result3: bool,
             is_passed: bool,
         },
@@ -158,7 +161,7 @@ pub mod pallet {
                 if last_computational_work.2 != current_author {
                     if !FirstAuthorHasChecked::<T>::get() {
                         // Check the computational work, get the result and the block height.
-                        let (is_passed, block_height) = Self::check_computational_work();
+                        let (is_passed, block_height) = Self::check_computational_work().unwrap();
 
                         // Set the first author.
                         FirstAuthor::<T>::put(current_author.clone());
@@ -238,102 +241,105 @@ pub mod pallet {
             // Set weight to 0 just for testing.
         }
     }
-}
 
-impl<T: Config> Pallet<T> {
-    /// Check the computational work.
-    /// Returns a tuple of (is_passed, block_height).
-    /// is_passed: true if the computational work is passed, false otherwise.
-    /// block_height: the block height of the checked computational work.
-    pub fn check_computational_work() -> (bool, u32) {
-        use frame_support::sp_runtime::traits::Hash;
-        use sp_runtime::traits::SaturatedConversion;
 
-        // Get the last computational work.
-        let last_computational_work =
-            pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
+    impl<T: Config> Pallet<T> {
 
-        // Get the current block height.
-        let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
-
-        // Check the computational work.
-        // Calling math_work_testing() for PoC.
-        let check_computational_work =
-            pallet_computational_work::Pallet::<T>::math_work_testing(block_height);
-        // Hash the check computational work.
-        let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
-
-        // Compare the check computational work with the last computational work.
-        (
-            check_computational_work_hashed == last_computational_work.1,
-            block_height,
-        )
-    }
-
-    /// Elaborate the final check result.
-    /// If 2/3 of the authors passed the check, the check is passed.
-    pub fn check_result() {
-        use scale_info::prelude::vec;
-
-        // Get the check results from the storage.
-        let check_results = vec![
-            FirstAuthorIsPassed::<T>::get().unwrap(),
-            SecondAuthorIsPassed::<T>::get().unwrap(),
-            ThirdAuthorIsPassed::<T>::get().unwrap(),
-        ];
-
-        // Count the number of true values.
-        let mut votes = 0;
-        for check_results in check_results {
-            if check_results {
-                votes += 1;
+        /// Check the computational work.
+        /// Returns a tuple of (is_passed, block_height).
+        /// is_passed: true if the computational work is passed, false otherwise.
+        /// block_height: the block height of the checked computational work.
+        pub fn check_computational_work() -> DispatchResult {    
+            // Get the last computational work.
+            let last_computational_work =
+                pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
+    
+            // Get the current block height.
+            let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
+    
+            // Check the computational work.
+            // Calling math_work_testing() for PoC.
+            let check_computational_work =
+                pallet_computational_work::Pallet::<T>::math_work_testing(block_height);
+            // Hash the check computational work.
+            let check_computational_work_hashed = T::Hashing::hash_of(&check_computational_work);
+    
+            // Compare the check computational work with the last computational work.
+        
+            Ok(    (
+                check_computational_work_hashed == last_computational_work.1,
+                block_height,
+            ))
+        }
+    
+        /// Elaborate the final check result.
+        /// If 2/3 of the authors passed the check, the check is passed.
+        pub fn check_result() -> DispatchResult {
+            // Get the check results from the storage.
+            let check_results = vec![
+                FirstAuthorIsPassed::<T>::get().unwrap(),
+                SecondAuthorIsPassed::<T>::get().unwrap(),
+                ThirdAuthorIsPassed::<T>::get().unwrap(),
+            ];
+    
+            // Count the number of true values.
+            let mut votes = 0;
+            for check_results in check_results {
+                if check_results {
+                    votes += 1;
+                }
             }
+    
+            // Get last computational work for the event.
+            let last_computational_work =
+                pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
+    
+            // If 2/3 of the authors passed the check, the check is passed.
+            // emit the final check result event.
+            if votes >= 2 {
+                Self::deposit_event(Event::FinalResult {
+                    checked_author: last_computational_work.2,
+                    controller1: FirstAuthor::<T>::get().unwrap(),
+                    result1: FirstAuthorIsPassed::<T>::get().unwrap(),
+                    controller2: SecondAuthor::<T>::get().unwrap(),
+                    result2: SecondAuthorIsPassed::<T>::get().unwrap(),
+                    controller3: ThirdAuthor::<T>::get().unwrap(),
+                    result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
+                    is_passed: true,
+                });
+            } else {
+                Self::deposit_event(Event::FinalResult {
+                    checked_author: last_computational_work.2,
+                    controller1: FirstAuthor::<T>::get().unwrap(),
+                    result1: FirstAuthorIsPassed::<T>::get().unwrap(),
+                    controller2: SecondAuthor::<T>::get().unwrap(),
+                    result2: SecondAuthorIsPassed::<T>::get().unwrap(),
+                    controller3: ThirdAuthor::<T>::get().unwrap(),
+                    result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
+                    is_passed: false,
+                });
+            }
+            Ok(())
         }
-
-        // Get last computational work for the event.
-        let last_computational_work =
-            pallet_computational_work::Pallet::<T>::last_computational_work().unwrap();
-
-        // If 2/3 of the authors passed the check, the check is passed.
-        // emit the final check result event.
-        if votes >= 2 {
-            Self::deposit_event(Event::FinalResult {
-                checked_author: last_computational_work.2,
-                controller1: FirstAuthor::<T>::get().unwrap(),
-                result1: FirstAuthorIsPassed::<T>::get().unwrap(),
-                controller2: SecondAuthor::<T>::get().unwrap(),
-                result2: SecondAuthorIsPassed::<T>::get().unwrap(),
-                controller3: ThirdAuthor::<T>::get().unwrap(),
-                result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
-                is_passed: true,
-            });
-        } else {
-            Self::deposit_event(Event::FinalResult {
-                checked_author: last_computational_work.2,
-                controller1: FirstAuthor::<T>::get().unwrap(),
-                result1: FirstAuthorIsPassed::<T>::get().unwrap(),
-                controller2: SecondAuthor::<T>::get().unwrap(),
-                result2: SecondAuthorIsPassed::<T>::get().unwrap(),
-                controller3: ThirdAuthor::<T>::get().unwrap(),
-                result3: ThirdAuthorIsPassed::<T>::get().unwrap(),
-                is_passed: false,
-            });
+    
+        /// Resetting the check process
+        pub fn reset_check_process() -> DispatchResult {
+            // Checks are done, reset the checks.
+            FirstAuthorHasChecked::<T>::put(false);
+            SecondAuthorHasChecked::<T>::put(false);
+            ThirdAuthorHasChecked::<T>::put(false);
+    
+            // Reset the voters.
+            FirstAuthor::<T>::kill();
+            SecondAuthor::<T>::kill();
+            ThirdAuthor::<T>::kill();
+    
+            // Set the last computational work as checked.
+            pallet_computational_work::Pallet::<T>::set_last_computational_work_is_checked(true);
+            Ok(())
         }
-    }
-
-    /// Resetting the check process
-    pub fn reset_check_process() {
-        // Checks are done, reset the checks.
-        FirstAuthorHasChecked::<T>::put(false);
-        SecondAuthorHasChecked::<T>::put(false);
-        ThirdAuthorHasChecked::<T>::put(false);
-
-        // Reset the voters.
-        FirstAuthor::<T>::kill();
-        SecondAuthor::<T>::kill();
-        ThirdAuthor::<T>::kill();
-
-        // Set the last computational work as checked.
-        pallet_computational_work::Pallet::<T>::set_last_computational_work_is_checked(true);
     }
 }
+
+
+

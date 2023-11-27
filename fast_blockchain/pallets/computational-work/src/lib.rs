@@ -17,17 +17,16 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
     use sp_runtime::traits::SaturatedConversion;
 
-    #[pallet::pallet]
-    #[pallet::without_storage_info]
-    pub struct Pallet<T>(_);
-
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
     pub trait Config: frame_system::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-        type ComputationalWorkAuthor: FindAuthor<T::AccountId>;
+        type FindAuthor: FindAuthor<Self::AccountId>;
     }
+
+    #[pallet::pallet]
+    pub struct Pallet<T>(_);
 
     #[pallet::error]
     pub enum Error<T> {
@@ -127,7 +126,7 @@ pub mod pallet {
             // Get the block author.
             let block_digest = <frame_system::Pallet<T>>::digest();
             let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
-            let author = T::ComputationalWorkAuthor::find_author(digests).unwrap();
+            let author = T::FindAuthor::find_author(digests).unwrap();
 
             if Self::last_computational_work_is_checked() {
                 if Self::x_work_index() == Self::x_work() {

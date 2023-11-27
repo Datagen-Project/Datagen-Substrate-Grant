@@ -55,7 +55,6 @@ type FullClient =
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
-#[allow(clippy::type_complexity)]
 pub fn new_partial(
     config: &Configuration,
 ) -> Result<
@@ -65,18 +64,7 @@ pub fn new_partial(
         FullSelectChain,
         sc_consensus::DefaultImportQueue<Block>,
         sc_transaction_pool::FullPool<Block, FullClient>,
-        (
-            sc_consensus_grandpa::GrandpaBlockImport<
-                FullBackend,
-                Block,
-                FullClient,
-                FullSelectChain,
-            >,
-            sc_consensus_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
-            sc_consensus_beefy::BeefyVoterLinks<Block>,
-            sc_consensus_beefy::BeefyRPCLinks<Block>,
-            Option<Telemetry>,
-        ),
+        Option<Telemetry>,
     >,
     ServiceError,
 > {

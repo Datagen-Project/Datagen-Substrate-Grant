@@ -90,7 +90,7 @@ use xcm_builder::{
 };
 use xcm_executor::{Config, XcmExecutor};
 
-pub mod millau_messages;
+pub mod westend_messages;
 
 // generate signed extension that rejects obsolete bridge transactions
 generate_bridge_reject_obsolete_headers_and_messages! {
@@ -542,12 +542,12 @@ impl pallet_bridge_relayers::Config for Runtime {
 	type WeightInfo = ();
 }
 
-pub type MillauGrandpaInstance = ();
+pub type WestendGrandpaInstance = ();
 impl pallet_bridge_grandpa::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type BridgedChain = bp_millau::Millau;
+	type BridgedChain = bp_westend::Westend;
 	type MaxFreeMandatoryHeadersPerBlock = ConstU32<4>;
-	type HeadersToKeep = ConstU32<{ bp_millau::DAYS as u32 }>;
+	type HeadersToKeep = ConstU32<{ bp_westend::DAYS as u32 }>;
 	type WeightInfo = pallet_bridge_grandpa::weights::BridgeWeight<Runtime>;
 }
 
@@ -556,16 +556,16 @@ parameter_types! {
 	pub const RootAccountForPayments: Option<AccountId> = None;
 }
 
-/// Instance of the messages pallet used to relay messages to/from Millau chain.
-pub type WithMillauMessagesInstance = ();
+/// Instance of the messages pallet used to relay messages to/from Westend chain.
+pub type WithWestendMessagesInstance = ();
 
-impl pallet_bridge_messages::Config<WithMillauMessagesInstance> for Runtime {
+impl pallet_bridge_messages::Config<WithWestendMessagesInstance> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = pallet_bridge_messages::weights::BridgeWeight<Runtime>;
-
+	type WeightInfo = weights::pallet_bridge_messages::WeightInfo<Runtime>;
+	type BridgedChainId = BridgeHubWestendChainId;
 	type ThisChain = bp_rialto_parachain::RialtoParachain;
-	type BridgedChain = bp_millau::Millau;
-	type BridgedHeaderChain = BridgeMillauGrandpa;
+	type BridgedChain = bp_westend::Westend;
+	type BridgedHeaderChain = BridgeWestendGrandpa;
 
 	type OutboundPayload = bp_xcm_bridge_hub::XcmAsPlainPayload;
 	type InboundPayload = bp_xcm_bridge_hub::XcmAsPlainPayload;
@@ -573,10 +573,10 @@ impl pallet_bridge_messages::Config<WithMillauMessagesInstance> for Runtime {
 	type DeliveryPayments = ();
 	type DeliveryConfirmationPayments = pallet_bridge_relayers::DeliveryConfirmationPaymentsAdapter<
 		Runtime,
-		WithMillauMessagesInstance,
+		WithWestendMessagesInstance,
 		frame_support::traits::ConstU128<100_000>,
 	>;
-	type OnMessagesDelivered = XcmMillauBridgeHub;
+	type OnMessagesDelivered = OnMessagesDeliveredFromWestend;
 
 	type MessageDispatch = XcmMillauBridgeHub;
 }

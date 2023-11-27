@@ -1,6 +1,6 @@
 [package]
-name = "millau-bridge-node"
-description = "Substrate node compatible with Millau runtime"
+name = "westend-bridge-node"
+description = "Substrate node compatible with Westend runtime"
 version = "0.1.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
@@ -15,8 +15,6 @@ jsonrpsee = { version = "0.20.2", features = ["server"] }
 serde_json = "1.0.108"
 
 # Bridge dependencies
-
-# millau-runtime = { path = "../runtime" }
 bp-messages =  { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", default-features = false }
 bridge-runtime-common = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.3.0", features = ["integrity-test"] }
 westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
