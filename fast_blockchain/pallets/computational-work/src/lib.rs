@@ -22,7 +22,7 @@ pub mod pallet {
     pub trait Config: frame_system::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
-        type FindAuthor: FindAuthor<Self::AccountId>;
+        type FindAuthor: FindAuthor<<Self as frame_system::Config>::AccountId>;
     }
 
     #[pallet::pallet]
@@ -77,7 +77,7 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    pub enum Event<T: Config>{
+    pub enum Event<T: Config> {
         /// Event emitted when a new data is hashed.
         /// The data will be only hashed at production time, the not hashed data is shown for testing purposes.
         ResultsComputationalWork {
@@ -111,7 +111,7 @@ pub mod pallet {
         /// for future checks.
         #[pallet::weight(100)]
         pub fn hash_work(origin: OriginFor<T>) -> DispatchResult {
-            let _sender = ensure_signed(origin)?;
+            let sender = ensure_signed(origin)?;
 
             // Get the block height.
             let block_height = <frame_system::Pallet<T>>::block_number().saturated_into::<u32>();
@@ -123,18 +123,13 @@ pub mod pallet {
             let raw_hashed_data = T::Hashing::hash_of(&block_height);
             let elaborated_hashed_data = T::Hashing::hash_of(&elaborated_math_work);
 
-            // Get the block author.
-            let block_digest = <frame_system::Pallet<T>>::digest();
-            let digests = block_digest.logs.iter().filter_map(|d| d.as_pre_runtime());
-            let author = T::FindAuthor::find_author(digests).unwrap();
-
             if Self::last_computational_work_is_checked() {
                 if Self::x_work_index() == Self::x_work() {
                     // Store data for possible checks.
                     <LastComputationalWork<T>>::put((
                         raw_hashed_data,
                         elaborated_hashed_data,
-                        author.clone(),
+                        sender.clone(),
                         block_height.saturated_into::<u32>(),
                     ));
 
@@ -154,7 +149,7 @@ pub mod pallet {
                 elaborated_data: elaborated_math_work,
                 raw_hash: raw_hashed_data,
                 elaborated_hash: elaborated_hashed_data,
-                author,
+                author: sender,
                 block_height,
             });
 

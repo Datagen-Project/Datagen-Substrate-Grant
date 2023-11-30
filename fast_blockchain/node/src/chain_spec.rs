@@ -14,17 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
-use bridge_hub_westend_runtime::{BridgeRococoMessagesConfig};
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+use sp_consensus_babe::AuthorityId as BabeId;
 use sp_consensus_beefy::ecdsa_crypto::AuthorityId as BeefyId;
 use sp_consensus_grandpa::AuthorityId as GrandpaId;
 use sp_core::{sr25519, Pair, Public};
-use sp_runtime::{traits::Verify, MultiSignature as Signature, AccountId32 as AccountId};
-use westend_runtime::{
-    BalancesConfig, BeefyConfig, GrandpaConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys, SudoConfig, SystemConfig, WASM_BINARY, 
+use sp_runtime::{
+    traits::{IdentifyAccount, Verify},
+    AccountId32 as AccountId, MultiSignature as Signature,
 };
-
+use westend_runtime::{
+    BalancesConfig, BeefyConfig, GrandpaConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys,
+    SudoConfig, SystemConfig, WASM_BINARY,
+};
 use xcm::v3::{NetworkId::Rococo as RococoId, NetworkId::Westend as WestednId};
+
 /// The default XCM version to set in genesis config.
 pub const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
 
@@ -118,6 +124,7 @@ impl Alternative {
                 None,
                 properties,
                 None,
+                &vec![0, 1, 2, 4, 5, 6],
             ),
             Alternative::LocalTestnet => ChainSpec::from_genesis(
                 "Westend Local",
@@ -140,6 +147,7 @@ impl Alternative {
                 None,
                 properties,
                 None,
+                &vec![0, 1, 2, 4, 5, 6],
             ),
         }
     }
@@ -187,23 +195,35 @@ fn endowed_accounts() -> Vec<AccountId> {
     .collect()
 }
 
-fn session_keys(aura: AuraId, beefy: BeefyId, grandpa: GrandpaId) -> SessionKeys {
-    SessionKeys {
-        aura,
-        beefy,
+fn session_keys(
+    babe: BabeId,
+    grandpa: GrandpaId,
+    im_online: ImOnlineId,
+    para_validator: ValidatorId,
+    para_assignment: AssignmentId,
+    authority_discovery: AuthorityDiscoveryId,
+    beefy: BeefyId,
+) -> westend_runtime::SessionKeys {
+    westend_runtime::SessionKeys {
+        babe,
         grandpa,
+        im_online,
+        para_validator,
+        para_assignment,
+        authority_discovery,
+        beefy,
     }
 }
 
 fn testnet_genesis(
-    initial_authorities: Vec<(AccountId, AuraId, BeefyId, GrandpaId)>,
+    initial_authorities: Vec<(AccountId, BeefyId, GrandpaId)>,
     root_key: AccountId,
     endowed_accounts: Vec<AccountId>,
     _enable_println: bool,
 ) -> RuntimeGenesisConfig {
     RuntimeGenesisConfig {
         system: SystemConfig::default(),
-        // TODO: check if th einit could be done otherwise
+        // TODO: check if the init could be done in another way
         balances: BalancesConfig {
             balances: endowed_accounts
                 .iter()
@@ -224,8 +244,16 @@ fn testnet_genesis(
                 .map(|x| {
                     (
                         x.0.clone(),
-                        x.0.clone(),
-                        session_keys(x.1.clone(), x.2.clone(), x.3.clone()),
+                        x.1.clone(),
+                        session_keys(
+                            x.2.clone(),
+                            x.3.clone(),
+                            x.4.clone(),
+                            x.5.clone(),
+                            x.6.clone(),
+                            x.7.clone(),
+                            x.8.clone(),
+                        ),
                     )
                 })
                 .collect::<Vec<_>>(),

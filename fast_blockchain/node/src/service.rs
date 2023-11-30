@@ -16,6 +16,7 @@
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
+
 use jsonrpsee::RpcModule;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus_aura::{CompatibilityMode, ImportQueueParams, SlotProportion, StartAuraParams};
@@ -168,13 +169,7 @@ pub fn new_partial(
         keystore_container,
         select_chain,
         transaction_pool,
-        other: (
-            grandpa_block_import,
-            grandpa_link,
-            beefy_voter_links,
-            beefy_rpc_links,
-            telemetry,
-        ),
+        other: (telemetry)
     })
 }
 

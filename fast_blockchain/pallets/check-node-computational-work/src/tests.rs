@@ -15,7 +15,7 @@ fn correct_hook_event_when_hash_work_is_called() {
         let row_hash_to_check = hash_number(8);
         let elaborated_hash_to_check = hash_number(55);
 
-        System::assert_last_event(RuntimEvent::ComputationalWork(
+        System::assert_last_event(RuntimeEvent::ComputationalWork(
             pallet_computational_work::Event::ResultsComputationalWork {
                 // The not hashed raw data, it's for testing purposes.
                 raw_data: 8,
@@ -30,7 +30,7 @@ fn correct_hook_event_when_hash_work_is_called() {
 
         run_to_block(9);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,

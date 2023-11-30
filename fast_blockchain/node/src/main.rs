@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Millau bridge node.
+//! Westend bridge node.
 
 #![warn(missing_docs)]
 
@@ -24,7 +24,7 @@ mod service;
 mod cli;
 mod command;
 
-/// Run the Millau Node
+/// Run the Westend Node
 fn main() -> sc_cli::Result<()> {
     command::run()
 }

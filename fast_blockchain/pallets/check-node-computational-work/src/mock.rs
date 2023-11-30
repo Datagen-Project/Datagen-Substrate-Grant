@@ -5,10 +5,8 @@ use sp_core::{
     sr25519, H256,
 };
 use sp_runtime::{
-    traits::{BlakeTwo256, Hash, IdentifyAccount, IdentityLookup, Verify, ConstU64},
-    SaturatedConversion,
-    MultiSignature,
-    ConsensusEngineId
+    traits::{BlakeTwo256, ConstU64, Hash, IdentifyAccount, IdentityLookup, Verify},
+    ConsensusEngineId, MultiSignature, SaturatedConversion,
 };
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;

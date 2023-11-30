@@ -26,7 +26,7 @@ use westend_runtime::{Block, RuntimeApi};
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
-        "Millau Bridge Node".into()
+        "Westend Bridge Node".into()
     }
 
     fn impl_version() -> String {
@@ -34,7 +34,7 @@ impl SubstrateCli for Cli {
     }
 
     fn description() -> String {
-        "Millau Bridge Node".into()
+        "Westend Bridge Node".into()
     }
 
     fn author() -> String {
@@ -50,7 +50,7 @@ impl SubstrateCli for Cli {
     }
 
     fn executable_name() -> String {
-        "millau-bridge-node".into()
+        "westend-bridge-node".into()
     }
 
     fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {

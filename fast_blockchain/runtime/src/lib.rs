@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
-//! The Millau runtime. This can be compiled with `#[no_std]`, ready for Wasm.
+//! The Westend runtime. This can be compiled with `#[no_std]`, ready for Wasm.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
@@ -29,7 +29,6 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 pub mod rococo_messages;
-pub mod rococo_parachain_messages;
 pub mod weights;
 pub mod xcm_config;
 
@@ -57,7 +56,7 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use xcm_builder::NetworkExportTable;
 
-// to be able to use Millau runtime in `bridge-runtime-common` tests
+// to be able to use Westend runtime in `bridge-runtime-common` tests
 pub use bridge_runtime_common;
 
 // A few exports that help ease life for downstream crates.
@@ -91,30 +90,30 @@ pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
 /// An index to a block.
-pub type BlockNumber = bp_millau::BlockNumber;
+pub type BlockNumber = bp_westend::BlockNumber;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = bp_millau::Signature;
+pub type Signature = bp_westend::Signature;
 
 /// Some way of identifying an account on the chain. We intentionally make it equivalent
 /// to the public key of our transaction signing scheme.
-pub type AccountId = bp_millau::AccountId;
+pub type AccountId = bp_westend::AccountId;
 
 /// The type for looking up accounts. We don't expect more than 4 billion of them, but you
 /// never know...
 pub type AccountIndex = u32;
 
 /// Balance of an account.
-pub type Balance = bp_millau::Balance;
+pub type Balance = bp_westend::Balance;
 
 /// Nonce of a transaction in the chain.
-pub type Nonce = bp_millau::Nonce;
+pub type Nonce = bp_westend::Nonce;
 
 /// A hash of some data used by the chain.
-pub type Hash = bp_millau::Hash;
+pub type Hash = bp_westend::Hash;
 
 /// Hashing algorithm used by the chain.
-pub type Hashing = bp_millau::Hasher;
+pub type Hashing = bp_westend::Hasher;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -136,16 +135,13 @@ pub mod opaque {
 impl_opaque_keys! {
     pub struct SessionKeys {
         pub aura: Aura,
-        pub beefy: Beefy,
-        pub grandpa: Grandpa,
     }
 }
 
-/// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("millau-runtime"),
-    impl_name: create_runtime_str!("millau-runtime"),
+    spec_name: create_runtime_str!("westend-runtime"),
+    impl_name: create_runtime_str!("westend-runtime"),
     authoring_version: 1,
     spec_version: 1,
     impl_version: 1,
@@ -171,6 +167,7 @@ parameter_types! {
         write: 200_000_000, // ~0.2 ms = 200 µs
     };
     pub const SS58Prefix: u8 = 60;
+    pub const BridgeHubRococoChainId: bp_runtime::ChainId = bp_runtime::BRIDGE_HUB_ROCOCO_CHAIN_ID;
 }
 
 impl frame_system::Config for Runtime {
@@ -210,9 +207,9 @@ impl frame_system::Config for Runtime {
     /// Weight information for the extrinsics of this pallet.
     type SystemWeightInfo = ();
     /// Block and extrinsics weights: base values and limits.
-    type BlockWeights = bp_millau::BlockWeights;
+    type BlockWeights = bp_westend::BlockWeights;
     /// The maximum length of a block (in bytes).
-    type BlockLength = bp_millau::BlockLength;
+    type BlockLength = bp_westend::BlockLength;
     /// The weight of database operations that the runtime can invoke.
     type DbWeight = DbWeight;
     /// The designated SS58 prefix of this chain.
@@ -300,7 +297,7 @@ impl pallet_beefy_mmr::Config for Runtime {
 }
 
 parameter_types! {
-    pub const MinimumPeriod: u64 = bp_millau::SLOT_DURATION / 2;
+    pub const MinimumPeriod: u64 = bp_westend::SLOT_DURATION / 2;
 }
 
 impl pallet_timestamp::Config for Runtime {
@@ -313,10 +310,11 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 parameter_types! {
-    pub const ExistentialDeposit: bp_millau::Balance = 500;
+    pub const ExistentialDeposit: bp_westend::Balance = 500;
 }
 
 impl pallet_balances::Config for Runtime {
+    type MaxLocks = ConstU32<50>;
     /// The type for recording an account's balance.
     type Balance = Balance;
     /// The ubiquitous event type.
@@ -324,17 +322,15 @@ impl pallet_balances::Config for Runtime {
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = System;
-    // TODO: update me (https://github.com/paritytech/parity-bridges-common/issues/78)
-    type WeightInfo = ();
-    // For weight estimation, we assume that the most locks on an individual account will be 50.
-    // This number may need to be adjusted in the future if this assumption no longer holds true.
-    type MaxLocks = ConstU32<50>;
+	type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
     type MaxReserves = ConstU32<50>;
     type ReserveIdentifier = [u8; 8];
     type RuntimeHoldReason = RuntimeHoldReason;
+    type RuntimeFreezeReason = RuntimeFreezeReason;
     type FreezeIdentifier = ();
     type MaxHolds = ConstU32<0>;
     type MaxFreezes = ConstU32<0>;
+
 }
 
 parameter_types! {
@@ -351,7 +347,7 @@ parameter_types! {
 impl pallet_transaction_payment::Config for Runtime {
     type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, ()>;
     type OperationalFeeMultiplier = ConstU8<5>;
-    type WeightToFee = bp_millau::WeightToFee;
+    type WeightToFee = bp_westend::WeightToFee;
     type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
     type FeeMultiplierUpdate = pallet_transaction_payment::TargetedFeeAdjustment<
         Runtime,
@@ -408,7 +404,7 @@ impl pallet_bridge_relayers::Config for Runtime {
 pub type RococoGrandpaInstance = ();
 impl pallet_bridge_grandpa::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
-    type BridgedChain = bp_rialto::Rialto;
+    type BridgedChain = bp_rococo::Rococo;
     type MaxFreeMandatoryHeadersPerBlock = ConstU32<4>;
     type HeadersToKeep = ConstU32<{ bp_rialto::DAYS }>;
     type WeightInfo = pallet_bridge_grandpa::weights::BridgeWeight<Runtime>;
@@ -430,45 +426,17 @@ parameter_types! {
     pub const RootAccountForPayments: Option<AccountId> = None;
 }
 
-/// Instance of the messages pallet used to relay messages to/from Rialto chain.
-pub type WithRialtoMessagesInstance = ();
+/// Instance of the messages pallet used to relay messages to/from Rococo chain.
+pub type WithRococoMessagesInstance = ();
 
-impl pallet_bridge_messages::Config<WithRialtoMessagesInstance> for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = weights::RialtoMessagesWeightInfo<Runtime>;
+impl pallet_bridge_messages::Config<WithRococoMessagesInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = weights::pallet_bridge_messages::WeightInfo<Runtime>;
+	type BridgedChainId = BridgeHubRococoChainId;
 
-    type ThisChain = bp_millau::Millau;
-    type BridgedChain = bp_rialto::Rialto;
-    type BridgedHeaderChain = BridgeRialtoGrandpa;
-
-    type OutboundPayload = bp_xcm_bridge_hub::XcmAsPlainPayload;
-    type InboundPayload = bp_xcm_bridge_hub::XcmAsPlainPayload;
-
-    type DeliveryPayments = ();
-    type DeliveryConfirmationPayments = pallet_bridge_relayers::DeliveryConfirmationPaymentsAdapter<
-        Runtime,
-        WithRialtoMessagesInstance,
-        frame_support::traits::ConstU64<100_000>,
-    >;
-    type OnMessagesDelivered = XcmRialtoBridgeHub;
-
-    type MessageDispatch = XcmRialtoBridgeHub;
-}
-
-/// Instance of the messages pallet used to relay messages to/from RialtoParachain chain.
-pub type WithRialtoParachainMessagesInstance = pallet_bridge_messages::Instance1;
-
-impl pallet_bridge_messages::Config<WithRialtoParachainMessagesInstance> for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = weights::RialtoParachainMessagesWeightInfo<Runtime>;
-
-    type ThisChain = bp_millau::Millau;
-    type BridgedChain = bp_rialto_parachain::RialtoParachain;
-    type BridgedHeaderChain = pallet_bridge_parachains::ParachainHeaders<
-        Runtime,
-        WithRialtoParachainsInstance,
-        bp_rialto_parachain::RialtoParachain,
-    >;
+    type ThisChain = bp_westend::Westend;
+    type BridgedChain = bp_rococo::Rococo;
+    type BridgedHeaderChain = BridgeRococoGrandpa;
 
     type OutboundPayload = bp_xcm_bridge_hub::XcmAsPlainPayload;
     type InboundPayload = bp_xcm_bridge_hub::XcmAsPlainPayload;
@@ -476,124 +444,75 @@ impl pallet_bridge_messages::Config<WithRialtoParachainMessagesInstance> for Run
     type DeliveryPayments = ();
     type DeliveryConfirmationPayments = pallet_bridge_relayers::DeliveryConfirmationPaymentsAdapter<
         Runtime,
-        WithRialtoParachainMessagesInstance,
+        WithRococoMessagesInstance,
         frame_support::traits::ConstU64<100_000>,
     >;
-    type OnMessagesDelivered = XcmRialtoParachainBridgeHub;
 
-    type MessageDispatch = XcmRialtoParachainBridgeHub;
+	type SourceHeaderChain = SourceHeaderChainAdapter<WithBridgeHubRococoMessageBridge>;
+	type MessageDispatch = XcmBlobMessageDispatch<
+		FromRococoMessageBlobDispatcher,
+		Self::WeightInfo,
+		cumulus_pallet_xcmp_queue::bridging::OutXcmpChannelStatusProvider<
+			AssetHubWestendParaId,
+			Runtime,
+		>,
+	>;
+	type OnMessagesDelivered = OnMessagesDelivered;
 }
 
-parameter_types! {
-    pub const RialtoParasPalletName: &'static str = bp_rialto::PARAS_PALLET_NAME;
-    pub const WestendParasPalletName: &'static str = bp_westend::PARAS_PALLET_NAME;
-    pub const MaxRialtoParaHeadDataSize: u32 = bp_rialto::MAX_NESTED_PARACHAIN_HEAD_DATA_SIZE;
-    pub const MaxWestendParaHeadDataSize: u32 = bp_westend::MAX_NESTED_PARACHAIN_HEAD_DATA_SIZE;
+
+/// XCM router instance to BridgeHub with bridging capabilities for `Westend` global
+/// consensus with dynamic fees and back-pressure.
+pub type ToWestendXcmRouterInstance = pallet_xcm_bridge_hub_router::Instance3;
+
+impl pallet_xcm_bridge_hub_router::Config<ToWestendXcmRouterInstance> for Runtime {
+	type WeightInfo = weights::pallet_xcm_bridge_hub_router::WeightInfo<Runtime>;
+
+	type UniversalLocation = xcm_config::UniversalLocation;
+	type BridgedNetworkId = xcm_config::bridging::to_westend::WestendNetwork;
+	type Bridges = xcm_config::bridging::NetworkExportTable;
+
+	#[cfg(not(feature = "runtime-benchmarks"))]
+	type BridgeHubOrigin = EnsureXcm<Equals<xcm_config::bridging::SiblingBridgeHub>>;
+	#[cfg(feature = "runtime-benchmarks")]
+	type BridgeHubOrigin = EitherOfDiverse<
+		// for running benchmarks
+		EnsureRoot<AccountId>,
+		// for running tests with `--feature runtime-benchmarks`
+		EnsureXcm<Equals<xcm_config::bridging::SiblingBridgeHub>>,
+	>;
+
+	type ToBridgeHubSender = XcmpQueue;
+	type WithBridgeHubChannel =
+		cumulus_pallet_xcmp_queue::bridging::InAndOutXcmpChannelStatusProvider<
+			xcm_config::bridging::SiblingBridgeHubParaId,
+			Runtime,
+		>;
+
+	type ByteFee = xcm_config::bridging::XcmBridgeHubRouterByteFee;
+	type FeeAsset = xcm_config::bridging::XcmBridgeHubRouterFeeAssetId;
 }
 
-/// Instance of the with-Rialto parachains pallet.
-pub type WithRialtoParachainsInstance = ();
+// /// Instance of the XCM bridge hub pallet used to relay messages to/from Rococo chain.
+// pub type WithRialtoXcmBridgeHubInstance = ();
 
-impl pallet_bridge_parachains::Config<WithRialtoParachainsInstance> for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = pallet_bridge_parachains::weights::BridgeWeight<Runtime>;
-    type BridgesGrandpaPalletInstance = RialtoGrandpaInstance;
-    type ParasPalletName = RialtoParasPalletName;
-    type ParaStoredHeaderDataBuilder =
-        SingleParaStoredHeaderDataBuilder<bp_rialto_parachain::RialtoParachain>;
-    type HeadsToKeep = ConstU32<1024>;
-    type MaxParaHeadDataSize = MaxRialtoParaHeadDataSize;
-}
+// impl pallet_xcm_bridge_hub::Config<WithRialtoXcmBridgeHubInstance> for Runtime {
+//     type RuntimeEvent = RuntimeEvent;
 
-/// Instance of the with-Westend parachains pallet.
-pub type WithWestendParachainsInstance = pallet_bridge_parachains::Instance1;
+//     type UniversalLocation = xcm_config::UniversalLocation;
+//     type BridgedNetworkId = xcm_config::RialtoNetwork;
+//     type BridgeMessagesPalletInstance = WithRialtoMessagesInstance;
 
-impl pallet_bridge_parachains::Config<WithWestendParachainsInstance> for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type WeightInfo = pallet_bridge_parachains::weights::BridgeWeight<Runtime>;
-    type BridgesGrandpaPalletInstance = WestendGrandpaInstance;
-    type ParasPalletName = WestendParasPalletName;
-    type ParaStoredHeaderDataBuilder =
-        SingleParaStoredHeaderDataBuilder<bp_westend::AssetHubWestend>;
-    type HeadsToKeep = ConstU32<1024>;
-    type MaxParaHeadDataSize = MaxWestendParaHeadDataSize;
-}
+//     type OpenBridgeOrigin = frame_support::traits::NeverEnsureOrigin<xcm::latest::MultiLocation>;
+//     type BridgeOriginAccountIdConverter = xcm_config::SovereignAccountOf;
 
-impl pallet_utility::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-    type RuntimeCall = RuntimeCall;
-    type PalletsOrigin = OriginCaller;
-    type WeightInfo = ();
-}
+//     type BridgeReserve = ConstU64<1_000_000_000>;
+//     type NativeCurrency = Balances;
 
-// this config is totally incorrect - the pallet is not actually used at this runtime. We need
-// it only to be able to run benchmarks and make required traits (and default weights for tests).
-
-parameter_types! {
-    pub BridgeTable: Vec<(xcm::prelude::NetworkId, xcm::prelude::MultiLocation, Option<xcm::prelude::MultiAsset>)>
-        = vec![(
-            xcm_config::RialtoNetwork::get(),
-            xcm_config::TokenLocation::get(),
-            Some((xcm_config::TokenAssetId::get(), 1_000_000_000_u128).into()),
-        )];
-}
-
-impl pallet_xcm_bridge_hub_router::Config for Runtime {
-    type WeightInfo = ();
-
-    type UniversalLocation = xcm_config::UniversalLocation;
-    type SiblingBridgeHubLocation = xcm_config::TokenLocation;
-    type BridgedNetworkId = xcm_config::RialtoNetwork;
-    type Bridges = NetworkExportTable<BridgeTable>;
-
-    type ToBridgeHubSender = xcm_config::XcmRouter;
-    type LocalXcmChannelManager = xcm_config::EmulatedSiblingXcmpChannel;
-
-    type ByteFee = ConstU128<1_000>;
-    type FeeAsset = xcm_config::TokenAssetId;
-}
-
-/// Instance of the XCM bridge hub pallet used to relay messages to/from Rialto chain.
-pub type WithRialtoXcmBridgeHubInstance = ();
-
-impl pallet_xcm_bridge_hub::Config<WithRialtoXcmBridgeHubInstance> for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-
-    type UniversalLocation = xcm_config::UniversalLocation;
-    type BridgedNetworkId = xcm_config::RialtoNetwork;
-    type BridgeMessagesPalletInstance = WithRialtoMessagesInstance;
-
-    type OpenBridgeOrigin = frame_support::traits::NeverEnsureOrigin<xcm::latest::MultiLocation>;
-    type BridgeOriginAccountIdConverter = xcm_config::SovereignAccountOf;
-
-    type BridgeReserve = ConstU64<1_000_000_000>;
-    type NativeCurrency = Balances;
-
-    type LocalXcmChannelManager = ();
-    type BlobDispatcher = xcm_config::OnMillauBlobDispatcher;
-    type MessageExportPrice = ();
-}
-
-/// Instance of the XCM bridge hub pallet used to relay messages to/from RialtoParachain chain.
-pub type WithRialtoParachainXcmBridgeHubInstance = pallet_xcm_bridge_hub::Instance1;
-
-impl pallet_xcm_bridge_hub::Config<WithRialtoParachainXcmBridgeHubInstance> for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-
-    type UniversalLocation = xcm_config::UniversalLocation;
-    type BridgedNetworkId = xcm_config::RialtoParachainNetwork;
-    type BridgeMessagesPalletInstance = WithRialtoParachainMessagesInstance;
-
-    type OpenBridgeOrigin = frame_support::traits::NeverEnsureOrigin<xcm::latest::MultiLocation>;
-    type BridgeOriginAccountIdConverter = xcm_config::SovereignAccountOf;
-
-    type BridgeReserve = ConstU64<1_000_000_000>;
-    type NativeCurrency = Balances;
-
-    type LocalXcmChannelManager = ();
-    type BlobDispatcher = xcm_config::OnMillauBlobDispatcher;
-    type MessageExportPrice = ();
-}
+//     type LocalXcmChannelManager = ();
+//     type BlobDispatcher = xcm_config::OnMillauBlobDispatcher;
+//     type MessageExportPrice = ();
+// }
 
 // Configure the pallet-computational-work in pallets/computational_work.
 impl pallet_computational_work::Config for Runtime {
@@ -629,11 +548,13 @@ construct_runtime!(
         Mmr: pallet_mmr::{Pallet, Storage},
         MmrLeaf: pallet_beefy_mmr::{Pallet, Storage},
 
-        // Rialto bridge modules.
+        // Rococo bridge modules.
         BridgeRelayers: pallet_bridge_relayers::{Pallet, Call, Storage, Event<T>},
-        BridgeRialtoGrandpa: pallet_bridge_grandpa::{Pallet, Call, Storage, Event<T>},
-        BridgeRialtoMessages: pallet_bridge_messages::{Pallet, Call, Storage, Event<T>, Config<T>},
-        XcmRialtoBridgeHub: pallet_xcm_bridge_hub::{Pallet, Call, Storage, Event<T>, Config<T>},
+        BridgeRococoGrandpa: pallet_bridge_grandpa::{Pallet, Call, Storage, Event<T>},
+        BridgeRococoMessages: pallet_bridge_messages::{Pallet, Call, Storage, Event<T>, Config<T>},
+        
+        // Check if it still relevant
+        XcmRococoBridgeHub: pallet_xcm_bridge_hub::{Pallet, Call, Storage, Event<T>, Config<T>},
 
         ComputationalWork: pallet_computational_work::{Pallet, Call, Storage, Event<T>},
         CheckNodeComputationalWork: pallet_check_node_computational_work::{Pallet, Storage, Event<T>},
@@ -641,11 +562,6 @@ construct_runtime!(
         // Westend bridge modules.
         BridgeWestendGrandpa: pallet_bridge_grandpa::<Instance1>::{Pallet, Call, Config<T>, Storage, Event<T>},
         BridgeWestendParachains: pallet_bridge_parachains::<Instance1>::{Pallet, Call, Storage, Event<T>},
-
-        // RialtoParachain bridge modules.
-        BridgeRialtoParachains: pallet_bridge_parachains::{Pallet, Call, Storage, Event<T>},
-        BridgeRialtoParachainMessages: pallet_bridge_messages::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
-        XcmRialtoParachainBridgeHub: pallet_xcm_bridge_hub::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
 
         // Pallet for sending XCM.
         XcmPallet: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config<T>} = 99,
@@ -658,28 +574,11 @@ construct_runtime!(
 generate_bridge_reject_obsolete_headers_and_messages! {
     RuntimeCall, AccountId,
     // Grandpa
-    BridgeRialtoGrandpa, BridgeWestendGrandpa,
-    // Parachains
-    BridgeRialtoParachains,
+    BridgeRococoGrandpa, BridgeWestendGrandpa,
     //Messages
-    BridgeRialtoMessages, BridgeRialtoParachainMessages
+    BridgeRococoMessages
 }
 
-bp_runtime::generate_static_str_provider!(BridgeRefundRialtoPara2000Msgs);
-/// Signed extension that refunds relayers that are delivering messages from the Rialto parachain.
-pub type PriorityBoostPerMessage = ConstU64<351_343_108>;
-pub type BridgeRefundRialtoParachainMessages =
-    pallet_bridge_relayers::extension::BridgeRelayersSignedExtension<
-        Runtime,
-        pallet_bridge_relayers::extension::WithParachainExtensionConfig<
-            StrBridgeRefundRialtoPara2000Msgs,
-            Runtime,
-            bp_relayers::RuntimeWithUtilityPallet<Runtime>,
-            WithRialtoParachainsInstance,
-            WithRialtoParachainMessagesInstance,
-            PriorityBoostPerMessage,
-        >,
-    >;
 
 /// The address format for describing accounts.
 pub type Address = AccountId;
@@ -723,10 +622,8 @@ pub type Executive = frame_executive::Executive<
 #[cfg(feature = "runtime-benchmarks")]
 mod benches {
     frame_benchmarking::define_benchmarks!(
-        [pallet_bridge_messages, MessagesBench::<Runtime, WithRialtoMessagesInstance>]
-        [pallet_bridge_messages, MessagesBench::<Runtime, WithRialtoParachainMessagesInstance>]
-        [pallet_bridge_grandpa, BridgeRialtoGrandpa]
-        [pallet_bridge_parachains, ParachainsBench::<Runtime, WithRialtoParachainsInstance>]
+        [pallet_bridge_messages, MessagesBench::<Runtime, WithRococoMessagesInstance>]
+        [pallet_bridge_grandpa, BridgeRococoGrandpa]
         [pallet_bridge_relayers, RelayersBench::<Runtime>]
         [pallet_xcm_bridge_hub_router, XcmBridgeHubRouterBench::<Runtime>]
     );
@@ -953,14 +850,14 @@ impl_runtime_apis! {
         }
     }
 
-    impl bp_rialto::RialtoFinalityApi<Block> for Runtime {
-        fn best_finalized() -> Option<HeaderId<bp_rialto::Hash, bp_rialto::BlockNumber>> {
-            BridgeRialtoGrandpa::best_finalized()
+    impl bp_rococo::RococoFinalityApi<Block> for Runtime {
+        fn best_finalized() -> Option<HeaderId<bp_rococo::Hash, bp_rococo::BlockNumber>> {
+            BridgeRococoGrandpa::best_finalized()
         }
 
         fn synced_headers_grandpa_info(
-        ) -> Vec<bp_header_chain::StoredHeaderGrandpaInfo<bp_rialto::Header>> {
-            BridgeRialtoGrandpa::synced_headers_grandpa_info()
+        ) -> Vec<bp_header_chain::StoredHeaderGrandpaInfo<bp_rococo::Header>> {
+            BridgeRococoGrandpa::synced_headers_grandpa_info()
         }
     }
 
@@ -984,16 +881,7 @@ impl_runtime_apis! {
         }
     }
 
-    impl bp_rialto_parachain::RialtoParachainFinalityApi<Block> for Runtime {
-        fn best_finalized() -> Option<HeaderId<bp_rialto::Hash, bp_rialto::BlockNumber>> {
-            pallet_bridge_parachains::Pallet::<
-                Runtime,
-                WithRialtoParachainsInstance,
-            >::best_parachain_head_id::<bp_rialto_parachain::RialtoParachain>().unwrap_or(None)
-        }
-    }
-
-    impl bp_rialto::ToRialtoOutboundLaneApi<Block> for Runtime {
+    impl bp_rococo::ToRococoOutboundLaneApi<Block> for Runtime {
         fn message_details(
             lane: bp_messages::LaneId,
             begin: bp_messages::MessageNonce,
@@ -1001,47 +889,23 @@ impl_runtime_apis! {
         ) -> Vec<bp_messages::OutboundMessageDetails> {
             bridge_runtime_common::messages_api::outbound_message_details::<
                 Runtime,
-                WithRialtoMessagesInstance,
+                WithRococoMessagesInstance,
             >(lane, begin, end)
         }
     }
 
-    impl bp_rialto::FromRialtoInboundLaneApi<Block> for Runtime {
+    impl bp_rococo::FromRococoInboundLaneApi<Block> for Runtime {
         fn message_details(
             lane: bp_messages::LaneId,
             messages: Vec<(bp_messages::MessagePayload, bp_messages::OutboundMessageDetails)>,
         ) -> Vec<bp_messages::InboundMessageDetails> {
             bridge_runtime_common::messages_api::inbound_message_details::<
                 Runtime,
-                WithRialtoMessagesInstance,
+                WithRococoMessagesInstance,
             >(lane, messages)
         }
     }
-
-    impl bp_rialto_parachain::ToRialtoParachainOutboundLaneApi<Block> for Runtime {
-        fn message_details(
-            lane: bp_messages::LaneId,
-            begin: bp_messages::MessageNonce,
-            end: bp_messages::MessageNonce,
-        ) -> Vec<bp_messages::OutboundMessageDetails> {
-            bridge_runtime_common::messages_api::outbound_message_details::<
-                Runtime,
-                WithRialtoParachainMessagesInstance,
-            >(lane, begin, end)
-        }
-    }
-
-    impl bp_rialto_parachain::FromRialtoParachainInboundLaneApi<Block> for Runtime {
-        fn message_details(
-            lane: bp_messages::LaneId,
-            messages: Vec<(bp_messages::MessagePayload, bp_messages::OutboundMessageDetails)>,
-        ) -> Vec<bp_messages::InboundMessageDetails> {
-            bridge_runtime_common::messages_api::inbound_message_details::<
-                Runtime,
-                WithRialtoParachainMessagesInstance,
-            >(lane, messages)
-        }
-    }
+    
 
     #[cfg(feature = "runtime-benchmarks")]
     impl frame_benchmarking::Benchmark<Block> for Runtime {
@@ -1177,7 +1041,7 @@ impl_runtime_apis! {
 
                 fn is_relayer_rewarded(relayer: &Self::AccountId) -> bool {
                     let lane = <Self as MessagesConfig<WithRialtoMessagesInstance>>::bench_lane_id();
-                    let bridged_chain_id = bp_rialto::Rialto::ID;
+                    let bridged_chain_id = bp_rialto::Rococo::ID;
                     pallet_bridge_relayers::Pallet::<Runtime>::relayer_reward(
                         relayer,
                         RewardsAccountParams::new(lane, bridged_chain_id, RewardsAccountOwner::BridgedChain)
