@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
+use bridge_hub_westend_runtime::BridgeRococoMessagesConfig;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
+use polkadot_primitives::{AssignmentId, ValidatorId};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_babe::AuthorityId as BabeId;
@@ -25,9 +27,10 @@ use sp_runtime::{
     traits::{IdentifyAccount, Verify},
     AccountId32 as AccountId, MultiSignature as Signature,
 };
+use westend_runtime::RuntimeGenesisConfig;
 use westend_runtime::{
-    BalancesConfig, BeefyConfig, GrandpaConfig, RuntimeGenesisConfig, SessionConfig, SessionKeys,
-    SudoConfig, SystemConfig, WASM_BINARY,
+    BalancesConfig, BeefyConfig, GrandpaConfig, SessionConfig, SessionKeys, SudoConfig,
+    SystemConfig, WASM_BINARY,
 };
 use xcm::v3::{NetworkId::Rococo as RococoId, NetworkId::Westend as WestednId};
 

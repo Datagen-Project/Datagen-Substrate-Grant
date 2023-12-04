@@ -43,7 +43,7 @@ fn correct_hook_event_when_hash_work_is_called() {
 
         run_to_block(10);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -56,7 +56,7 @@ fn correct_hook_event_when_hash_work_is_called() {
 
         run_to_block(11);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -69,7 +69,7 @@ fn correct_hook_event_when_hash_work_is_called() {
 
         run_to_block(12);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::FinalResult {
                 checked_author: get_account_id_from_seed::<sr25519::Public>("Alice"),
                 controller1: get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -96,7 +96,7 @@ fn correct_hook_event_when_hash_work_is_called_2() {
         let row_hash_to_check = hash_number(10);
         let elaborated_hash_to_check = hash_number(0);
 
-        System::assert_last_event(Event::ComputationalWork(
+        System::assert_last_event(RuntimeEvent::ComputationalWork(
             pallet_computational_work::Event::ResultsComputationalWork {
                 // The not hashed raw data, it's for testing purposes.
                 raw_data: 10,
@@ -111,7 +111,7 @@ fn correct_hook_event_when_hash_work_is_called_2() {
 
         run_to_block(11);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -124,7 +124,7 @@ fn correct_hook_event_when_hash_work_is_called_2() {
 
         run_to_block(12);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,
@@ -137,7 +137,7 @@ fn correct_hook_event_when_hash_work_is_called_2() {
 
         run_to_block(13);
 
-        System::assert_last_event(Event::CheckNodeComputationalWork(
+        System::assert_last_event(RuntimeEvent::CheckNodeComputationalWork(
             crate::Event::CheckResult {
                 raw_hash: row_hash_to_check,
                 elaborated_hash: elaborated_hash_to_check,

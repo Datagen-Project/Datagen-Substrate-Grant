@@ -15,9 +15,10 @@ jsonrpsee = { version = "0.20.2", features = ["server"] }
 serde_json = "1.0.108"
 
 # Bridge dependencies
-bp-messages =  { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+bp-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
 bridge-runtime-common = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", features = ["integrity-test"] }
 westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
+rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" } 
 bridge-hub-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 bridge-hub-rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 
@@ -63,8 +64,8 @@ substrate-frame-rpc-system = { git = "https://github.com/paritytech/polkadot-sdk
 sc-network-common = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 
 # Polkadot Dependencies
-
 xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
+polkadot-primitives  = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" } 
 
 [build-dependencies]
 substrate-build-script-utils = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }

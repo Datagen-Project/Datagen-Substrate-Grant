@@ -16,7 +16,7 @@
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
-
+use bridge_hub_westend_runtime::Block;
 use jsonrpsee::RpcModule;
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus_aura::{CompatibilityMode, ImportQueueParams, SlotProportion, StartAuraParams};
@@ -29,7 +29,6 @@ use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use std::{sync::Arc, time::Duration};
 use westend_runtime::{self, RuntimeApi};
-use bridge_hub_westend_runtime::Block;
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -169,7 +168,7 @@ pub fn new_partial(
         keystore_container,
         select_chain,
         transaction_pool,
-        other: (telemetry)
+        other: (telemetry),
     })
 }
 

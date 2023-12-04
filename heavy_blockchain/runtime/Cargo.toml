@@ -22,15 +22,13 @@ bp-polkadot-core = { git = "https://github.com/lean-apple/dg-bridges-common.git"
 bp-relayers = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
 bp-runtime = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
 bp-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false}
-bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
 pallet-bridge-grandpa = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
 pallet-bridge-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
 pallet-bridge-relayers = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
 pallet-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
-
-# Outdated Bridge depedencies
-# bp-millau = { path = "../../parity-bridges-common/primitives/chain-millau", default-features = false }
-# bp-rialto-parachain = { path = "../../parity-bridges-common/primitives/chain-rialto-parachain", default-features = false }
+bridge-runtime-common = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+bridge-hub-rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+bridge-hub-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 
 # Substrate Dependencies
 

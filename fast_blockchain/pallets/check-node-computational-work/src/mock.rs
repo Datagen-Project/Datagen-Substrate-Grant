@@ -1,5 +1,5 @@
 use crate as pallet_check_node_computational_work;
-use frame_support::traits::{ConstU16, FindAuthor};
+use frame_support::traits::{ConstU16, FindAuthor, OnFinalize, OnInitialize};
 use sp_core::{
     crypto::{Pair, Public},
     sr25519, H256,

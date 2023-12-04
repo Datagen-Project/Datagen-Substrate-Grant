@@ -557,11 +557,11 @@ parameter_types! {
 }
 
 /// Instance of the messages pallet used to relay messages to/from Westend chain.
-pub type WithWestendMessagesInstance = ();
+pub type WithBridgeHubWestendMessagesInstance = pallet_bridge_messages::Instance3;
 
-impl pallet_bridge_messages::Config<WithWestendMessagesInstance> for Runtime {
+impl pallet_bridge_messages::Config<WithBridgeHubWestendMessagesInstance> for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = weights::pallet_bridge_messages::WeightInfo<Runtime>;
+	type WeightInfo = bridge_hub_rococo_runtime::weights::pallet_bridge_messages::WeightInfo<Runtime>;
 	type BridgedChainId = BridgeHubWestendChainId;
 	type ThisChain = bp_rialto_parachain::RialtoParachain;
 	type BridgedChain = bp_westend::Westend;
