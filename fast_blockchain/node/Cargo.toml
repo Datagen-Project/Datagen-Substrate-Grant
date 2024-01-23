@@ -15,12 +15,13 @@ jsonrpsee = { version = "0.20.2", features = ["server"] }
 serde_json = "1.0.108"
 
 # Bridge dependencies
-bp-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+bp-messages = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 bridge-runtime-common = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", features = ["integrity-test"] }
-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
+westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" } 
 bridge-hub-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 bridge-hub-rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
+westend-runtime-constants = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 
 # Substrate Dependencies
 
@@ -56,7 +57,7 @@ sc-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", bran
 sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 sp-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 sp-core = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
-
+sp-arithmetic = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 sp-consensus-grandpa = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 sp-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
@@ -66,6 +67,8 @@ sc-network-common = { git = "https://github.com/paritytech/polkadot-sdk", branch
 # Polkadot Dependencies
 xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 polkadot-primitives  = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" } 
+pallet-staking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" } 
+parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 
 [build-dependencies]
 substrate-build-script-utils = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
@@ -73,7 +76,7 @@ frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", b
 
 [features]
 default = []
-std = [ "bp-messages/std", "bridge-runtime-common/std" ]
+std = [ "bp-messages/std", "bridge-runtime-common/std", 	"pallet-staking/std", 	"sp-arithmetic/std", ]
 runtime-benchmarks = []
 
 try-runtime = [

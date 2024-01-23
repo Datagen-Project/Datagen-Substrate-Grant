@@ -7,6 +7,7 @@ use sp_core::{
 use sp_runtime::{
     traits::{BlakeTwo256, ConstU64, Hash, IdentifyAccount, IdentityLookup, Verify},
     ConsensusEngineId, MultiSignature, SaturatedConversion,
+    BuildStorage
 };
 
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;

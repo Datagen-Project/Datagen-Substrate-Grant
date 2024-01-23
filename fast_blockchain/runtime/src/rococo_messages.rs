@@ -24,7 +24,7 @@ use xcm::prelude::*;
 use ::pallet_bridge_messages::WeightInfoExt as MessagesWeightInfoExt;
 use ::pallet_bridge_parachains::WeightInfoExt as ParachainsWeightInfoExt;
 
-impl MessagesWeightInfoExt for pallet_bridge_messages::WeightInfo<super::Runtime> {
+impl MessagesWeightInfoExt for pallet_bridge_messages::WeightInfo<bridge_hub_westend_runtime::Runtime> {
     fn expected_extra_storage_proof_size() -> u32 {
         bp_bridge_hub_rococo::EXTRA_STORAGE_PROOF_SIZE
     }

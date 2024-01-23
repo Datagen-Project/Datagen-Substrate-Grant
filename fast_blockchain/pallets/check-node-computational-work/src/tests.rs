@@ -9,7 +9,7 @@ fn correct_hook_event_when_hash_work_is_called() {
     new_test_ext().execute_with(|| {
         run_to_block(8);
 
-        assert_ok!(pallet_computational_work::hash_work(Origin::signed(
+        assert_ok!(pallet_computational_work::hash_work(Origin::as_signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         let row_hash_to_check = hash_number(8);
@@ -172,7 +172,7 @@ fn correct_reset_when_final_result_is_emitted() {
     new_test_ext().execute_with(|| {
         run_to_block(8);
 
-        assert_ok!(ComputationalWork::hash_work(Origin::signed(
+        assert_ok!(ComputationalWork::hash_work(Origin::as_signed(
             get_account_id_from_seed::<sr25519::Public>("Alice")
         )));
         let last_computational_work_is_checked =

@@ -23,7 +23,7 @@ use sc_consensus_aura::{CompatibilityMode, ImportQueueParams, SlotProportion, St
 use sc_consensus_grandpa::SharedVoterState;
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_executor::{HeapAllocStrategy, WasmExecutor, DEFAULT_HEAP_ALLOC_STRATEGY};
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
+use sc_service::{error::Error as ServiceError, Configuration, TaskManager, WarpSyncParams};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sc_transaction_pool_api::OffchainTransactionPoolFactory;
 use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
@@ -174,18 +174,16 @@ pub fn new_partial(
 
 /// Builds a new service for a full client.
 pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
-    use sc_service::WarpSyncParams;
-
-    let sc_service::PartialComponents {
-        client,
-        backend,
-        mut task_manager,
-        import_queue,
-        keystore_container,
-        select_chain,
-        transaction_pool,
-        other: (block_import, grandpa_link, beefy_voter_links, beefy_rpc_links, mut telemetry),
-    } = new_partial(&config)?;
+	let sc_service::PartialComponents {
+		client,
+		backend,
+		mut task_manager,
+		import_queue,
+		keystore_container,
+		select_chain,
+		transaction_pool,
+		other: (block_import, grandpa_link, mut telemetry),
+	} = new_partial(&config)?;
 
     let genesis_hash = client
         .block_hash(0)
@@ -276,72 +274,16 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
     let prometheus_registry = config.prometheus_registry().cloned();
     let shared_voter_state = SharedVoterState::empty();
 
-    let rpc_extensions_builder = {
-        use sc_consensus_grandpa::FinalityProofProvider as GrandpaFinalityProofProvider;
+	let rpc_extensions_builder = {
+		let client = client.clone();
+		let pool = transaction_pool.clone();
 
-        use mmr_rpc::{Mmr, MmrApiServer};
-        use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
-        use sc_consensus_beefy_rpc::{Beefy, BeefyApiServer};
-        use sc_consensus_grandpa_rpc::{Grandpa, GrandpaApiServer};
-        use sc_rpc::DenyUnsafe;
-        use substrate_frame_rpc_system::{System, SystemApiServer};
-
-        let backend = backend.clone();
-        let client = client.clone();
-        let pool = transaction_pool.clone();
-
-        let justification_stream = grandpa_link.justification_stream();
-        let shared_authority_set = grandpa_link.shared_authority_set().clone();
-        let shared_voter_state = shared_voter_state.clone();
-
-        let finality_proof_provider = GrandpaFinalityProofProvider::new_for_service(
-            backend.clone(),
-            Some(shared_authority_set.clone()),
-        );
-
-        Box::new(
-            move |_, subscription_executor: sc_rpc::SubscriptionTaskExecutor| {
-                let mut io = RpcModule::new(());
-                let map_err = |e| sc_service::Error::Other(format!("{e}"));
-                io.merge(System::new(client.clone(), pool.clone(), DenyUnsafe::No).into_rpc())
-                    .map_err(map_err)?;
-                io.merge(TransactionPayment::new(client.clone()).into_rpc())
-                    .map_err(map_err)?;
-                io.merge(
-                    Grandpa::new(
-                        subscription_executor.clone(),
-                        shared_authority_set.clone(),
-                        shared_voter_state.clone(),
-                        justification_stream.clone(),
-                        finality_proof_provider.clone(),
-                    )
-                    .into_rpc(),
-                )
-                .map_err(map_err)?;
-                io.merge(
-                    Beefy::<Block>::new(
-                        beefy_rpc_links.from_voter_justif_stream.clone(),
-                        beefy_rpc_links.from_voter_best_beefy_stream.clone(),
-                        subscription_executor,
-                    )
-                    .map_err(|e| sc_service::Error::Other(format!("{e}")))?
-                    .into_rpc(),
-                )
-                .map_err(map_err)?;
-                io.merge(
-                    Mmr::new(
-                        client.clone(),
-                        backend
-                            .offchain_storage()
-                            .ok_or("Backend doesn't provide the required offchain storage")?,
-                    )
-                    .into_rpc(),
-                )
-                .map_err(map_err)?;
-                Ok(io)
-            },
-        )
-    };
+		Box::new(move |deny_unsafe, _| {
+			let deps =
+				polkadot_rpc::FullDeps { client: client.clone(), pool: pool.clone(), deny_unsafe };
+                polkadot_rpc::create_full(deps).map_err(Into::into)
+		})
+	};
 
     let _rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
         network: network.clone(),
@@ -416,31 +358,7 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 
     let justifications_protocol_name = beefy_on_demand_justifications_handler.protocol_name();
     let payload_provider = sp_consensus_beefy::mmr::MmrRootProvider::new(client.clone());
-    let beefy_params = sc_consensus_beefy::BeefyParams {
-        client: client.clone(),
-        backend,
-        payload_provider,
-        runtime: client,
-        key_store: keystore.clone(),
-        network_params: sc_consensus_beefy::BeefyNetworkParams {
-            network: network.clone(),
-            sync: sync_service.clone(),
-            gossip_protocol_name: beefy_gossip_proto_name,
-            justifications_protocol_name,
-            _phantom: core::marker::PhantomData::<Block>,
-        },
-        min_block_delta: 2,
-        prometheus_registry: prometheus_registry.clone(),
-        links: beefy_voter_links,
-        on_demand_justifications_handler: beefy_on_demand_justifications_handler,
-    };
 
-    // Start the BEEFY bridge gadget.
-    task_manager.spawn_essential_handle().spawn_blocking(
-        "beefy-gadget",
-        None,
-        sc_consensus_beefy::start_beefy_gadget::<_, _, _, _, _, _, _>(beefy_params),
-    );
 
     let grandpa_config = sc_consensus_grandpa::Config {
         // FIXME #1578 make this available through chainspec

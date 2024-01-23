@@ -23,7 +23,7 @@ bs58 = { version = "0.4.0" }
 jsonrpsee = { version = "0.20.2", features = ["server"] }
 
 # Bridges Dependencies
-bp-messages = { git = "https://github.com/lean-apple/dg-bridges-common.git", branch="ln-add-datagen-chain", default-features = false }
+bp-messages = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 bridge-runtime-common = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 
 # Oudated Bridge Dependencies

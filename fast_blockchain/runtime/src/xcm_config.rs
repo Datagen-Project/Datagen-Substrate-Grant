@@ -130,11 +130,11 @@ impl xcm_executor::Config for XcmConfig {
     type IsTeleporter = ();
     type UniversalLocation = UniversalLocation;
     type Barrier = Barrier;
-    type Weigher = WeightInfoBounds<
-        bridge_hub_westend_runtime::weights::xcm::BridgeHubWestendXcmWeight<RuntimeCall>,
-        RuntimeCall,
-        MaxInstructions,
-    >;
+	type Weigher = xcm_builder::weight::FixedWeightBounds<
+        collectives_westend_runtime::xcm_config::TempFixedXcmWeight,
+		RuntimeCall,
+		MaxInstructions,
+	>;
     type Trader =
         UsingComponents<WeightToFee, WestendLocation, AccountId, Balances, ToStakingPot<Runtime>>;
     type ResponseHandler = PolkadotXcm;
