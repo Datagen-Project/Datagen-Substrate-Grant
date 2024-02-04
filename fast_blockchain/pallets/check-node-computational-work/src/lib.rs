@@ -21,7 +21,7 @@ pub mod pallet {
     use scale_info::prelude::vec;
     use sp_runtime::traits::SaturatedConversion;
 
-    type Aura<T> = pallet_aura::Pallet<T>;
+    // type Aura<T> = pallet_aura::Pallet<T>;
 
     #[pallet::pallet]
     #[pallet::without_storage_info]
@@ -29,7 +29,6 @@ pub mod pallet {
 
     /// Configure the pallet by specifying the parameters and types on which it depends.
     #[pallet::config]
-
     pub trait Config: frame_system::Config + pallet_computational_work::Config {
         /// Because this pallet emits events, it depends on the runtime's definition of an event.
         type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
@@ -50,7 +49,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn first_author_has_checked)]
     pub type FirstAuthorHasChecked<T: Config> =
-        StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
+    StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
 
     // Store the first author.
     #[pallet::storage]
@@ -67,7 +66,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn second_author_has_checked)]
     pub type SecondAuthorHasChecked<T: Config> =
-        StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
+    StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
 
     // Store the second author.
     #[pallet::storage]
@@ -84,7 +83,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn third_author_has_checked)]
     pub type ThirdAuthorHasChecked<T: Config> =
-        StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
+    StorageValue<_, bool, ValueQuery, DefaultCheckAuthor<T>>;
 
     // Store the third author.
     #[pallet::storage]
@@ -99,7 +98,7 @@ pub mod pallet {
     // Pallets use events to inform users when important changes are made.
     // https://docs.substrate.io/main-docs/build/events-errors/
     #[pallet::event]
-    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    #[pallet::generate_deposit(pub (super) fn deposit_event)]
     pub enum Event<T: Config> {
         /// Emit an event when an author has been checked.
         CheckResult {
@@ -135,7 +134,7 @@ pub mod pallet {
 
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-        fn on_initialize(header: BlockNumberFor<T>) -> frame_support::weights::Weight {
+        fn on_initialize(_header: BlockNumberFor<T>) -> frame_support::weights::Weight {
             // Check if there is a computational work to check.
             if !pallet_computational_work::Pallet::<T>::last_computational_work_is_checked() {
                 let last_computational_work =
@@ -147,10 +146,10 @@ pub mod pallet {
                     && ThirdAuthorHasChecked::<T>::get()
                 {
                     // Check the final result and emit the event
-                    Self::check_result();
+                    let _ = Self::check_result();
 
                     // Reset the check
-                    Self::reset_check_process();
+                    let _ = Self::reset_check_process();
                 }
 
                 // Get the current block author.

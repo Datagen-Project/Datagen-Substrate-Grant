@@ -109,7 +109,8 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         /// Hashes the raw data and elaborated and store them in the storage with the author and the block number
         /// for future checks.
-        #[pallet::weight(100)]
+        #[pallet::call_index(0)]
+        #[pallet::weight({100})]
         pub fn hash_work(origin: OriginFor<T>) -> DispatchResult {
             let sender = ensure_signed(origin)?;
 
@@ -158,7 +159,8 @@ pub mod pallet {
 
         /// Set the check every x works value.
         /// Must be more than 0.
-        #[pallet::weight(100)]
+        #[pallet::call_index(1)]
+        #[pallet::weight({100})]
         pub fn set_check_every_x_works(origin: OriginFor<T>, x: u32) -> DispatchResult {
             let _sender = ensure_signed(origin)?;
 
@@ -181,7 +183,8 @@ pub mod pallet {
         }
 
         /// Get the last computational work.
-        #[pallet::weight(100)]
+        #[pallet::call_index(2)]
+        #[pallet::weight({100})]
         pub fn get_last_computational_work(origin: OriginFor<T>) -> DispatchResult {
             let _sender = ensure_signed(origin)?;
 

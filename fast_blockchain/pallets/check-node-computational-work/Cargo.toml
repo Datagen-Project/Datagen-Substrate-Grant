@@ -14,7 +14,6 @@ sp-core = {   default-features = false, git = "https://github.com/paritytech/pol
 sp-runtime = {   default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 pallet-authorship = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 pallet-session = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
-pallet-aura = {  default-features = false, git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
 
 # Coupling with the pallet computational work
 pallet-computational-work = { path = "../computational-work", default-features = false }
