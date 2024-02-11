@@ -16,7 +16,7 @@ sp-runtime = { default-features = false, git = "https://github.com/paritytech/po
 
 [dev-dependencies]
 frame-support-test = {  git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
-pallet-insecure-randomness-collective-flip  = { package="pallet_randomness_collective_flip", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+pallet-insecure-randomness-collective-flip  = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 
 [features]
 default = ["std"]

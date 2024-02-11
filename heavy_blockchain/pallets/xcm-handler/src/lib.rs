@@ -7,7 +7,6 @@ use cumulus_primitives_core::ParaId;
 use frame_support::{pallet_prelude::*, parameter_types, BoundedVec};
 use frame_system::Config as SystemConfig;
 pub use pallet::*;
-use serde::{Deserialize, Serialize};
 use sp_runtime::traits::Saturating;
 use sp_std::{prelude::*, vec};
 use xcm::latest::prelude::*;
@@ -20,12 +19,7 @@ parameter_types! {
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::{pallet_prelude::*, traits::Currency};
 	use frame_system::pallet_prelude::*;
-	use polkadot_parachain::primitives::Sibling;
-	use sp_runtime::traits::{AccountIdConversion, Convert, SaturatedConversion};
-	use sp_std::prelude::*;
-	use xcm_executor::traits::WeightBounds;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -156,7 +150,7 @@ pub mod pallet {
 
 			Self::deposit_event(Event::XcmRecieved { para, seq, payload: payload.clone() });
 
-			let bounded_payload = BoundedVec::<u8, MaxPayloadSize>::try_from(payload.clone())
+			let _bounded_payload = BoundedVec::<u8, MaxPayloadSize>::try_from(payload.clone())
 				.map_err(|_| Error::<T>::PayloadTooLarge)?;
 
 			ReceivedXcm::<T>::insert(seq, para);

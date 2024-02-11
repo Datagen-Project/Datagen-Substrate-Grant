@@ -103,7 +103,7 @@ pub mod pallet {
 	// Storage for the pallet.
 
 	/// The las random hash.
-	/// dev - This is only for testing purposes.
+	/// Dev - This is only for testing purposes.
 	#[pallet::storage]
 	pub(super) type RandomHash<T: Config> =
 		StorageValue<_, T::Hash>;
@@ -167,8 +167,9 @@ pub mod pallet {
 		// Test functions.
 
 		/// Create a new random hash.
-		/// dev - This function is only for testing purposes.
-		#[pallet::weight(100)]
+		/// Dev - This function is only for testing purposes.
+		#[pallet::call_index(0)]
+		#[pallet::weight({100})]
 		pub fn test_create_random_hash(
 			origin: OriginFor<T>
 		) -> DispatchResult {
@@ -185,8 +186,9 @@ pub mod pallet {
 		}
 
 		/// Crate a new random number.
-		/// dev - This function is only for testing purposes.
-		#[pallet::weight(100)]
+		/// Dev - This function is only for testing purposes.
+		#[pallet::call_index(1)]
+		#[pallet::weight({100})]
 		pub fn test_create_random_number(
 			origin: OriginFor<T>
 		) -> DispatchResult {
@@ -201,8 +203,9 @@ pub mod pallet {
 		}
 
 		/// Number of elements in the map.
-		/// dev - This function is only for testing purposes.
-		#[pallet::weight(100)]
+		/// Dev - This function is only for testing purposes.
+		#[pallet::call_index(2)]
+		#[pallet::weight({100})]
 		pub fn test_total_elements(
 			origin: OriginFor<T>
 		) -> DispatchResult {
@@ -218,8 +221,9 @@ pub mod pallet {
 
 
 		/// Get the list of all node owners.
-		/// dev - This function is only for development purposes.
-		#[pallet::weight(100)]
+		/// Dev - This function is only for development purposes.
+		#[pallet::call_index(3)]
+		#[pallet::weight({100})]
 		pub fn test_get_owners_list(
 			origin: OriginFor<T>
 		) -> DispatchResult {
@@ -233,8 +237,9 @@ pub mod pallet {
 		}
 
 		/// Generate a random number within a range.
-		/// dev - This function is only for demonstration purposes.
-		#[pallet::weight(100)]
+		/// Dev - This function is only for demonstration purposes.
+		#[pallet::call_index(4)]
+		#[pallet::weight({100})]
 		pub fn test_generate_random_number_range(
 			origin: OriginFor<T>,
 			max: u32
@@ -251,9 +256,10 @@ pub mod pallet {
 
 		// Production functions.
 
-		/// Update reliable node list.
+		/// Update a reliable node list.
 		/// Add a reliable node to the list and set the ownership.
-		#[pallet::weight(100)]
+		#[pallet::call_index(5)]
+		#[pallet::weight({100})]
 		pub fn add_reliable_node(
 			origin: OriginFor<T>,
 			owner: T::AccountId,
@@ -272,7 +278,8 @@ pub mod pallet {
 
 		/// Update reliable node list.
 		/// Remove a reliable node.
-		#[pallet::weight(100)]
+		#[pallet::call_index(6)]
+		#[pallet::weight({100})]
 		pub fn remove_reliable_node(
 			origin: OriginFor<T>,
 			peer_id: PeerId
@@ -291,7 +298,8 @@ pub mod pallet {
 
 		/// Select a random reliable node from the list for the control.
 		/// Emit the selected node and the random number.
-		#[pallet::weight(100)]
+		#[pallet::call_index(7)]
+		#[pallet::weight({100})]
 		pub fn random_node_to_check(
 			origin: OriginFor<T>
 		) -> DispatchResult {
@@ -313,9 +321,10 @@ pub mod pallet {
 			Ok(())
 		}
 
-		/// Select 3 random reliable nodes from the list as controllers.
-		/// Emit the selected controllers nodes and the random numbers.
-		#[pallet::weight(100)]
+		/// Select three random reliable nodes from the list as controllers.
+		/// Emit the selected controller nodes and the random numbers.
+		#[pallet::call_index(8)]
+		#[pallet::weight({100})]
 		pub fn random_checker_node_selector(
 			origin: OriginFor<T>
 		)-> DispatchResult {
@@ -402,7 +411,7 @@ impl<T: Config> Pallet<T> {
 
 	/// Generate a random number within a range 0 to max.
 	/// This function is used to generate a random number within a range.
-	/// The range is from 0 to max.
+	/// The range is from zero to max.
 	fn generate_random_number_in_range(max: u32) -> u32 {
 		let random_number = Self::generate_random_number();
 		random_number % max
