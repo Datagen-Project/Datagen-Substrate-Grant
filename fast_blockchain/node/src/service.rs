@@ -182,7 +182,7 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 		keystore_container,
 		select_chain,
 		transaction_pool,
-		other: (block_import, grandpa_link, mut telemetry),
+		other: (block_import, mut telemetry),
 	} = new_partial(&config)?;
 
     let genesis_hash = client
@@ -341,14 +341,14 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
             },
         )?;
 
-        // the AURA authoring task is considered essential, i.e. if it
-        // fails we take down the service with it.
+        // the AURA authoring task is considered essential, i.e., if it
+        //  fails, we take down the service with it.
         task_manager
             .spawn_essential_handle()
             .spawn_blocking("aura", Some("block-authoring"), aura);
     }
 
-    // if the node isn't actively participating in consensus then it doesn't
+    // if the node isn't actively participating in consensus, then it doesn't
     // need a keystore, regardless of which protocol we use below.
     let keystore = if role.is_authority() {
         Some(keystore_container.keystore())
@@ -377,7 +377,7 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
         // NOTE: non-authorities could run the GRANDPA observer protocol, but at
         // this point the full voter should provide better guarantees of block
         // and vote data availability than the observer. The observer has not
-        // been tested extensively yet and having most nodes in a network run it
+        // been tested extensively yet, and having most nodes in a network run it
         // could lead to finality stalls.
         let grandpa_config = sc_consensus_grandpa::GrandpaParams {
             config: grandpa_config,
@@ -392,7 +392,7 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
         };
 
         // the GRANDPA voter task is considered infallible, i.e.
-        // if it fails we take down the service with it.
+        // if it fails, we take down the service with it.
         task_manager.spawn_essential_handle().spawn_blocking(
             "grandpa-voter",
             None,

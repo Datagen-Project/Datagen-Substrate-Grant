@@ -130,7 +130,7 @@ impl xcm_executor::Config for XcmConfig {
     type IsTeleporter = ();
     type UniversalLocation = UniversalLocation;
     type Barrier = Barrier;
-	type Weigher = xcm_builder::weight::FixedWeightBounds<
+	type Weigher = xcm_builder::WeightInfoBounds<
         collectives_westend_runtime::xcm_config::TempFixedXcmWeight,
 		RuntimeCall,
 		MaxInstructions,

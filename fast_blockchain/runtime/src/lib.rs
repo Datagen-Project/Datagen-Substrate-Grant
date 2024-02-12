@@ -43,8 +43,8 @@ use bridge_hub_westend_runtime::{
         MaxUnconfirmedMessagesAtInboundLane, MaxUnrewardedRelayerEntriesAtInboundLane,
         ToBridgeHubRococoXcmBlobHauler,
         WithBridgeHubRococoMessageBridge, BridgeHubRococo, BridgeHubWestend, BridgeParachainRococoInstance,
-        OnBridgeHubWestendRefundBridgeHubRococoMessages, 
-        BridgeWestendToRococoMessagesPalletInstance, BridgeHubWestendUniversalLocation
+        OnBridgeHubWestendRefundBridgeHubRococoMessages,
+        BridgeWestendToRococoMessagesPalletInstance, BridgeHubWestendUniversalLocation,
     },
     xcm_config::XcmRouter,
     BridgeRejectObsoleteHeadersAndMessages, CollatorSelection, XcmpQueue,
@@ -106,6 +106,8 @@ pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_xcm::Call as XcmCall;
 
 use bridge_runtime_common::generate_bridge_reject_obsolete_headers_and_messages;
+use frame_support::traits::EitherOfDiverse;
+use frame_system::EnsureRoot;
 
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -157,6 +159,7 @@ pub mod opaque {
 impl_opaque_keys! {
     pub struct SessionKeys {
         pub aura: Aura,
+        pub grandpa: Grandpa,
     }
 }
 
@@ -193,47 +196,47 @@ parameter_types! {
 }
 
 impl frame_system::Config for Runtime {
+    /// The ubiquitous event type.
+    type RuntimeEvent = RuntimeEvent;
     /// The basic call filter to use in dispatchable.
     type BaseCallFilter = frame_support::traits::Everything;
-    /// The identifier used to distinguish between accounts.
-    type AccountId = AccountId;
+    /// Block and extrinsics weights: base values and limits.
+    type BlockWeights = bp_westend::BlockWeights;
+    /// The maximum length of a block (in bytes).
+    type BlockLength = bp_westend::BlockLength;
+    /// The ubiquitous origin type.
+    type RuntimeOrigin = RuntimeOrigin;
     /// The aggregated dispatch type that is available for extrinsics.
     type RuntimeCall = RuntimeCall;
-    /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
-    type Lookup = IdentityLookup<AccountId>;
     /// The index type for storing how many extrinsics an account has signed.
     type Nonce = Nonce;
     /// The type for hashing blocks and tries.
     type Hash = Hash;
     /// The hashing algorithm used.
     type Hashing = Hashing;
+    /// The identifier used to distinguish between accounts.
+    type AccountId = AccountId;
+    /// The lookup mechanism to get account ID from whatever is passed in dispatchers.
+    type Lookup = IdentityLookup<AccountId>;
     /// The header type.
     type Block = Block;
-    /// The ubiquitous event type.
-    type RuntimeEvent = RuntimeEvent;
-    /// The ubiquitous origin type.
-    type RuntimeOrigin = RuntimeOrigin;
     /// Maximum number of block number to block hash mappings to keep (oldest pruned first).
     type BlockHashCount = BlockHashCount;
+    /// The weight of database operations that the runtime can invoke.
+    type DbWeight = DbWeight;
     /// Version of the runtime.
     type Version = Version;
     /// Provides information about the pallet setup in the runtime.
     type PalletInfo = PalletInfo;
+    /// The data to be stored in an account.
+    type AccountData = pallet_balances::AccountData<Balance>;
     /// What to do if a new account is created.
     type OnNewAccount = ();
     /// What to do if an account is fully reaped from the system.
     type OnKilledAccount = ();
-    /// The data to be stored in an account.
-    type AccountData = pallet_balances::AccountData<Balance>;
     // TODO: update me (https://github.com/paritytech/parity-bridges-common/issues/78)
     /// Weight information for the extrinsics of this pallet.
     type SystemWeightInfo = ();
-    /// Block and extrinsics weights: base values and limits.
-    type BlockWeights = bp_westend::BlockWeights;
-    /// The maximum length of a block (in bytes).
-    type BlockLength = bp_westend::BlockLength;
-    /// The weight of database operations that the runtime can invoke.
-    type DbWeight = DbWeight;
     /// The designated SS58 prefix of this chain.
     type SS58Prefix = SS58Prefix;
     /// The set code logic, just the default since we're not a parachain.
@@ -251,12 +254,12 @@ impl pallet_aura::Config for Runtime {
 impl pallet_beefy::Config for Runtime {
     type BeefyId = BeefyId;
     type MaxAuthorities = ConstU32<10>;
+    type MaxNominators = ConstU32<256>;
     type MaxSetIdSessionEntries = ConstU64<0>;
     type OnNewValidatorSet = MmrLeaf;
     type WeightInfo = ();
     type KeyOwnerProof = sp_core::Void;
     type EquivocationReportSystem = ();
-    type MaxNominators = ConstU32<256>;
 }
 
 impl pallet_grandpa::Config for Runtime {
@@ -264,10 +267,10 @@ impl pallet_grandpa::Config for Runtime {
     // TODO: update me (https://github.com/paritytech/parity-bridges-common/issues/78)
     type WeightInfo = ();
     type MaxAuthorities = ConstU32<10>;
+    type MaxNominators = ConstU32<256>;
     type MaxSetIdSessionEntries = ConstU64<0>;
     type KeyOwnerProof = sp_core::Void;
     type EquivocationReportSystem = ();
-    type MaxNominators = ConstU32<256>;
 }
 
 /// MMR helper types.
@@ -283,24 +286,24 @@ mod mmr {
 impl pallet_mmr::Config for Runtime {
     const INDEXING_PREFIX: &'static [u8] = b"mmr";
     type Hashing = Keccak256;
+    type LeafData = pallet_beefy_mmr::Pallet<Runtime>;
     type OnNewRoot = pallet_beefy_mmr::DepositBeefyDigest<Runtime>;
     type WeightInfo = ();
-    type LeafData = pallet_beefy_mmr::Pallet<Runtime>;
 }
 
 parameter_types! {
     /// Version of the produced MMR leaf.
     ///
     /// The version consists of two parts;
-    /// - `major` (3 bits)
-    /// - `minor` (5 bits)
+    /// - `major` (three bits)
+    /// - `minor` (five bits)
     ///
-    /// `major` should be updated only if decoding the previous MMR Leaf format from the payload
-    /// is not possible (i.e. backward incompatible change).
-    /// `minor` should be updated if fields are added to the previous MMR Leaf, which given SCALE
-    /// encoding does not prevent old leafs from being decoded.
+    /// `Major` should be updated only if decoding the previous MMR Leaf format from the payload
+    /// is not possible (i.e., backward incompatible change).
+    /// `Minor` should be updated if fields are added to the previous MMR Leaf, which given SCALE
+    /// encoding does not prevent old leaves from being decoded.
     ///
-    /// Hence we expect `major` to be changed really rarely (think never).
+    /// Hence, we expect `major` to be changed really rarely (think never).
     /// See [`MmrLeafVersion`] type documentation for more details.
     pub LeafVersion: MmrLeafVersion = MmrLeafVersion::new(0, 0);
 }
@@ -336,20 +339,20 @@ parameter_types! {
 }
 
 impl pallet_balances::Config for Runtime {
-    type MaxLocks = ConstU32<50>;
-    /// The type for recording an account's balance.
-    type Balance = Balance;
     /// The ubiquitous event type.
     type RuntimeEvent = RuntimeEvent;
+    type RuntimeHoldReason = RuntimeHoldReason;
+    type RuntimeFreezeReason = RuntimeFreezeReason;
+    type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
+    /// The type for recording an account's balance.
+    type Balance = Balance;
     type DustRemoval = ();
     type ExistentialDeposit = ExistentialDeposit;
     type AccountStore = System;
-    type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
-    type MaxReserves = ConstU32<50>;
     type ReserveIdentifier = [u8; 8];
-    type RuntimeHoldReason = RuntimeHoldReason;
-    type RuntimeFreezeReason = RuntimeFreezeReason;
     type FreezeIdentifier = ();
+    type MaxLocks = ConstU32<50>;
+    type MaxReserves = ConstU32<50>;
     type MaxHolds = ConstU32<0>;
     type MaxFreezes = ConstU32<0>;
 }
@@ -366,8 +369,8 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
     type OnChargeTransaction = pallet_transaction_payment::CurrencyAdapter<Balances, ()>;
-    type OperationalFeeMultiplier = ConstU8<5>;
     type WeightToFee = WeightToFee;
     type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
     type FeeMultiplierUpdate = pallet_transaction_payment::TargetedFeeAdjustment<
@@ -377,7 +380,7 @@ impl pallet_transaction_payment::Config for Runtime {
         MinimumMultiplier,
         MaximumMultiplier,
     >;
-    type RuntimeEvent = RuntimeEvent;
+    type OperationalFeeMultiplier = ConstU8<5>;
 }
 
 impl pallet_sudo::Config for Runtime {
@@ -410,7 +413,7 @@ impl pallet_bridge_relayers::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type Reward = Balance;
     type PaymentProcedure =
-        bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
+    bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
     type StakeAndSlash = pallet_bridge_relayers::StakeAndSlashNamed<
         AccountId,
         BlockNumber,
@@ -423,6 +426,7 @@ impl pallet_bridge_relayers::Config for Runtime {
 }
 
 pub type RococoGrandpaInstance = ();
+
 impl pallet_bridge_grandpa::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type BridgedChain = bp_rococo::Rococo;
@@ -432,6 +436,7 @@ impl pallet_bridge_grandpa::Config for Runtime {
 }
 
 pub type WestendGrandpaInstance = pallet_bridge_grandpa::Instance1;
+
 impl pallet_bridge_grandpa::Config<WestendGrandpaInstance> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type BridgedChain = bp_westend::Westend;
@@ -450,28 +455,29 @@ type OnMessagesDelivered = XcmBlobHaulerAdapter<ToBridgeHubRococoXcmBlobHauler>;
 
 /// Message verifier for BridgeHubRococo messages sent from BridgeHubWestend
 type ToBridgeHubRococoMessageVerifier =
-    bridge_runtime_common::messages::source::FromThisChainMessageVerifier<
-        WithBridgeHubRococoMessageBridge,
-    >;
+bridge_runtime_common::messages::source::FromThisChainMessageVerifier<
+    WithBridgeHubRococoMessageBridge,
+>;
 
 /// Dispatches received XCM messages from other bridge
 type FromRococoMessageBlobDispatcher = BridgeBlobDispatcher<
-	XcmRouter,
-	BridgeHubWestendUniversalLocation,
-	BridgeWestendToRococoMessagesPalletInstance,
+    XcmRouter,
+    BridgeHubWestendUniversalLocation,
+    BridgeWestendToRococoMessagesPalletInstance,
 >;
 
 /// Maximal outbound payload size of BridgeHubWestend -> BridgeHubRococo messages.
 type ToBridgeHubRococoMaximalOutboundPayloadSize =
-	FromThisChainMaximalOutboundPayloadSize<WithBridgeHubRococoMessageBridge>;
+FromThisChainMaximalOutboundPayloadSize<WithBridgeHubRococoMessageBridge>;
 
 
 /// Add XCM messages support for BridgeHubWestend to support Westend->Rococo XCM messages
 pub type WithBridgeHubRococoMessagesInstance = pallet_bridge_messages::Instance1;
+
 impl pallet_bridge_messages::Config<WithBridgeHubRococoMessagesInstance> for Runtime {
     type RuntimeEvent = RuntimeEvent;
     type WeightInfo =
-        bridge_hub_westend_runtime::weights::pallet_bridge_messages::WeightInfo<Runtime>;
+    bridge_hub_westend_runtime::weights::pallet_bridge_messages::WeightInfo<Runtime>;
     type BridgedChainId = BridgeHubRococoChainId;
     type ActiveOutboundLanes = ActiveOutboundLanesToBridgeHubRococo;
     type MaxUnrewardedRelayerEntriesAtInboundLane = MaxUnrewardedRelayerEntriesAtInboundLane;
@@ -492,6 +498,7 @@ impl pallet_bridge_messages::Config<WithBridgeHubRococoMessagesInstance> for Run
         DeliveryRewardInBalance,
     >;
 
+    type OnMessagesDelivered = OnMessagesDelivered;
     type SourceHeaderChain = SourceHeaderChainAdapter<WithBridgeHubRococoMessageBridge>;
     type MessageDispatch = XcmBlobMessageDispatch<
         FromRococoMessageBlobDispatcher,
@@ -501,7 +508,6 @@ impl pallet_bridge_messages::Config<WithBridgeHubRococoMessagesInstance> for Run
             Runtime,
         >,
     >;
-    type OnMessagesDelivered = OnMessagesDelivered;
 }
 
 /// XCM router instance to BridgeHub with bridging capabilities for `Westend` global
@@ -510,16 +516,16 @@ pub type ToWestendXcmRouterInstance = pallet_xcm_bridge_hub_router::Instance3;
 
 impl pallet_xcm_bridge_hub_router::Config<ToWestendXcmRouterInstance> for Runtime {
     type WeightInfo =
-        asset_hub_rococo_runtime::weights::pallet_xcm_bridge_hub_router::WeightInfo<Runtime>;
+    asset_hub_rococo_runtime::weights::pallet_xcm_bridge_hub_router::WeightInfo<Runtime>;
 
     type UniversalLocation = asset_hub_rococo_runtime::xcm_config::UniversalLocation;
     type BridgedNetworkId =
-        asset_hub_rococo_runtime::xcm_config::bridging::to_westend::WestendNetwork;
+    asset_hub_rococo_runtime::xcm_config::bridging::to_westend::WestendNetwork;
     type Bridges = asset_hub_rococo_runtime::xcm_config::bridging::NetworkExportTable;
 
     #[cfg(not(feature = "runtime-benchmarks"))]
     type BridgeHubOrigin =
-        EnsureXcm<Equals<asset_hub_westend_runtime::xcm_config::bridging::SiblingBridgeHub>>;
+    EnsureXcm<Equals<asset_hub_westend_runtime::xcm_config::bridging::SiblingBridgeHub>>;
     #[cfg(feature = "runtime-benchmarks")]
     type BridgeHubOrigin = EitherOfDiverse<
         // for running benchmarks
@@ -530,10 +536,10 @@ impl pallet_xcm_bridge_hub_router::Config<ToWestendXcmRouterInstance> for Runtim
 
     type ToBridgeHubSender = XcmpQueue;
     type WithBridgeHubChannel =
-        cumulus_pallet_xcmp_queue::bridging::InAndOutXcmpChannelStatusProvider<
-            asset_hub_westend_runtime::xcm_config::bridging::SiblingBridgeHubParaId,
-            Runtime,
-        >;
+    cumulus_pallet_xcmp_queue::bridging::InAndOutXcmpChannelStatusProvider<
+        asset_hub_westend_runtime::xcm_config::bridging::SiblingBridgeHubParaId,
+        Runtime,
+    >;
 
     type ByteFee = asset_hub_westend_runtime::xcm_config::bridging::XcmBridgeHubRouterByteFee;
     type FeeAsset = asset_hub_westend_runtime::xcm_config::bridging::XcmBridgeHubRouterFeeAssetId;
@@ -643,13 +649,13 @@ pub type SignedExtra = (
     frame_system::CheckWeight<Runtime>,
     pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
     BridgeRejectObsoleteHeadersAndMessages,
-	OnBridgeHubWestendRefundBridgeHubRococoMessages,
+    OnBridgeHubWestendRefundBridgeHubRococoMessages,
 );
 /// The payload being signed in transactions.
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, SignedExtra>;
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic =
-    generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
+generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, RuntimeCall, SignedExtra>;
 /// Executive: handles dispatch to the various modules.

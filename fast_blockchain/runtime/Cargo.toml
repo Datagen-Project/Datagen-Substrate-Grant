@@ -1,10 +1,13 @@
 [package]
-name = "westend-runtime"
+name = "westend-bridge"
 version = "0.1.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 repository = "https://github.com/paritytech/parity-bridges-common/"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 hex-literal = "0.4.1"
@@ -25,12 +28,12 @@ bp-xcm-bridge-hub = { git = "https://github.com/lean-apple/dg-bridges-common", b
 bp-bridge-hub-rococo = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 bp-bridge-hub-westend = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 bridge-runtime-common = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", features = ["integrity-test", "std"] }
-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
-rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
-bridge-hub-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
-bridge-hub-rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
-asset-hub-rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
-asset-hub-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0" }
+#westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+#rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+bridge-hub-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+#bridge-hub-rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+asset-hub-rococo-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+asset-hub-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 
 pallet-bridge-grandpa = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 pallet-bridge-messages = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
@@ -43,7 +46,7 @@ pallet-xcm-bridge-hub-router = { git = "https://github.com/paritytech/polkadot-s
 # Substrate Dependencies
 
 sp-consensus-beefy = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
-frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false, optional = true }
 frame-executive = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 frame-support = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 frame-system = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
@@ -76,13 +79,14 @@ sp-version = { git = "https://github.com/paritytech/polkadot-sdk", branch = "rel
 # Cumulus
 parachains-common = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 cumulus-pallet-xcmp-queue = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+#collectives-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 
 # Local Dependencies
 pallet-computational-work = { default-features = false, path = "../pallets/computational-work" }
 pallet-check-node-computational-work = { default-features = false, path = "../pallets/check-node-computational-work" }
 
 # Polkadot Dependencies
-polkadot-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+#polkadot-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 pallet-xcm = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 xcm = { package = "staging-xcm", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
 xcm-builder = { package = "staging-xcm-builder", git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
@@ -91,7 +95,7 @@ xcm-executor = { package = "staging-xcm-executor", git = "https://github.com/par
 [dev-dependencies]
 static_assertions = "1.1"
 env_logger = "0.10"
-collectives-westend-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", default-features = false }
+
 
 [build-dependencies]
 substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "release-polkadot-v1.4.0", optional = true}
@@ -99,16 +103,23 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", b
 [features]
 default = [ "std" ]
 std = [
+	"frame-benchmarking?/std",
 	"bp-header-chain/std",
 	"bp-messages/std",
 	"bp-parachains/std",
 	"bp-polkadot-core/std",
 	"bp-relayers/std",
 	"bp-runtime/std",
+	"bp-rococo/std",
 	"bp-westend/std",
 	"bp-xcm-bridge-hub/std",
+	"bp-bridge-hub-rococo/std",
+	"bp-bridge-hub-westend/std",
 	"bridge-runtime-common/std",
 	"codec/std",
+	"parachains-common/std",
+	"cumulus-pallet-xcmp-queue/std",
+#	"collectives-westend-runtime/std",
 	"frame-executive/std",
 	"frame-support/std",
 	"frame-system-rpc-runtime-api/std",
@@ -132,6 +143,8 @@ std = [
 	"pallet-transaction-payment/std",
 	"pallet-utility/std",
 	"pallet-xcm/std",
+	"pallet-xcm-bridge-hub/std",
+	"pallet-xcm-bridge-hub-router/std",
 	"scale-info/std",
 	"sp-api/std",
 	"sp-block-builder/std",
@@ -150,6 +163,12 @@ std = [
 	"xcm-builder/std",
 	"xcm-executor/std",
 	"xcm/std",
+#	"westend-runtime/std",
+#	"rococo-runtime/std",
+	"bridge-hub-westend-runtime/std",
+#	"bridge-hub-rococo-runtime/std",
+	"asset-hub-rococo-runtime/std",
+	"asset-hub-westend-runtime/std",
 ]
 runtime-benchmarks = [
 	"bridge-runtime-common/runtime-benchmarks",

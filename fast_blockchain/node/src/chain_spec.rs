@@ -30,7 +30,7 @@ use sp_runtime::{
 use westend_runtime::{
     StakerStatus,
     BalancesConfig, BeefyConfig, GrandpaConfig, SessionConfig, SessionKeys, SudoConfig,
-    SystemConfig, WASM_BINARY, BABE_GENESIS_EPOCH_CONFIG
+    SystemConfig, WASM_BINARY, BABE_GENESIS_EPOCH_CONFIG,
 };
 use xcm::v3::{NetworkId::Rococo as RococoId, NetworkId::Westend as WestednId};
 use pallet_staking::Forcing;
@@ -86,19 +86,36 @@ type AccountPublic = <Signature as Verify>::Signer;
 
 /// Helper function to generate an account ID from seed
 pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
-where
-    AccountPublic: From<<TPublic::Pair as Pair>::Public>,
+    where
+        AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
     AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
 /// Helper function to generate an authority key for Aura
-pub fn get_authority_keys_from_seed(s: &str) -> (AccountId, AuraId, BeefyId, GrandpaId) {
+pub fn get_authority_keys_from_seed(
+    s: &str
+) -> (
+    AccountId,
+    AccountId,
+    BabeId,
+    GrandpaId,
+    ImOnlineId,
+    ValidatorId,
+    AssignmentId,
+    AuthorityDiscoveryId,
+    BeefyId
+) {
     (
         get_account_id_from_seed::<sr25519::Public>(s),
-        get_from_seed::<AuraId>(s),
-        get_from_seed::<BeefyId>(s),
+        get_account_id_from_seed::<sr25519::Public>(s),
+        get_from_seed::<BabeId>(s),
         get_from_seed::<GrandpaId>(s),
+        get_from_seed::<ImOnlineId>(s),
+        get_from_seed::<ValidatorId>(s),
+        get_from_seed::<AssignmentId>(s),
+        get_from_seed::<AuthorityDiscoveryId>(s),
+        get_from_seed::<BeefyId>(s),
     )
 }
 
@@ -110,56 +127,47 @@ impl Alternative {
                 "tokenDecimals": 9,
                 "tokenSymbol": "MLAU"
             })
-            .as_object()
-            .expect("Map given; qed")
-            .clone(),
+                .as_object()
+                .expect("Map given; qed")
+                .clone(),
         );
         match self {
-            Alternative::Development => ChainSpec::from_genesis(
-                "Westend Development",
-                "westend_dev",
-                sc_service::ChainType::Development,
-                || {
+            Alternative::Development => ChainSpec::builder(
+                WASM_BINARY.ok_or_else(|| {
+                    "Development chain spec not available: wasm binary not available".to_string()
+                }).unwrap(),
+                None)
+                .with_name("Westend Development")
+                .with_id("westend_dev")
+                .with_chain_type(sc_service::ChainType::Development)
+                .with_genesis_config_patch(
                     westend_testnet_genesis(
                         DEV_AUTHORITIES_ACCOUNTS
                             .into_iter()
-                            .map(get_authority_keys_from_seed)
+                            .map(|seed| get_authority_keys_from_seed(seed))
                             .collect(),
                         get_account_id_from_seed::<sr25519::Public>(SUDO_ACCOUNT),
                         Some(endowed_accounts()),
-                    )
-                },
-                vec![],
-                None,
-                None,
-                None,
-                properties,
-                None,
-                &vec![0, 1, 2, 4, 5, 6],
-            ),
-            Alternative::LocalTestnet => ChainSpec::from_genesis(
-                "Westend Local",
-                "westend_local",
-                sc_service::ChainType::Local,
-                || {
+                    ))
+                .build(),
+            Alternative::LocalTestnet => ChainSpec::builder(
+                WASM_BINARY.ok_or_else(|| {
+                    "Local testnet chain spec not available: wasm binary not available".to_string()
+                }).unwrap(),
+                None)
+                .with_name("Westend Local")
+                .with_id("westend_local")
+                .with_chain_type(sc_service::ChainType::Local)
+                .with_genesis_config_patch(
                     westend_testnet_genesis(
                         LOCAL_AUTHORITIES_ACCOUNTS
                             .into_iter()
-                            .map(get_authority_keys_from_seed)
+                            .map(|seed| get_authority_keys_from_seed(seed))
                             .collect(),
                         get_account_id_from_seed::<sr25519::Public>(SUDO_ACCOUNT),
-                        endowed_accounts(),
-                        true,
-                    )
-                },
-                vec![],
-                None,
-                None,
-                None,
-                properties,
-                None,
-                &vec![0, 1, 2, 4, 5, 6],
-            ),
+                        Some(endowed_accounts()),
+                    ))
+                .build(),
         }
     }
 }
@@ -201,72 +209,72 @@ fn endowed_accounts() -> Vec<AccountId> {
         get_account_id_from_seed::<sr25519::Public>("RococoParachain.RococoHeadersRelay2"),
         get_account_id_from_seed::<sr25519::Public>("RococoParachain.MessagesSender"),
     ]
-    .into_iter()
-    .chain(all_authorities)
-    .collect()
+        .into_iter()
+        .chain(all_authorities)
+        .collect()
 }
 
 fn westend_session_keys(
-	babe: BabeId,
-	grandpa: GrandpaId,
-	im_online: ImOnlineId,
-	para_validator: ValidatorId,
-	para_assignment: AssignmentId,
-	authority_discovery: AuthorityDiscoveryId,
-	beefy: BeefyId,
+    babe: BabeId,
+    grandpa: GrandpaId,
+    im_online: ImOnlineId,
+    para_validator: ValidatorId,
+    para_assignment: AssignmentId,
+    authority_discovery: AuthorityDiscoveryId,
+    beefy: BeefyId,
 ) -> westend_runtime::SessionKeys {
-	westend_runtime::SessionKeys {
-		babe,
-		grandpa,
-		im_online,
-		para_validator,
-		para_assignment,
-		authority_discovery,
-		beefy,
-	}
+    westend_runtime::SessionKeys {
+        babe,
+        grandpa,
+        im_online,
+        para_validator,
+        para_assignment,
+        authority_discovery,
+        beefy,
+    }
 }
 
-#[cfg(any(feature = "westend-native", feature = "rococo-native"))]
+// #[cfg(any(feature = "westend-native", feature = "rococo-native"))]
 fn testnet_accounts() -> Vec<AccountId> {
-	vec![
-		get_account_id_from_seed::<sr25519::Public>("Alice"),
-		get_account_id_from_seed::<sr25519::Public>("Bob"),
-		get_account_id_from_seed::<sr25519::Public>("Charlie"),
-		get_account_id_from_seed::<sr25519::Public>("Dave"),
-		get_account_id_from_seed::<sr25519::Public>("Eve"),
-		get_account_id_from_seed::<sr25519::Public>("Ferdie"),
-		get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-		get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-		get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
-		get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
-		get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
-		get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
-	]
+    vec![
+        get_account_id_from_seed::<sr25519::Public>("Alice"),
+        get_account_id_from_seed::<sr25519::Public>("Bob"),
+        get_account_id_from_seed::<sr25519::Public>("Charlie"),
+        get_account_id_from_seed::<sr25519::Public>("Dave"),
+        get_account_id_from_seed::<sr25519::Public>("Eve"),
+        get_account_id_from_seed::<sr25519::Public>("Ferdie"),
+        get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+        get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
+        get_account_id_from_seed::<sr25519::Public>("Charlie//stash"),
+        get_account_id_from_seed::<sr25519::Public>("Dave//stash"),
+        get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
+        get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
+    ]
 }
 
 /// Helper function to create westend runtime `GenesisConfig` patch for testing
-#[cfg(feature = "westend-native")]
+// #[cfg(feature = "westend-native")]
 pub fn westend_testnet_genesis(
-	initial_authorities: Vec<(
-		AccountId,
-		AccountId,
-		BabeId,
-		GrandpaId,
-		ImOnlineId,
-		ValidatorId,
-		AssignmentId,
-		AuthorityDiscoveryId,
-		BeefyId,
-	)>,
-	root_key: AccountId,
-	endowed_accounts: Option<Vec<AccountId>>,
+    initial_authorities: Vec<(
+        AccountId,
+        AccountId,
+        BabeId,
+        GrandpaId,
+        ImOnlineId,
+        ValidatorId,
+        AssignmentId,
+        AuthorityDiscoveryId,
+        BeefyId,
+    )>,
+    root_key: AccountId,
+    endowed_accounts: Option<Vec<AccountId>>,
 ) -> serde_json::Value {
-	let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(testnet_accounts);
+    let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(testnet_accounts);
 
-	const ENDOWMENT: u128 = 1_000_000 * WND;
-	const STASH: u128 = 100 * WND;
+    const ENDOWMENT: u128 = 1_000_000 * WND;
+    const STASH: u128 = 100 * WND;
 
-	serde_json::json!({
+    serde_json::json!({
 		"balances": {
 			"balances": endowed_accounts.iter().map(|k| (k.clone(), ENDOWMENT)).collect::<Vec<_>>(),
 		},
@@ -305,9 +313,9 @@ pub fn westend_testnet_genesis(
 			"epochConfig": Some(BABE_GENESIS_EPOCH_CONFIG),
 		},
 		"sudo": { "key": Some(root_key) },
-		"configuration": {
-			"config": default_parachains_host_configuration(),
-		},
+		// "configuration": {
+		// 	"config": default_parachains_host_configuration(),
+		// },
 		"registrar": {
 			"nextFreeParaId": polkadot_primitives::LOWEST_PUBLIC_ID,
 		},
