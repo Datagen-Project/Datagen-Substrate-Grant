@@ -17,7 +17,7 @@
 //! The Westend runtime. This can be compiled with `#[no_std]`, ready for Wasm.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-// `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
+// `construct_runtime!` does a lot of recursions and requires us to increase the limit to 256.
 #![recursion_limit = "256"]
 // Runtime-generated enums
 #![allow(clippy::large_enum_variant)]
@@ -44,7 +44,7 @@ use bridge_hub_westend_runtime::{
         ToBridgeHubRococoXcmBlobHauler,
         WithBridgeHubRococoMessageBridge, BridgeHubRococo, BridgeHubWestend, BridgeParachainRococoInstance,
         OnBridgeHubWestendRefundBridgeHubRococoMessages,
-        BridgeWestendToRococoMessagesPalletInstance, BridgeHubWestendUniversalLocation,
+        BridgeWestendToRococoMessagesPalletInstance,
     },
     xcm_config::XcmRouter,
     BridgeRejectObsoleteHeadersAndMessages, CollatorSelection, XcmpQueue,
@@ -59,7 +59,6 @@ use pallet_grandpa::{
 };
 use pallet_transaction_payment::{FeeDetails, Multiplier, RuntimeDispatchInfo};
 use pallet_xcm::EnsureXcm;
-use parachains_common::polkadot::fee::WeightToFee;
 use parachains_common::HOURS;
 use sp_api::impl_runtime_apis;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
@@ -192,7 +191,7 @@ parameter_types! {
         write: 200_000_000, // ~0.2 ms = 200 µs
     };
     pub const SS58Prefix: u8 = 60;
-    pub const BridgeHubRococoChainId: bp_runtime::ChainId = bp_runtime::BRIDGE_HUB_ROCOCO_CHAIN_ID;
+    pub const BridgeHubRococoChainId: bp_runtime::ChainId = BRIDGE_HUB_ROCOCO_CHAIN_ID;
 }
 
 impl frame_system::Config for Runtime {
@@ -208,6 +207,7 @@ impl frame_system::Config for Runtime {
     type RuntimeOrigin = RuntimeOrigin;
     /// The aggregated dispatch type that is available for extrinsics.
     type RuntimeCall = RuntimeCall;
+    type RuntimeTask = ();
     /// The index type for storing how many extrinsics an account has signed.
     type Nonce = Nonce;
     /// The type for hashing blocks and tries.
@@ -353,14 +353,13 @@ impl pallet_balances::Config for Runtime {
     type FreezeIdentifier = ();
     type MaxLocks = ConstU32<50>;
     type MaxReserves = ConstU32<50>;
-    type MaxHolds = ConstU32<0>;
     type MaxFreezes = ConstU32<0>;
 }
 
 parameter_types! {
     pub const TransactionBaseFee: Balance = 0;
     pub const TransactionByteFee: Balance = 1;
-    // values for following parameters are copied from polkadot repo, but it is fine
+    // values for the following parameters are copied from polkadot repo, but it is fine
     // not to sync them - we're not going to make Rococo a full copy of one of Polkadot-like chains
     pub const TargetBlockFullness: Perquintill = Perquintill::from_percent(25);
     pub AdjustmentVariable: Multiplier = Multiplier::saturating_from_rational(3, 100_000);
@@ -451,15 +450,14 @@ parameter_types! {
 }
 
 /// On messages delivered callback.
-type OnMessagesDelivered = XcmBlobHaulerAdapter<ToBridgeHubRococoXcmBlobHauler>;
+type OnMessagesDelivered = XcmBlobHaulerAdapter<ToBridgeHubRococoXcmBlobHauler, _>;
 
 /// Message verifier for BridgeHubRococo messages sent from BridgeHubWestend
-type ToBridgeHubRococoMessageVerifier =
-bridge_runtime_common::messages::source::FromThisChainMessageVerifier<
+type ToBridgeHubRococoMessageVerifier = FromThisChainMessageVerifier<
     WithBridgeHubRococoMessageBridge,
 >;
 
-/// Dispatches received XCM messages from other bridge
+/// Dispatches received XCM messages from another bridge
 type FromRococoMessageBlobDispatcher = BridgeBlobDispatcher<
     XcmRouter,
     BridgeHubWestendUniversalLocation,
@@ -491,7 +489,6 @@ impl pallet_bridge_messages::Config<WithBridgeHubRococoMessagesInstance> for Run
     type DeliveryPayments = ();
 
     type TargetHeaderChain = TargetHeaderChainAdapter<WithBridgeHubRococoMessageBridge>;
-    type LaneMessageVerifier = ToBridgeHubRococoMessageVerifier;
     type DeliveryConfirmationPayments = pallet_bridge_relayers::DeliveryConfirmationPaymentsAdapter<
         Runtime,
         WithBridgeHubRococoMessagesInstance,
@@ -522,6 +519,7 @@ impl pallet_xcm_bridge_hub_router::Config<ToWestendXcmRouterInstance> for Runtim
     type BridgedNetworkId =
     asset_hub_rococo_runtime::xcm_config::bridging::to_westend::WestendNetwork;
     type Bridges = asset_hub_rococo_runtime::xcm_config::bridging::NetworkExportTable;
+    type DestinationVersion = ();
 
     #[cfg(not(feature = "runtime-benchmarks"))]
     type BridgeHubOrigin =
